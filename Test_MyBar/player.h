@@ -2,9 +2,15 @@
 #define PLAYER_H
 
 #include <QMainWindow>
+#include <QDebug>
+
 #include "include/vlc/vlc.h"
+#include <chrono>
+#include <thread>
+
 #include <timebar.h>
 #include <playerdefinitions.h>
+
 
 using namespace std;
 
@@ -30,6 +36,7 @@ private:
     bool isPlaying = false;
     bool isIntendedToPlay = false;
     float playSpeed = 1;
+    string inputLocation;
 
     //Переменные libVLC
     libvlc_instance_t *mVlcInstance;
@@ -41,20 +48,25 @@ private:
 
 signals:
     //Запросить изменение параметров источника
-    void RequestSource(long requestTime, float playSpeed);
+    void RequestToObtainSource(long requestTime, float playSpeed);
+    void RequestToStream(float playSpeed);
+    void RequestToPauseStream();
 
 public slots:
     //Слот по сигналу от контроллера к продолжению воспроизведения
     void HandleSourceObtained();
 
     //Начать воспроизведение из источника
-    void PlaySource(SourceData sourceData);
+    void PlayStream();
 
     //Запрос пользователя на новый момент воспроизведения
     void SetPlayPosition(long requestTime);
 
     //Слот таймера синхронизации интерфейса с воспроизведением
     void PlayTimerShot();
+
+    //Слоты кнопок управления воспроизведением
+    void PlayButtonClicked();
 };
 
 #endif // PLAYER_H

@@ -2,26 +2,37 @@
 #define PLAYERCONTROLLER_H
 
 #include <QObject>
+#include <QDebug>
+
+#include "include/vlc/vlc.h"
+#include <unistd.h>
+
 #include <playerdefinitions.h>
-#include <player.h>
 
 class PlayerController : public QObject
 {
     Q_OBJECT
 public:
-    explicit PlayerController(Player* _player, QObject *parent = 0);
+    explicit PlayerController(QObject *parent = 0);
 
 private:
-    Player* player;
+    //Переменные libVLC
+    libvlc_instance_t *mVlcInstance;
+    libvlc_media_player_t *mMediaPlayer;
+    libvlc_media_t *mMedia;
+
+    SourceData sourceData;
+    long sourceMargin;
 
 signals:
     //Сигнал проигрывателю о том, что запущен новый источник
     void SignalSourceObtained();
 
 public slots:
-    //Слот по сигналу от проигрывателя с запросом изменения параметров источника
-    void ReceiveRequestForSource(long requestTime, float playSpeed);
-
+    //Слот по сигналам от проигрывателя
+    void RequestedToObtainSource(long requestTime, float playSpeed);
+    void RequestedToStream(float playSpeed);
+    void RequestedToPauseStream();
 
 };
 

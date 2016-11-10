@@ -8,6 +8,8 @@ struct SourceData {
         sourceStartTime(_sourceStartTime),
         sourceEndTime(_sourceEndTime){}
 
+    SourceData(){}
+
     string path;
     long sourceStartTime;
     long sourceEndTime;

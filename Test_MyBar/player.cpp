@@ -6,22 +6,23 @@ Player::Player(QWidget *parent) :
     ui(new Ui::Player)
 {
     ui->setupUi(this);
+    setWindowTitle(tr("Player"));
 
+    //Создание элементов управления
     TimeBar *timeBar = new TimeBar(ui->centralwidget);
     timeBar->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     ui->centralwidget->layout()->addWidget(timeBar);
 
-
-    const char * const vlc_args[] = {"--verbose=2"};
-    mVlcInstance=libvlc_new(sizeof(vlc_args) / sizeof(vlc_args[0]), vlc_args);  //tricky calculation of the char space used
+    //Объекты libVLC для воспроизведения входящего стрима
+    const char * const vlc_args[] = {"--verbose=0"};
+    mVlcInstance=libvlc_new(sizeof(vlc_args) / sizeof(vlc_args[0]), vlc_args);
     mMediaPlayer = libvlc_media_player_new (mVlcInstance);
 
+    inputLocation = "rtsp://localhost:5544/";
 
-    //TEST
-    SourceData data("D:\\example.avi", 0, 100);
-    PlaySource(data);
-
-    setWindowTitle(tr("Player"));
+    //Коннекты элементов управления
+    connect(ui->playButton, &QPushButton::clicked,
+            this, &Player::PlayButtonClicked);
 }
 
 Player::~Player()
@@ -29,22 +30,23 @@ Player::~Player()
     delete ui;
 }
 
-//Слот: Контроллер присылает список новых источников вместо или в дополнение к текущему
 void Player::HandleSourceObtained()
 {
+    //Возобновить воспроизведение, если воспроизводилось до этого
     if(isIntendedToPlay && !isPlaying)
     {
+        emit RequestToStream(playSpeed);
 
+        std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+        PlayStream();
     }
 }
 
-//Начать воспроизведение источника с заданным смещением
-void Player::PlaySource(SourceData sourceData)
+void Player::PlayStream()
 {
     //Объект медиаданных из источника
-    mMedia = libvlc_media_new_path(mVlcInstance, sourceData.path.c_str());
-    libvlc_media_player_set_media(mMediaPlayer, mMedia);
-    //libvlc_media_player_set_position(mMediaPlayer, sourceMargin);
+    mMedia = libvlc_media_new_location(mVlcInstance, inputLocation.c_str());
+    libvlc_media_player_set_media (mMediaPlayer, mMedia);
 
     //Дескриптор окна
     int windid = ui->videoFrame->winId();
@@ -52,42 +54,30 @@ void Player::PlaySource(SourceData sourceData)
 
     //Старт проигрывания
     libvlc_media_player_play(mMediaPlayer);
+
     isPlaying=true;
     isIntendedToPlay = true;
 }
 
-//Слот: Пользователь запрашивает смену момента воспроизведения
 void Player::SetPlayPosition(long requestTime)
-{
-    if(!sourceList.empty())
-    {
-        //Если момент в пределах текущего источника
-        if(requestTime < sourceList[0].sourceEndTime && requestTime > sourceList[0].sourceStartTime)
-        {
-            sourceMargin = sourceList[0].sourceStartTime + requestTime;
-            libvlc_media_player_set_position(mMediaPlayer, sourceMargin);
-            return;
-        }
-    }
-
-    if(isPlaying)
-    {
-       libvlc_media_player_stop(mMediaPlayer);
-       isPlaying = false;
-    }
-
-    //Запрос на новый список источников и смещение
-    emit RequestSource(requestTime, playSpeed);
+{   
+    //TODO::Отправка запроса на обновление стрима
 }
 
 void Player::PlayTimerShot()
 {
-    //TODO: Проверка на окончание текущего источника и запрос на дополнение списка источников
-
     //TODO: Синхронизация с интерфейсом
 
 }
 
+void Player::PlayButtonClicked()
+{
+    //isIntendedToPlay = !isIntendedToPlay;
+    isIntendedToPlay = true;
+
+    //TOTALLY TEST CODE
+    emit RequestToObtainSource(5, 1);
+}
 
 
 /*
