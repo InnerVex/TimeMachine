@@ -8,8 +8,10 @@
 
 #include <odb/core.hxx>
 #include <odb/tr1/memory.hxx>
-#include "path.h"
-#include "source.h"
+
+#include <Qt>
+#include <QtCore>
+#include <QString>
 
 using std::tr1::shared_ptr;
 
@@ -24,41 +26,49 @@ typedef std::vector<shared_ptr<path> > paths;
 class file
 {
 public:
-    typedef::path path_type;
-    typedef::source source_type;
-    file (const std::string& name,
-          shared_ptr<path_type> pathId,
-          shared_ptr<source_type> sourceId)
+    file (const QString name,
+          qint32  pathId,
+          qint32 sourceId)
         : name_ (name), pathId_ (pathId), sourceId_ (sourceId)
   {
   }
+  qint32
+  id () const
+  {
+    return id_;
+  }
 
-  const std::string&
+  void
+  id (qint32 id)
+  {
+    id_ = id;
+  }
+  const QString&
   name () const
   {
     return name_;
   }
 
-  shared_ptr<path_type>
+  qint32
   pathId () const
   {
     return pathId_;
   }
 
   void
-  pathId (shared_ptr<path_type> pathId)
+  pathId (qint32 pathId)
   {
     pathId_ = pathId;
   }
 
-  shared_ptr<source_type>
+  qint32
   sourceId () const
   {
     return sourceId_;
   }
 
   void
-  sourceId (shared_ptr<source_type> sourceId)
+  sourceId (qint32 sourceId)
   {
     sourceId_ = sourceId;
   }
@@ -69,29 +79,13 @@ private:
   file () {}
 
   #pragma db id auto
-  unsigned long id_;
+  qint32 id_;
 
-  std::string name_;
+  const QString name_;
 
-#pragma db not_null
-  shared_ptr<path_type> pathId_;
+  qint32 pathId_;
 
-#pragma db not_null
-  shared_ptr<source_type> sourceId_;
-};
-
-
-#pragma db view object(file)
-struct timeStamp_stat
-{
-  #pragma db column("count(" + file::id_ + ")")
-  std::size_t count;
-
-  #pragma db column("min(" + file::pathId_ + ")")
-  unsigned short pathId;
-
-  #pragma db column("max(" + file::sourceId_ + ")")
-  unsigned short sourceId;
+  qint32 sourceId_;
 };
 
 #endif // FILE_HXX

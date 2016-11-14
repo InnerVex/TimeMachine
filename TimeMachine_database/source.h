@@ -6,23 +6,39 @@
 
 #include <odb/core.hxx>
 
+#include <Qt>
+#include <QtCore>
+#include <QString>
+
 #pragma db object
 class source
 {
 public:
-  source (const std::string& name,
-          const std::string& adress)
+  source (const QString name,
+          const QString adress)
       : name_ (name), adress_ (adress)
   {
   }
 
-  const std::string&
+  qint32
+  id () const
+  {
+    return id_;
+  }
+
+  void
+  id (qint32 id)
+  {
+    id_ = id;
+  }
+
+  const QString&
   name () const
   {
     return name_;
   }
 
-  const std::string&
+  const QString&
   adress () const
   {
     return adress_;
@@ -34,23 +50,10 @@ private:
   source () {}
 
   #pragma db id auto
-  unsigned long id_;
+  qint32 id_;
 
-  std::string name_;
-  std::string adress_;
-};
-
-#pragma db view object(source)
-struct source_stat
-{
-  #pragma db column("count(" + source::id_ + ")")
-  std::size_t count;
-
-  #pragma db column("min(" + source::name_ + ")")
-  std::string name;
-
-  #pragma db column("max(" + source::adress_ + ")")
-  std::string adress;
+  const QString name_;
+  const QString adress_;
 };
 
 #endif // SOURCE_HXX

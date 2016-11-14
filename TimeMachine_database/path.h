@@ -6,17 +6,33 @@
 
 #include <odb/core.hxx>
 
+#include <Qt>
+#include <QtCore>
+#include <QString>
+
 #pragma db object
 class path
 {
 public:
-  path (const std::string& filePath)
+  path (const QString filePath)
       : filePath_ (filePath)
   {
 
   }
 
-  const std::string&
+  qint32
+  id () const
+  {
+    return id_;
+  }
+
+  void
+  id (qint32 id)
+  {
+    id_ = id;
+  }
+
+  const QString&
   filePath () const
   {
     return filePath_;
@@ -28,19 +44,9 @@ private:
   path () {}
 
   #pragma db id auto
-  unsigned long id_;
+  qint32 id_;
 
-  std::string filePath_;
-};
-
-#pragma db view object(path)
-struct path_stat
-{
-  #pragma db column("count(" + path::id_ + ")")
-  std::size_t count;
-
-  #pragma db column("max(" + path::filePath_ + ")")
-  std::string filePath;
+  const QString filePath_;
 };
 
 #endif // PATH_HXX
