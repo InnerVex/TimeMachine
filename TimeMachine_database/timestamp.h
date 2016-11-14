@@ -4,10 +4,15 @@
 #include <string>
 #include <cstddef> // std::size_t
 
+#include <Qt>
+#include <QtCore>
+#include <QString>
+
 #include <odb/core.hxx>
 #include <odb/tr1/memory.hxx>
-#include "file.h"
 
+
+#include "file.h"
 using std::tr1::shared_ptr;
 
 class file;
@@ -17,34 +22,48 @@ class timeStamp;
 class timeStamp
 {
 public:
-    typedef::file file_id;
-    timeStamp (shared_ptr<file_id> fileId,
-               const std::string& dateTime,
-               unsigned short offset)
+    timeStamp (qint32 fileId,
+               QDateTime dateTime,
+               qint32 offset)
         : fileId_ (fileId), dateTime_ (dateTime), offset_ (offset)
   {
   }
+  qint32
+  id () const
+  {
+    return id_;
+  }
 
   void
-  fileId (shared_ptr<file_id> fileId)
+  id (qint32 id)
+  {
+    id_ = id;
+  }
+  qint32
+  fileId () const
+  {
+    return fileId_;
+  }
+  void
+  fileId (qint32 fileId)
   {
     fileId_ = fileId;
   }
 
-  const std::string&
+  QDateTime
   dateTime () const
   {
     return dateTime_;
   }
 
-  unsigned short
+  qint32
   offset () const
   {
     return offset_;
   }
 
   void
-  offset (unsigned short offset)
+  offset (qint32 offset)
   {
     offset_ = offset;
   }
@@ -55,33 +74,12 @@ private:
   timeStamp () {}
 
   #pragma db id auto
-  unsigned long id_;
+  qint32 id_;
 
-  #pragma db not_null
-  shared_ptr<file_id> fileId_;
+  qint32 fileId_;
 
-  std::string dateTime_;
+  QDateTime dateTime_;
 
-  #pragma db not_null
-  unsigned short offset_;
+  qint32 offset_;
 };
-
-
-#pragma db view object(timeStamp)
-struct file_stat
-{
-  #pragma db column("count(" + timeStamp::id_ + ")")
-  std::size_t count;
-
-  #pragma db column("min(" + timeStamp::fileId_ + ")")
-  unsigned short fileId;
-
-  #pragma db column("max(" + timeStamp::dateTime_ + ")")
-  const std::string dateTime;
-
-  #pragma db column("max(" + timeStamp::offset_ + ")")
-  unsigned short offset;
-
-};
-
 #endif // TIMESTAMP_HXX

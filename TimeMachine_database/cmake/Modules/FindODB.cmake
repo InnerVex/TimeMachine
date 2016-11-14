@@ -16,20 +16,22 @@ set(${SRCS})
 set(${HDRS})
 
 get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
+message( ${CMAKE_CURRENT_SOURCE_DIR})
+message(${CMAKE_CURRENT_BINARY_DIR})
+
 foreach(dir ${dirs})
   set( current_include_directories ${current_include_directories} -I ${dir} )
 endforeach()
-
 foreach(_odb_h ${ARGN})
     get_filename_component(_abs_odb_h ${_odb_h} ABSOLUTE)
     get_filename_component(_we_odb_h ${_odb_h} NAME_WE)
- 
+
     list(APPEND ${SRCS} "${CMAKE_CURRENT_BINARY_DIR}/${_we_odb_h}-odb.cpp")
     list(APPEND ${HDRS} "${CMAKE_CURRENT_BINARY_DIR}/${_we_odb_h}-odb.h")
 #    list(APPEND ${HDRS} "${CMAKE_CURRENT_BINARY_DIR}/${_we_odb_h}-odb.i")
  
     add_custom_command(
-    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${_we_odb_h}-odb.cpp"
+    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/o${_we_odb_h}-odb.cpp"
            "${CMAKE_CURRENT_BINARY_DIR}/${_we_odb_h}-odb.h"
            "${CMAKE_CURRENT_BINARY_DIR}/${_we_odb_h}-odb.i"
     COMMAND ${ODB_COMPILER}
@@ -44,7 +46,7 @@ foreach(_odb_h ${ARGN})
     --sqlite-override-null
     --schema-name ${SCHEMA_NAME}
     --generate-session
-    -x -fPIC
+    -x -std=c++11
     ${_abs_odb_h}
     DEPENDS ${_abs_odb_h}
     COMMENT "Running C++ ODB compiler on ${_odb_h}")

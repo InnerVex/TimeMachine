@@ -53,13 +53,6 @@ int main ()
            insert(thirdDateTime = thirdDateTime.addSecs(1),"thrdfile","CAM03","193.333.3.3","/storage/thrtg",i);
         }
 
-
-
-        /*
-        insert(dateTime.addYears(1),"e2FileName","e2SourceName","e2SourceAdress","e2FilePath",14);
-        insert(dateTime.addYears(1).addSecs(1),"e2FileName","e2SourceName","e2SourceAdress","e2FilePath",15);
-        insert(dateTime.addYears(1).addSecs(2),"e2FileName","e2SourceName","e2SourceAdress","e2FilePath",16);
-        */
         select(firstDateTime.addSecs(-11));
         select(secondDateTime.addSecs(-22));
         select(thirdDateTime.addSecs(-33));
