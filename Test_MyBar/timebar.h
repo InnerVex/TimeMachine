@@ -1,5 +1,4 @@
-#ifndef TIMEBAR_H
-#define TIMEBAR_H
+#pragma once
 
 #include <timebarconstants.h>
 
@@ -51,5 +50,3 @@ private:
     //Функция отрисовки подписи под шкалой
     void drawDivSign(QPainter &painter, const char* format);
 };
-
-#endif // TIMEBAR_H

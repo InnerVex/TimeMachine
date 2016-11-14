@@ -23,6 +23,8 @@ Player::Player(QWidget *parent) :
     //Коннекты элементов управления
     connect(ui->playButton, &QPushButton::clicked,
             this, &Player::PlayButtonClicked);
+    connect(ui->testTimeButton, &QPushButton::clicked,
+            this, &Player::TestInputButtonClicked);
 }
 
 Player::~Player()
@@ -76,6 +78,14 @@ void Player::PlayButtonClicked()
     isIntendedToPlay = true;
 
     //TOTALLY TEST CODE
+    emit RequestToObtainSource(0, 1);
+}
+
+//TOTALLY TEST CODE
+void Player::TestInputButtonClicked()
+{
+    isIntendedToPlay = true;
+
     emit RequestToObtainSource(5, 1);
 }
 

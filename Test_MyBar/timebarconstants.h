@@ -1,5 +1,4 @@
-#ifndef TIMEBARCONSTANTS_H
-#define TIMEBARCONSTANTS_H
+#pragma once
 
 //Размер по умолчанию
 #define TB_HINT_WIDTH 500
@@ -49,5 +48,3 @@
 #define TB_DIV_VALUE_H1     3600
 #define TB_DIV_VALUE_H6     21600
 #define TB_DIV_VALUE_D1     86400
-
-#endif // TIMEBARCONSTANTS_H

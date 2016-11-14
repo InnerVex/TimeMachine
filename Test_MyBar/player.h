@@ -1,18 +1,14 @@
-#ifndef PLAYER_H
-#define PLAYER_H
+#pragma once
 
 #include <QMainWindow>
 #include <QDebug>
 
-#include "include/vlc/vlc.h"
+#include "vlc/vlc.h"
 #include <chrono>
 #include <thread>
 
 #include <timebar.h>
 #include <playerdefinitions.h>
-
-
-using namespace std;
 
 namespace Ui {
 class Player;
@@ -29,14 +25,13 @@ public:
 private:
     Ui::Player *ui;
 
-    SourceList sourceList;
     long sourceMargin;
 
     //Параметры воспроизведения
     bool isPlaying = false;
     bool isIntendedToPlay = false;
     float playSpeed = 1;
-    string inputLocation;
+    std::string inputLocation;
 
     //Переменные libVLC
     libvlc_instance_t *mVlcInstance;
@@ -67,6 +62,5 @@ public slots:
 
     //Слоты кнопок управления воспроизведением
     void PlayButtonClicked();
+    void TestInputButtonClicked();
 };
-
-#endif // PLAYER_H

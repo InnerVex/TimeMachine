@@ -13,24 +13,22 @@ find_package(Qt5Gui REQUIRED)
 
 aux_source_directory(. SRC_LIST)
 
+
 add_executable(${PROJECT_NAME}
     ${SRC_LIST}
-    main.cpp
     playerdefinitions.h
     player.h
-    player.cpp
     player.ui
     playercontroller.h
-    playercontroller.cpp
+    streamcontroller.h
     timebarconstants.h
-    timebar.h
-    timebar.cpp)
+    timebar.h)
 
 # Include QT
 qt5_use_modules( ${PROJECT_NAME} LINK_PRIVATE Core Widgets Gui )
 
 # Include libvlc
-set(LIBVLC_DIR "${PROJECT_SOURCE_DIR}/../../../Libraries/libvlc")
+set(LIBVLC_DIR "${PROJECT_SOURCE_DIR}/../../../Libraries/libvlc/include")
 include_directories(${LIBVLC_DIR})
 
 set(LIBVLC_PATH "${PROJECT_SOURCE_DIR}/../../../Libraries/libvlc/libvlc.dll")

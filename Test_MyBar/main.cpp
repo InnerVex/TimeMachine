@@ -1,4 +1,4 @@
-#include "playercontroller.h"
+#include "streamcontroller.h"
 #include "player.h"
 #include <QApplication>
 #include <QObject>
@@ -7,18 +7,18 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-    PlayerController playerController;
+    StreamController playerController;
     Player player;
     player.show();
 
     QObject::connect(&player, &Player::RequestToObtainSource,
-                    &playerController, &PlayerController::RequestedToObtainSource);
+                    &playerController, &StreamController::RequestedToObtainSource);
     QObject::connect(&player, &Player::RequestToStream,
-                    &playerController, &PlayerController::RequestedToStream);
+                    &playerController, &StreamController::RequestedToStream);
     QObject::connect(&player, &Player::RequestToPauseStream,
-                    &playerController, &PlayerController::RequestedToPauseStream);
+                    &playerController, &StreamController::RequestedToPauseStream);
 
-    QObject::connect(&playerController, &PlayerController::SignalSourceObtained,
+    QObject::connect(&playerController, &StreamController::SignalSourceObtained,
                     &player, &Player::HandleSourceObtained);
 
 
