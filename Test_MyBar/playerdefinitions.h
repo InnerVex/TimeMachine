@@ -1,8 +1,7 @@
-#ifndef PLAYERDEFINITIONS_H
-#define PLAYERDEFINITIONS_H
+#pragma once
 
 struct SourceData {
-    SourceData(std::string _path, long _sourceStartTime, long _sourceEndTime) :
+    SourceData(std::string _path, qint32 _sourceStartTime, qint32 _sourceEndTime) :
         path(_path),
         sourceStartTime(_sourceStartTime),
         sourceEndTime(_sourceEndTime){}
@@ -13,5 +12,3 @@ struct SourceData {
     long sourceStartTime;
     long sourceEndTime;
 }; 
-
-#endif // PLAYERDEFINITIONS_H
