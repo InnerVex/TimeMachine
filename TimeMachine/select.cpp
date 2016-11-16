@@ -199,12 +199,12 @@ qint32 Select::selectOffset(quint32 sDateTime)
 
         if (sFileId == -1)
         {
-            e = "File with time:" + QString::number(sDateTime) + " does't found";
+            e = "File with time:" + QDateTime::fromTime_t(sDateTime).toString() +"wasn't found";
             throw e;
         }
         if (sOffset == -1)
         {
-            e = "Offset in file for time" + QString::number(sDateTime) +"does't found";
+            e = "Offset in file for time" + QDateTime::fromTime_t(sDateTime).toString() +"wasn't found";
         }
 
         return sOffset;
@@ -237,7 +237,7 @@ qint32 Select::selectPathId(quint32 sDateTime)
 
                 if(sPathId == 0)
                 {
-                    e = "Path to file for time = " + QString::number(sDateTime) +" does't found";
+                    e = "Path to file for time = " + QDateTime::fromTime_t(sDateTime).toString() +"wasn't found";
                     throw e;
                 }
 
@@ -272,7 +272,7 @@ qint32 Select::selectSourceId(quint32 sDateTime)
 
                 if(sSourceId == 0)
                 {
-                    e = "Source for time = " + QString::number(sDateTime) +" does't found";
+                    e = "Source for time = " + QDateTime::fromTime_t(sDateTime).toString() +"wasn't found";
                     throw e;
 
                 }
@@ -305,7 +305,7 @@ QString Select::selectFile(quint32 sDateTime)
 
                 if(sFileName == "")
                 {
-                    e = "File for time = " + QString::number(sDateTime) + " does't found";
+                    e = "File for time = " + QDateTime::fromTime_t(sDateTime).toString() +"wasn't found";
                     throw e;
                 }
 

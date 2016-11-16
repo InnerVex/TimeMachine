@@ -23,6 +23,8 @@ StreamController::StreamController(QObject *parent) : QObject(parent)
 
 void StreamController::requestedToObtainSource(quint32 requestTime, float playSpeed)
 {
+    libvlc_media_player_stop(mMediaPlayer);
+
     sourceFileName = Select::selectFile(requestTime).toStdString().c_str();
     sourceMargin = Select::selectOffset(requestTime);
 
@@ -33,7 +35,8 @@ void StreamController::requestedToObtainSource(quint32 requestTime, float playSp
 
     //Переходим к нужному моменту
     //quint64 duration = libvlc_media_get_duration(mMedia) * 0.001;
-    libvlc_media_player_set_position(mMediaPlayer, sourceMargin / 133);
+    float position = sourceMargin / 133.0;
+    libvlc_media_player_set_position(mMediaPlayer, position);
 
     //libvlc_media_player_stop(mMediaPlayer);
 
@@ -44,9 +47,9 @@ void StreamController::requestedToObtainSource(quint32 requestTime, float playSp
 void StreamController::requestedToStream(float playSpeed)
 {
     //Начать воспроизводить источник с заданными параметрами
-    mMedia = libvlc_media_new_path(mVlcInstance, "D:\\example.avi");
-    libvlc_media_player_set_media (mMediaPlayer, mMedia);
-    libvlc_media_player_play(mMediaPlayer);
+    //mMedia = libvlc_media_new_path(mVlcInstance, "D:\\example.avi");
+    //libvlc_media_player_set_media (mMediaPlayer, mMedia);
+    //libvlc_media_player_play(mMediaPlayer);
 
     /*QTimer *timer = new QTimer();
     connect(timer, &QTimer::timeout,

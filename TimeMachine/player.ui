@@ -355,8 +355,17 @@
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="minimumSize">
+            <size>
+             <width>130</width>
+             <height>0</height>
+            </size>
+           </property>
            <property name="alignment">
             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+           </property>
+           <property name="displayFormat">
+            <string>dd.MM.yyyy HH:mm:ss</string>
            </property>
           </widget>
          </item>
@@ -445,7 +454,17 @@
         </spacer>
        </item>
        <item>
-        <widget class="QDateTimeEdit" name="testTimeInput"/>
+        <widget class="QDateTimeEdit" name="testTimeInput">
+         <property name="minimumSize">
+          <size>
+           <width>150</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="displayFormat">
+          <string>dd.MM.yyyy HH:mm:ss</string>
+         </property>
+        </widget>
        </item>
        <item>
         <widget class="QPushButton" name="testTimeButton">
