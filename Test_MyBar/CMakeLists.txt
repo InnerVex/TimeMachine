@@ -21,9 +21,15 @@ set(HEADERS
     timebar.h)
 set(UI
     player.ui)
+set(RESOURCES
+    playerresources.qrc)
+
+qt5_add_resources(UI_RESOURCES_RCC ${RESOURCES})
 
 #Add Target
 add_executable(${PROJECT_NAME}
+    ${RESOURCES}
+    ${UI_RESOURCES_RCC}
     ${SRC_LIST}
     ${HEADERS}
     ${UI})
@@ -39,3 +45,5 @@ set(LIBVLC_DIR "${PROJECT_SOURCE_DIR}/../../../Libraries/libvlc/include")
 include_directories(${LIBVLC_DIR})
 set(LIBVLC_PATH "${PROJECT_SOURCE_DIR}/../../../Libraries/libvlc/libvlc.dll")
 target_link_libraries(${PROJECT_NAME} ${LIBVLC_PATH})
+
+MESSAGE ("DIR" ${LIBVLC_DIR})

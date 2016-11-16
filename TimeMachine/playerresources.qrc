@@ -1,0 +1,15 @@
+<RCC>
+    <qresource prefix="/player/icons">
+        <file alias="play">resources/icons/icon_play.png</file>
+        <file alias="speeddown">resources/icons/icon_speeddown.png</file>
+        <file alias="speedup">resources/icons/icon_speedup.png</file>
+        <file alias="stepback">resources/icons/icon_stepback.png</file>
+        <file alias="stepforward">resources/icons/icon_stepforward.png</file>
+        <file alias="stop">resources/icons/icon_stop.png</file>
+        <file alias="realtime">resources/icons/icon_realtime.png</file>
+        <file alias="eye">resources/icons/icon_eye.png</file>
+    </qresource>
+    <qresource prefix="/player/images">
+        <file alias="scroller">resources/images/timebar_scroller.png</file>
+    </qresource>
+</RCC>
