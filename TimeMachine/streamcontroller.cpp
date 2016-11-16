@@ -23,9 +23,8 @@ StreamController::StreamController(QObject *parent) : QObject(parent)
 
 void StreamController::requestedToObtainSource(quint32 requestTime, float playSpeed)
 {
-    QDateTime dateTime = QDateTime::fromTime_t(requestTime);
-    sourceFileName = Select::selectFile(dateTime).toStdString().c_str();
-    sourceMargin = Select::selectOffset(dateTime);
+    sourceFileName = Select::selectFile(requestTime).toStdString().c_str();
+    sourceMargin = Select::selectOffset(requestTime);
 
     //Запускаем проигрывание
     mMedia = libvlc_media_new_path(mVlcInstance, sourceFileName);
