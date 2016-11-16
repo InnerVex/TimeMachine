@@ -77,10 +77,12 @@ void PlayerController::playButtonClicked()
 void PlayerController::testInputButtonClicked()
 {
     isIntendedToPlay = true;
-    quint32 requestedTime = player->ui->testTimeInput->text().toUInt();
+    quint32 requestedTime = player->ui->testTimeInput->dateTime().toTime_t();
+    player->showMessageInStatusBar("RequestedTime: " + QString::number(requestedTime));
+
     if (requestedTime == 0)
     {
-        player->showMessageInStatusBar("Nope");
+        player->showMessageInStatusBar("RequestedTime Invalid");
     }
     else
     {

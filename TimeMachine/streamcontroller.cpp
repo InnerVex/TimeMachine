@@ -2,6 +2,8 @@
 
 #include <QDebug>
 #include <QTimer>
+#include <QDateTime>
+#include "select.h"
 
 StreamController::StreamController(QObject *parent) : QObject(parent)
 {
@@ -21,19 +23,20 @@ StreamController::StreamController(QObject *parent) : QObject(parent)
 
 void StreamController::requestedToObtainSource(quint32 requestTime, float playSpeed)
 {
-    //TODO::Запросить из БД файл и время его начала, рассчитать временное смещение
-
-
-    sourceData = SourceData("D:\\example.avi", 0, 100);
-    sourceMargin = 100;
+    QDateTime dateTime = QDateTime::fromTime_t(requestTime);
+    sourceFileName = Select::selectFile(dateTime).toStdString().c_str();
+    sourceMargin = Select::selectOffset(dateTime);
 
     //Запускаем проигрывание
-    mMedia = libvlc_media_new_path(mVlcInstance, "D:\\example.avi");
+    mMedia = libvlc_media_new_path(mVlcInstance, sourceFileName);
     libvlc_media_player_set_media (mMediaPlayer, mMedia);
     libvlc_media_player_play(mMediaPlayer);
 
-    libvlc_media_player_set_position(mMediaPlayer, 0.5f);
+    //Переходим к нужному моменту
+    //quint64 duration = libvlc_media_get_duration(mMedia) * 0.001;
+    libvlc_media_player_set_position(mMediaPlayer, sourceMargin / 133);
 
+    //libvlc_media_player_stop(mMediaPlayer);
 
     //Отправить сигнал о получении данных об источнике
     emit signalSourceObtained();

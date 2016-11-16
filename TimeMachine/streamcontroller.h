@@ -20,6 +20,7 @@ private:
     libvlc_media_t *mMedia;
 
     SourceData sourceData;
+    const char* sourceFileName;
     long sourceMargin;
 
 signals:

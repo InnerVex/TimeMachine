@@ -9,7 +9,7 @@
 
 int main(int argc, char *argv[])
 {
-    /*QDateTime firstDateTime(QDate(2011,1,1),QTime(1,10,00));
+    QDateTime firstDateTime(QDate(2000,1,1),QTime(0,0,0));
     QString iFileName = QFileInfo("slice_0.ts").fileName();
     //QDir iFilePath = QFileInfo("slice_0.ts").dir();
     QString iSourceName = "CAM01";
@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
               << " SourceAdress:"<< sourceAdress.toStdString()
               << " SourceName:"  << sourseName.toStdString()
               << " File:"        << file.toStdString() << std::endl;
-*/
+
     QApplication a(argc, argv);
 
     Player player;
