@@ -6,9 +6,11 @@
 #include <iostream>
 #include <QApplication>
 #include <QObject>
+#include <QThread>
 
 int main(int argc, char *argv[])
 {
+    /*
     QDateTime firstDateTime(QDate(2000,1,1),QTime(00,00,00));
     quint32 time = firstDateTime.toTime_t();
     QString iFileName = QFileInfo("slice_0.ts").fileName();
@@ -33,21 +35,29 @@ int main(int argc, char *argv[])
               << " SourceAdress:"<< sourceAdress.toStdString()
               << " SourceName:"  << sourseName.toStdString()
               << " File:"        << file.toStdString() << std::endl;
-
+    */
     QApplication a(argc, argv);
 
     Player player;
     PlayerController *playerController = new PlayerController(&player);
-    StreamController streamController;
+    StreamController *streamController = new StreamController();
     player.show();
 
+    /*QThread *playerControllerThread = new QThread();
+    playerController->moveToThread(playerControllerThread);
+    playerControllerThread->start();
+
+    QThread *streamControllerThread = new QThread();
+    streamController->moveToThread(streamControllerThread);
+    streamControllerThread->start();*/
+
     QObject::connect(playerController, &PlayerController::requestToObtainSource,
-                    &streamController, &StreamController::requestedToObtainSource);
+                    streamController, &StreamController::requestedToObtainSource);
     QObject::connect(playerController, &PlayerController::requestToStream,
-                    &streamController, &StreamController::requestedToStream);
+                    streamController, &StreamController::requestedToStream);
     QObject::connect(playerController, &PlayerController::requestToPauseStream,
-                    &streamController, &StreamController::requestedToPauseStream);
-    QObject::connect(&streamController, &StreamController::signalSourceObtained,
+                    streamController, &StreamController::requestedToPauseStream);
+    QObject::connect(streamController, &StreamController::signalSourceObtained,
                     playerController, &PlayerController::handleSourceObtained);
 
 

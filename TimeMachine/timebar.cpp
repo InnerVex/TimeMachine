@@ -1,5 +1,11 @@
 #include "timebar.h"
 
+#include <QPainter>
+#include <QDebug>
+#include <QToolTip>
+#include <QMouseEvent>
+#include <QWheelEvent>
+
 TimeBar::TimeBar(QWidget *parent) :
     QWidget(parent)
 {
@@ -14,6 +20,20 @@ QSize TimeBar::sizeHint() const
 void TimeBar::dragMoveEvent(QDragMoveEvent *event)
 {
 
+}
+
+void TimeBar::mouseMoveEvent(QMouseEvent *event)
+{
+    QPoint cursorPos = event->pos();
+    //QToolTip::showText(mapToGlobal(cursorPos), "TOOLTIP");
+    //emit sendMessageToStatusBar("CursorPos: " + QString::number(cursorPos.x()) + ", " + QString::number(cursorPos.y()));
+}
+
+void TimeBar::mousePressEvent(QMouseEvent *event)
+{
+    QPoint cursorPos = event->pos();
+
+    //emit sendMessageToStatusBar("Clicked: ");
 }
 
 void TimeBar::wheelEvent(QWheelEvent *event)

@@ -5,6 +5,8 @@
 
 #include <ui_player.h>
 
+
+
 PlayerController::PlayerController(Player *_player, QObject *parent) :
     QObject(parent),
     player(_player)
@@ -29,18 +31,42 @@ PlayerController::PlayerController(Player *_player, QObject *parent) :
 
 void PlayerController::handleSourceObtained()
 {
-    //Возобновить воспроизведение, если воспроизводилось до этого
-    if(isIntendedToPlay && !isPlaying)
+    //Воспроизведение продолжается, если воспроизводилось до этого
+    //if(isIntendedToPlay && !isPlaying)
     {
+        //Запрос стримеру на начало стрима и старт попыток подхватить стрим
         emit requestToStream(playSpeed);
-
-        //TODO - Как-то понять, что стрим работает и продолжить воспроизведение
-        //std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-        //playStream();
+        startAttemptsToPlayStream();
     }
 }
 
-void PlayerController::playStream()
+void PlayerController::startAttemptsToPlayStream()
+{
+    mAttemptTimer = new QTimer();
+    connect(mAttemptTimer, &QTimer::timeout, [=]()
+    {
+        if(libvlc_media_player_is_playing(mMediaPlayer) != 0)
+        {
+            player->showMessageInStatusBar("Stream started");
+            mAttemptTimer->stop();
+            isPlaying=true;
+            isIntendedToPlay = true;
+        }
+        else
+        {
+            player->showMessageInStatusBar("Attempt");
+            attemptToPlayStream();
+        }
+    });
+
+    QTimer *delayTimer = new QTimer();
+    delayTimer->singleShot(PLAY_ATTEMPT_DELAY, [=]()
+    {
+        mAttemptTimer->start(PLAY_ATTEMPT_DELAY);
+    });
+}
+
+void PlayerController::attemptToPlayStream()
 {
     //Объект медиаданных из источника
     mMedia = libvlc_media_new_location(mVlcInstance, inputLocation.c_str());
@@ -52,43 +78,35 @@ void PlayerController::playStream()
 
     //Старт проигрывания
     libvlc_media_player_play(mMediaPlayer);
-
-    isPlaying=true;
-    isIntendedToPlay = true;
 }
 
 void PlayerController::setPlayPosition(quint32 requestTime)
 {
     //TODO::Отправка запроса на обновление стрима
+
 }
 
 void PlayerController::playTimerShot()
 {
-    //TODO: Синхронизация с интерфейсом
+    //TODO::Синхронизация с интерфейсом
 
 }
 
 void PlayerController::playButtonClicked()
 {
-    playStream();
+    //TODO::Различные действия в зависимости от того, воспроизводится ли стрим
+    //Запрос стримеру на начало стрима и старт попыток подхватить стрим
+    emit requestToStream(playSpeed);
+    startAttemptsToPlayStream();
 }
 
 //TOTALLY TEST CODE
 void PlayerController::testInputButtonClicked()
 {
-    isIntendedToPlay = true;
     quint32 requestedTime = player->ui->testTimeInput->dateTime().toTime_t();
     player->showMessageInStatusBar("RequestedTime: " + QString::number(requestedTime));
 
-    if (requestedTime == 0)
-    {
-        player->showMessageInStatusBar("RequestedTime Invalid");
-    }
-    else
-    {
-        emit requestToObtainSource(requestedTime, 1);
-    }
-
+    emit requestToObtainSource(requestedTime, 1);
 }
 
 

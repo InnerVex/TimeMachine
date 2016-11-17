@@ -5,6 +5,8 @@
 #include <QDateTime>
 #include "select.h"
 
+#define TESTFILE_DURATION 133.0
+
 StreamController::StreamController(QObject *parent) : QObject(parent)
 {
     //Формирование строки выхода
@@ -25,6 +27,7 @@ void StreamController::requestedToObtainSource(quint32 requestTime, float playSp
 {
     libvlc_media_player_stop(mMediaPlayer);
 
+    //Получение данных из БД
     sourceFileName = Select::selectFile(requestTime).toStdString().c_str();
     sourceMargin = Select::selectOffset(requestTime);
 
@@ -33,12 +36,12 @@ void StreamController::requestedToObtainSource(quint32 requestTime, float playSp
     libvlc_media_player_set_media (mMediaPlayer, mMedia);
     libvlc_media_player_play(mMediaPlayer);
 
-    //Переходим к нужному моменту
-    //quint64 duration = libvlc_media_get_duration(mMedia) * 0.001;
-    float position = sourceMargin / 133.0;
+    //Переходим к нужному моменту и тормозим воспроизведение
+    //TODO::Из TS-файла невозможно извлечь продолжительность, здесь заглушка
+    float position = sourceMargin / TESTFILE_DURATION;
     libvlc_media_player_set_position(mMediaPlayer, position);
 
-    //libvlc_media_player_stop(mMediaPlayer);
+    libvlc_media_player_pause(mMediaPlayer);
 
     //Отправить сигнал о получении данных об источнике
     emit signalSourceObtained();
@@ -49,7 +52,7 @@ void StreamController::requestedToStream(float playSpeed)
     //Начать воспроизводить источник с заданными параметрами
     //mMedia = libvlc_media_new_path(mVlcInstance, "D:\\example.avi");
     //libvlc_media_player_set_media (mMediaPlayer, mMedia);
-    //libvlc_media_player_play(mMediaPlayer);
+    libvlc_media_player_play(mMediaPlayer);
 
     /*QTimer *timer = new QTimer();
     connect(timer, &QTimer::timeout,

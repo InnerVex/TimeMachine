@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QObject>
+#include <QTimer>
 
 #include "vlc/vlc.h"
 
@@ -31,6 +32,7 @@ private:
     libvlc_media_t *mMedia;
 
     //Таймер, сопровождающий воспроизведение
+    QTimer *mAttemptTimer;
     QTimer *mPlayTimer;
 
 signals:
@@ -44,7 +46,8 @@ public slots:
     void handleSourceObtained();
 
     //Начать воспроизведение из источника
-    void playStream();
+    void startAttemptsToPlayStream();
+    void attemptToPlayStream();
 
     //Запрос пользователя на новый момент воспроизведения
     void setPlayPosition(quint32 requestTime);

@@ -5,14 +5,6 @@
 #include <ctime>
 
 #include <QWidget>
-#include <QScrollArea>
-#include <QAbstractSlider>
-#include <QSlider>
-#include <QVBoxLayout>
-#include <QPainter>
-#include <QDebug>
-#include <QWheelEvent>
-#include <QPen>
 
 class TimeBar : public QWidget
 {
@@ -32,6 +24,8 @@ protected:
     void dragMoveEvent(QDragMoveEvent *event) Q_DECL_OVERRIDE;
     void wheelEvent(QWheelEvent *event) Q_DECL_OVERRIDE;
     void paintEvent(QPaintEvent *event) Q_DECL_OVERRIDE;
+    void mouseMoveEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
+    void mousePressEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
 
 private:
     QWidget *mainWindow;

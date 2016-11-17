@@ -461,6 +461,13 @@
            <height>0</height>
           </size>
          </property>
+         <property name="time">
+          <time>
+           <hour>0</hour>
+           <minute>0</minute>
+           <second>1</second>
+          </time>
+         </property>
          <property name="displayFormat">
           <string>dd.MM.yyyy HH:mm:ss</string>
          </property>
