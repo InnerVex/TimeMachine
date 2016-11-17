@@ -35,7 +35,13 @@ void StreamController::requestedToObtainSource(quint32 requestTime, float playSp
 
     //Переходим к нужному моменту
     //quint64 duration = libvlc_media_get_duration(mMedia) * 0.001;
-    float position = sourceMargin / 133.0;
+
+    float duration;
+    if (sourceFileName = "slice_0-5.ts")
+        duration = 366;
+    else
+        duration = 306;
+    float position = sourceMargin / duration;
     libvlc_media_player_set_position(mMediaPlayer, position);
 
     //libvlc_media_player_stop(mMediaPlayer);
