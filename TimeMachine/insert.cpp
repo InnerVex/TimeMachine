@@ -81,7 +81,7 @@ void Insert::insert(quint32 iDateTime,
     }
     catch(QString iFilePath)
     {
-        cout << "Path: " << iFilePath.toStdString().c_str() << " already exists. " << endl;
+        //cout << "Path: " << iFilePath.toStdString().c_str() << " already exists. " << endl;
     }
 
     try
@@ -115,7 +115,7 @@ void Insert::insert(quint32 iDateTime,
     }
     catch(QString iSourceAdress)
     {
-        cout << "Source adress: " << iSourceAdress.toStdString().c_str() << " already exists. " << endl;
+        //cout << "Source adress: " << iSourceAdress.toStdString().c_str() << " already exists. " << endl;
     }
     try
     {
@@ -174,7 +174,7 @@ void Insert::insert(quint32 iDateTime,
 
     catch(QString iFileName)
     {
-        cout << "File: " << iFileName.toStdString().c_str() << " already exists. " << endl;
+        //cout << "File: " << iFileName.toStdString().c_str() << " already exists. " << endl;
     }
 
     try
@@ -221,6 +221,6 @@ void Insert::insert(quint32 iDateTime,
     }
     catch(QString iFileName)
     {
-        cout << "Offset: " << iOffset << " in " << iFileName.toStdString().c_str() << " already exists. " << endl;
+        //cout << "Offset: " << iOffset << " in " << iFileName.toStdString().c_str() << " already exists. " << endl;
     }
 }

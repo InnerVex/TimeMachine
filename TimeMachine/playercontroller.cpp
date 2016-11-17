@@ -47,6 +47,7 @@ void PlayerController::startAttemptsToPlayStream()
     {
         if(libvlc_media_player_is_playing(mMediaPlayer) != 0)
         {
+            attemptToPlayStream();
             player->showMessageInStatusBar("Stream started");
             mAttemptTimer->stop();
             isPlaying=true;
@@ -54,15 +55,14 @@ void PlayerController::startAttemptsToPlayStream()
         }
         else
         {
-            player->showMessageInStatusBar("Attempt");
             attemptToPlayStream();
         }
     });
 
     QTimer *delayTimer = new QTimer();
-    delayTimer->singleShot(PLAY_ATTEMPT_DELAY, [=]()
+    delayTimer->singleShot(2000, [=]()
     {
-        mAttemptTimer->start(PLAY_ATTEMPT_DELAY);
+        mAttemptTimer->start(2000);
     });
 }
 

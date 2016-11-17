@@ -36,12 +36,15 @@ void StreamController::requestedToObtainSource(quint32 requestTime, float playSp
     libvlc_media_player_set_media (mMediaPlayer, mMedia);
     libvlc_media_player_play(mMediaPlayer);
 
-    //Переходим к нужному моменту и тормозим воспроизведение
-    //TODO::Из TS-файла невозможно извлечь продолжительность, здесь заглушка
-    float position = sourceMargin / TESTFILE_DURATION;
+    float duration;
+    if (sourceFileName = "slice_0-5.ts")
+        duration = 366;
+    else
+        duration = 306;
+    float position = sourceMargin / duration;
     libvlc_media_player_set_position(mMediaPlayer, position);
 
-    libvlc_media_player_pause(mMediaPlayer);
+    //libvlc_media_player_pause(mMediaPlayer);
 
     //Отправить сигнал о получении данных об источнике
     emit signalSourceObtained();
@@ -49,19 +52,7 @@ void StreamController::requestedToObtainSource(quint32 requestTime, float playSp
 
 void StreamController::requestedToStream(float playSpeed)
 {
-    //Начать воспроизводить источник с заданными параметрами
-    //mMedia = libvlc_media_new_path(mVlcInstance, "D:\\example.avi");
-    //libvlc_media_player_set_media (mMediaPlayer, mMedia);
-    libvlc_media_player_play(mMediaPlayer);
-
-    /*QTimer *timer = new QTimer();
-    connect(timer, &QTimer::timeout,
-            [=](){
-        libvlc_media_player_set_position(mMediaPlayer, 0.5f);
-    });
-    timer->start(10000);*/
-    //libvlc_media_player_set_position(mMediaPlayer, 0.5f);
-    //libvlc_media_player_set_rate(mMediaPlayer, 1.5f);
+    //libvlc_media_player_play(mMediaPlayer);
 }
 
 void StreamController::requestedToPauseStream()

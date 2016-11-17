@@ -1,6 +1,6 @@
 #pragma once
 
-#define PLAY_ATTEMPT_DELAY 1000
+#define PLAY_ATTEMPT_DELAY 2000
 
 struct SourceData {
     SourceData(std::string _path, qint32 _sourceStartTime, qint32 _sourceEndTime) :
