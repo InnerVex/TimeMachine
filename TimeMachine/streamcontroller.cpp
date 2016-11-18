@@ -34,17 +34,18 @@ void StreamController::requestedToObtainSource(quint32 requestTime, float playSp
     //Запускаем проигрывание
     mMedia = libvlc_media_new_path(mVlcInstance, sourceFileName);
     libvlc_media_player_set_media (mMediaPlayer, mMedia);
+
+    //Получаем продолжительность
+    libvlc_media_parse(mMedia);
+    float duration = libvlc_media_get_duration(mMedia);
+    duration *= 0.001;
+
     libvlc_media_player_play(mMediaPlayer);
 
-    float duration;
-    if (sourceFileName = "slice_0-5.ts")
-        duration = 366;
-    else
-        duration = 306;
     float position = sourceMargin / duration;
     libvlc_media_player_set_position(mMediaPlayer, position);
 
-    //libvlc_media_player_pause(mMediaPlayer);
+    libvlc_media_player_pause(mMediaPlayer);
 
     //Отправить сигнал о получении данных об источнике
     emit signalSourceObtained();
@@ -52,7 +53,7 @@ void StreamController::requestedToObtainSource(quint32 requestTime, float playSp
 
 void StreamController::requestedToStream(float playSpeed)
 {
-    //libvlc_media_player_play(mMediaPlayer);
+    libvlc_media_player_play(mMediaPlayer);
 }
 
 void StreamController::requestedToPauseStream()
