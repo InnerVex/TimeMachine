@@ -31,7 +31,10 @@ set(${PROJECT_NAME}_SOURCES
     playercontroller.cpp
     streamcontroller.cpp
     timebarconstants.h
-    timebar.cpp)
+    timebar.cpp
+    main_old.cpp
+    slicer.cpp
+    parser.cpp)
 set(${PROJECT_NAME}_HEADERS
     insert.h
     select.h
@@ -44,7 +47,9 @@ set(${PROJECT_NAME}_HEADERS
     playercontroller.h
     streamcontroller.h
     timebarconstants.h
-    timebar.h)
+    timebar.h
+    slicer.h
+    parser.h)
 set(UI
     player.ui)
 set(RESOURCES
