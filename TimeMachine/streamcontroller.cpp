@@ -11,10 +11,11 @@ StreamController::StreamController(QObject *parent) : QObject(parent)
 {
     //Формирование строки выхода
     std::string dstParam = "rtp{sdp=rtsp://localhost:5544/}";
-    //string soutLine = "--sout=#transcode{vcodec=MJPG,vb=0,scale=1,acodec=mpga,ab=128,channels=2,samplerate=44100}:";
-    std::string soutLine = "--sout=#transcode{vcodec=MJPG,vb=0,scale=1,acodec=mpga,ab=128,channels=2,samplerate=44100}:";
-    soutLine.append(dstParam);
+    //string soutLine = "--sout=#transcode{vcodec=h264,vb=0,scale=1,acodec=mpga,ab=128,channels=2,samplerate=44100}:";
+    //std::string soutLine = "--sout=";
+    //soutLine.append(dstParam);
 
+    std::string soutLine = "--sout=#rtp{dst=localhost,port=5544,sdp=rtsp://localhost:5544/}";
     //Объекты libVLC для стрима
     const char * const vlc_args[] = {
         "--verbose=0",
@@ -54,6 +55,8 @@ void StreamController::requestedToObtainSource(quint32 requestTime, float playSp
 void StreamController::requestedToStream(float playSpeed)
 {
     libvlc_media_player_play(mMediaPlayer);
+
+
 }
 
 void StreamController::requestedToPauseStream()
