@@ -127,3 +127,39 @@ void Slicer::makeSlice(const char* input, int start, int stop, const char* outpu
     qDebug()<<"End of makeSlice";
 
 }
+
+int Slicer::getDuration(const char* input)
+{
+    const char * const vlc_args[] =
+    {
+        //"--verbose=2",
+        "vlc://quit",
+    };
+    inst=libvlc_new(sizeof(vlc_args) / sizeof(vlc_args[0]), vlc_args);
+    m = libvlc_media_new_path (inst, input);
+    mp = libvlc_media_player_new_from_media (m);
+    libvlc_media_parse(m);
+    return libvlc_media_get_duration(m);
+}
+
+void Slicer::convertToTsFromStream(const char* input, const char* output)
+{
+    const char* sout="--sout=#standard{access=file,mux=ts,dst=\"";
+    const char* ending="\"}";
+    char *param;
+    param = new char[strlen(sout)+strlen(output)+strlen(ending)];
+    strcat(strcpy(param,sout),output);
+    strcat(param,ending);
+
+    const char * const vlc_args[] =
+    {
+        //"--verbose=2",
+        param,
+        //"--sout=#standard{access=file,mux=ts,dst=\"D:\\Work\\TD\\test\\Projects\\video\\outputFromStream.ts\"}",
+        "vlc://quit",
+    };
+    inst=libvlc_new(sizeof(vlc_args) / sizeof(vlc_args[0]), vlc_args);
+    m = libvlc_media_new_location(inst,input);  //"http://ar.solumedia.com.ar:1935/cool/hd/playlist.m3u8"
+    mp = libvlc_media_player_new_from_media (m);
+    libvlc_media_player_play(mp);
+}

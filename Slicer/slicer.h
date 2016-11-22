@@ -12,6 +12,8 @@ public:
     void splitTS(const char* input); //depricated
     void parseTS(const char* input);
     void makeSlice(const char* input, int start, int stop, const char* output); //there's no guarantee that it will work fine from the first time
+    int getDuration(const char* input);
+    void convertToTsFromStream(const char* input, const char* output);
 };
 
 
