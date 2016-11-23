@@ -14,6 +14,9 @@ public:
     void makeSlice(const char* input, int start, int stop, const char* output); //there's no guarantee that it will work fine from the first time
     int getDuration(const char* input);
     void convertToTsFromStream(const char* input, const char* output);
+    void makeSliceFromStreamSmem();
+    void makeSliceFromStreamDirty(const char* input, const char* output, int duration);
+    void makeMultipleSlices(const char* input, int number);
 };
 
 

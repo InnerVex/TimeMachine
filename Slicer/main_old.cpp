@@ -16,7 +16,11 @@ int main(int argc, char *argv[])
     //slicer.makeSlice(input,start,stop,output);
 
     //qDebug()<< slicer.getDuration(output);
-    slicer.convertToTsFromStream(input,outputFromStream); // there is no stop yet, so turn it off by yourself
+    //slicer.convertToTsFromStream(input,outputFromStream); // there is no stop yet, so turn it off by yourself
+    //slicer.makeSliceFromStream();
+    int numberOfSlices = 3;
+    slicer.makeMultipleSlices(input, numberOfSlices);
+
 
     qDebug()<<"End of main";
 

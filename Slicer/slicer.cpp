@@ -3,7 +3,10 @@
 #include <string>
 #include <string.h>
 #include <include/vlc/vlc.h>
-
+#include <mutex>
+//#include <QtTest/QTest>
+#include <chrono>
+#include <thread>
 
 
 void Slicer::convertToTS(const char* input, const char* output)
@@ -153,13 +156,118 @@ void Slicer::convertToTsFromStream(const char* input, const char* output)
 
     const char * const vlc_args[] =
     {
-        //"--verbose=2",
+        "--verbose=2",
         param,
         //"--sout=#standard{access=file,mux=ts,dst=\"D:\\Work\\TD\\test\\Projects\\video\\outputFromStream.ts\"}",
         "vlc://quit",
     };
     inst=libvlc_new(sizeof(vlc_args) / sizeof(vlc_args[0]), vlc_args);
     m = libvlc_media_new_location(inst,input);  //"http://ar.solumedia.com.ar:1935/cool/hd/playlist.m3u8"
+    mp = libvlc_media_player_new_from_media (m);
+    libvlc_media_player_play(mp);
+
+    //QTest::qSleep(10000);
+
+    //std::this_thread::sleep_for(std::chrono::milliseconds(30000));
+    //qDebug()<<"Hi";
+
+    //libvlc_media_player_stop(mp);
+}
+
+void Slicer::makeMultipleSlices(const char* input, int number)
+{
+    char output[1000];
+    int duration_of_slice = 20000; // in milliseconds
+    for (long long int i=0;i<number;i++)
+    {
+        sprintf(output
+                ,"D:\\Work\\TD\\test\\Projects\\video\\outputFromStream_%lld"
+                ".ts"
+                ,i
+                );
+        qDebug()<<output;
+        this->makeSliceFromStreamDirty(input,output,duration_of_slice);
+    }
+}
+
+void Slicer::makeSliceFromStreamDirty(const char *input, const char *output, int duration)
+{
+    const char* sout="--sout=#standard{access=file,mux=ts,dst=\"";
+    const char* ending="\"}";
+    char *param;
+    param = new char[strlen(sout)+strlen(output)+strlen(ending)];
+    strcat(strcpy(param,sout),output);
+    strcat(param,ending);
+
+    const char * const vlc_args[] =
+    {
+        "--verbose=2",
+        param,
+        //"--run-time=5",
+        //"--sout=#standard{access=file,mux=ts,dst=\"D:\\Work\\TD\\test\\Projects\\video\\outputFromStream.ts\"}",
+        "vlc://quit",
+    };
+    inst=libvlc_new(sizeof(vlc_args) / sizeof(vlc_args[0]), vlc_args);
+    m = libvlc_media_new_location(inst,input);  //"http://ar.solumedia.com.ar:1935/cool/hd/playlist.m3u8"
+    mp = libvlc_media_player_new_from_media (m);
+    libvlc_media_player_play(mp);
+
+    //QTest::qSleep(10000);
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(duration));
+    qDebug()<<"Hi";
+
+    libvlc_media_player_stop(mp);
+}
+
+
+std::mutex imageMutex;
+uint8_t * videoBuffer;
+void cbVideoPrerender(void *p_video_data, uint8_t **pp_pixel_buffer, int size) {
+    // Locking
+    imageMutex.lock();
+    qDebug()<<(dec)<<"Size is"<<size<<(int)p_video_data;
+    videoBuffer = (uint8_t *)malloc(size);
+    *pp_pixel_buffer = videoBuffer;
+}
+void cbVideoPostrender(void *p_video_data, uint8_t *p_pixel_buffer
+      , int width, int height, int pixel_pitch, int size, int64_t pts) {
+   // Unlocking
+   imageMutex.unlock();
+}
+
+void Slicer::makeSliceFromStreamSmem()
+{
+    char smem_options[1000];
+       sprintf(smem_options
+          , "#smem{"
+             "video-prerender-callback=%lld,"
+             "video-postrender-callback=%lld}"
+          , (long long int)(intptr_t)(void*)&cbVideoPrerender
+          , (long long int)(intptr_t)(void*)&cbVideoPostrender //This would normally be useful data, 100 is just test data
+         // , "D:\\Work\\TD\\test\\Projects\\video\\example1.flv" //Test data
+          );
+       //strcat(smem_options,"D:\\Work\\TD\\test\\Projects\\video\\example1.flv}");
+
+       strcat(smem_options,":std{access=file,mux=ts,dst=\"D:\\Work\\TD\\test\\Projects\\video\\outputFromOutput.ts\"}");
+
+
+
+        qDebug()<<smem_options;
+
+    const char * const vlc_args[] =
+    {
+        "-I", "dummy", // Don't use any interface
+        "--ignore-config", // Don't use VLC's config
+        //"--extraintf=logger", // Log anything
+        "--verbose=2", // Be verbose
+        "--sout", smem_options // Stream to memory
+    };
+    inst=libvlc_new(sizeof(vlc_args) / sizeof(vlc_args[0]), vlc_args);
+
+    //mp = libvlc_media_player_new(inst);
+
+    m = libvlc_media_new_path(inst,"D:\\Work\\TD\\test\\Projects\\video\\example1.flv");  //"http://ar.solumedia.com.ar:1935/cool/hd/playlist.m3u8"
     mp = libvlc_media_player_new_from_media (m);
     libvlc_media_player_play(mp);
 }
