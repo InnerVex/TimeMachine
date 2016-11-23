@@ -177,7 +177,7 @@ void Slicer::convertToTsFromStream(const char* input, const char* output)
 void Slicer::makeMultipleSlices(const char* input, int number)
 {
     char output[1000];
-    int duration_of_slice = 20000; // in milliseconds
+    int duration_of_slice = 30000; // in milliseconds
     for (long long int i=0;i<number;i++)
     {
         sprintf(output
@@ -185,8 +185,9 @@ void Slicer::makeMultipleSlices(const char* input, int number)
                 ".ts"
                 ,i
                 );
-        qDebug()<<output;
+        //qDebug()<<output;
         this->makeSliceFromStreamDirty(input,output,duration_of_slice);
+        qDebug()<<"Duration of"<<output<<"is"<<getDuration(output);
     }
 }
 
@@ -201,7 +202,7 @@ void Slicer::makeSliceFromStreamDirty(const char *input, const char *output, int
 
     const char * const vlc_args[] =
     {
-        "--verbose=2",
+        //"--verbose=2",
         param,
         //"--run-time=5",
         //"--sout=#standard{access=file,mux=ts,dst=\"D:\\Work\\TD\\test\\Projects\\video\\outputFromStream.ts\"}",
