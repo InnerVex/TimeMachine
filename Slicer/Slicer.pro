@@ -9,7 +9,7 @@ CONFIG -= app_bundle
 
 TEMPLATE = app
 
-SOURCES += main.cpp \
+SOURCES += main_old.cpp \
     slicer.cpp \
     parser.cpp
 

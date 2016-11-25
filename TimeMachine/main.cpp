@@ -10,63 +10,62 @@
 
 int main(int argc, char *argv[])
 {
+
+
     {
+        /*
         Slicer slicer;
-        const char* input ="1080p25.ts";
-        const char* output1 ="slice1.ts";
-        const char* output2 ="slice2.ts";
+        const char* input ="rtsp://ewns-hls-b-stream.hexaglobe.net/rtpeuronewslive/en_vidan750_rtp.sdp";
+        const char* output ="testOutput.ts";
+        const char* outputFromStream = "examples/testOutputFromStream.ts";
         //slicer.convertToTS(input,output);
-        //input = output;
-        //output = "slice.ts";
         uint start = 0;
-        uint stop = start + 29;
-        slicer.makeSlice(input,start,stop,output1);
-        {
+        uint stop = 300;
+        //slicer.makeSlice(input,start,stop,output);
+
+        //qDebug()<< slicer.getDuration(output);
+        //slicer.convertToTsFromStream(input,outputFromStream); // there is no stop yet, so turn it off by yourself
+        //slicer.makeSliceFromStream();
+        int numberOfSlices = 3;
+        slicer.makeMultipleSlices(input, numberOfSlices);
+        */
+        /*{
             QDateTime DateTime(QDate(2002,01,01),QTime(00,00,01));
             quint32 time = DateTime.toTime_t();
             QString iFileName = output1;
             //QString iFilePath = QFileInfo("slice_0-5.ts").dir();
             QString iSourceName = "CAM01";
             QString iSourceAdress = "1.1.1.1";
-            qint32  iOffset = 0;
+            quint32 iDuration = 333333;
             for(int i = 0; i < stop; ++i)
             {
                 iOffset++;
-                Insert::insert(++time,iFileName,iSourceName,iSourceAdress,"home/",iOffset);
+                Insert::insert(++time,iFileName,iSourceName,iSourceAdress,"home/",iDuration);
             }
         }
-        start = start+stop;
-        stop = start + 29;
-        {
-            QDateTime DateTime = DateTime.addSecs(start-29);
-            quint32 time = DateTime.toTime_t();
-            QString iFileName = output2;
-            //QString iFilePath = QFileInfo("slice_5-10.ts").dir();
-            QString iSourceName = "CAM01";
-            QString iSourceAdress = "1.1.1.1";
-            qint32  iOffset = 0;
-            for(int i = 0; i < stop; ++i)
-            {
-                iOffset++;
-                Insert::insert(++time,iFileName,iSourceName,iSourceAdress,"home/",iOffset);
-            }
-        }
-        slicer.makeSlice(input,start,stop,output2);
+        */
     }
+        QDateTime InsertDateTime(QDate(2000,01,01),QTime(00,00,00));
+        quint32 time = InsertDateTime.toTime_t();
+        QString iFileName = "EXAMPLE_FILE_NAME";
+        //QString iFilePath = QFileInfo("slice_0-5.ts").dir();
+        QString iSourceName = "CAM_01";
+        QString iSourceAdress = "1.1.1.1";
+        quint32 iDuration = 600000;
+        Insert::insert(time,iFileName,iSourceName,iSourceAdress,"EXAMPLE_FILE_PATH",iDuration);
+        QDateTime SelectDateTime(QDate(2000,01,01),QTime(00,05,00));
+        time = SelectDateTime.toTime_t();
 
-    /*
-    qint32 offset = Select::selectOffset(time-66);
-    QString path = Select::selectPath(time-66);
-    QString sourceAdress = Select::selectSourceAdress(time-66);
-    QString sourseName = Select::selectSourceName(time-66);
-    QString file = Select::selectFile(time-66);
+        std::cout << "DateTime:"     << Select::selectDateTime(time)
+                  << " Duration:"    << Select::selectDuration(time)
+                  << " Path:"        << Select::selectPath(time).toStdString()
+                  << " SourceAdress:"<< Select::selectSourceAdress(time).toStdString()
+                  << " SourceName:"  << Select::selectSourceName(time).toStdString()
+                  << " File:"        << Select::selectFile(time).toStdString()
+                  << " Offset:"      << Select::selectOffset(time)
+                  << " PercenOffset:"<< Select::selectPercentOffset(time)
+                                     << std::endl;
 
-    std::cout << "Offset:"       << offset
-              << " Path:"        << path.toStdString()
-              << " SourceAdress:"<< sourceAdress.toStdString()
-              << " SourceName:"  << sourseName.toStdString()
-              << " File:"        << file.toStdString() << std::endl;
-    */
     QApplication a(argc, argv);
 
     Player player;

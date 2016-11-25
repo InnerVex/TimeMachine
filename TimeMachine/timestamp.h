@@ -23,9 +23,8 @@ class timeStamp
 {
 public:
     timeStamp (qint32 fileId,
-               quint32 dateTime,
-               qint32 offset)
-        : fileId_ (fileId), dateTime_ (dateTime), offset_ (offset)
+               quint32 dateTime)
+        : fileId_ (fileId), dateTime_ (dateTime)
   {
   }
   qint32
@@ -56,18 +55,6 @@ public:
     return dateTime_;
   }
 
-  qint32
-  offset () const
-  {
-    return offset_;
-  }
-
-  void
-  offset (qint32 offset)
-  {
-    offset_ = offset;
-  }
-
 private:
   friend class odb::access;
 
@@ -79,7 +66,5 @@ private:
   qint32 fileId_;
 
   quint32 dateTime_;
-
-  qint32 offset_;
 };
 #endif // TIMESTAMP_HXX
