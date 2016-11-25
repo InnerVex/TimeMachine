@@ -10,12 +10,15 @@
 StreamController::StreamController(QObject *parent) : QObject(parent)
 {
     //Формирование строки выхода
-    std::string dstParam = "rtp{sdp=rtsp://localhost:5544/}";
-    //string soutLine = "--sout=#transcode{vcodec=h264,vb=0,scale=1,acodec=mpga,ab=128,channels=2,samplerate=44100}:";
-    //std::string soutLine = "--sout=";
+
+
+    //Стриминг с транскодингом в MJPG
+    //std::string dstParam = "rtp{sdp=rtsp://localhost:5544/}";
+    //std::string soutLine = "--sout=#transcode{vcodec=mpga,vb=0,scale=1,acodec=mpga,ab=128,channels=2,samplerate=44100}:";
     //soutLine.append(dstParam);
 
     std::string soutLine = "--sout=#rtp{dst=localhost,port=5544,sdp=rtsp://localhost:5544/}";
+
     //Объекты libVLC для стрима
     const char * const vlc_args[] = {
         "--verbose=0",
