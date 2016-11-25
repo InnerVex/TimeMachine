@@ -5,47 +5,179 @@
 #include <QDateTime>
 #include "select.h"
 
-#define TESTFILE_DURATION 133.0
+//Get и Release коллбэки для IMEM
+int MyImemGetCallback (void *data,
+                       const char *cookie,
+                       int64_t *dts,
+                       int64_t *pts,
+                       unsigned *flags,
+                       size_t * bufferSize,
+                       void ** buffer)
+{
+
+    ImemData* imem = (ImemData*)data;
+    cookie = imem->cookieString;
+    if(imem == NULL || imem->videoPatches.size() == 0)
+        return 1;
+
+    //Указываем LibVLC на данные и их размер
+    *buffer = (void*) (imem->videoPatches.front()).videoPatch;
+    *bufferSize = (size_t) (imem->videoPatches.front()).bytes;
+    pop_front(imem->videoPatches);
+
+    //TODO::Снова запускаем буфферизацию, уменьшаем buffered bytes
+
+    return 0;
+}
+
+int MyImemReleaseCallback (void *data,
+                           const char *cookie,
+                           size_t bufferSize,
+                           void * buffer)
+{
+    return 0;
+}
+
+void StreamController::replenishVideoPatchesBuffer()
+{
+    //Цикл по файлам
+    while(true)
+    {
+        bool eof, maxBuffered;
+
+        //Цикл по видеопатчам
+        while(true)
+        {
+            qint32 bytesToBuffer = VIDEO_PATCH_BYTES;
+            if(currentFileBytePosition + bytesToBuffer > currentFileBytes)
+            {
+                bytesToBuffer = currentFileBytes - currentFileBytePosition;
+                eof = true;
+            }
+
+            loadVideoPatchInMemory(bytesToBuffer);
+
+            if(totalBytesBuffered > VIDEO_PATCHES_TOTAL_BYTES - VIDEO_PATCH_BYTES)
+            {
+                maxBuffered = true;
+                break;
+            }
+        }
+
+        if(eof)
+        {
+            fclose(currentFile);
+            //TODO::Получаем имя следующего файла
+            openFileForBuffering(currentFilename);
+        }
+
+        if(maxBuffered)
+        {
+            break;
+        }
+    }
+}
+
+void StreamController::openFileForBuffering(const char* filename, bool withOffset)
+{
+    currentFile = fopen(currentFilename,"rb");
+
+    //Определяем размер файла в байтах
+    fseek(currentFile,0,SEEK_END);
+    currentFileBytes = ftell(currentFile);
+    rewind (currentFile);
+
+    //Рассчитываем первый байт для буфферизации
+    if(withOffset)
+    {
+        currentFileBytePosition = (qint32)(currentFileBytes * percentOffset);
+    }
+    else
+    {
+        currentFileBytePosition = 0;
+    }
+}
+
+void StreamController::loadVideoPatchInMemory(qint32 bytesToBuffer)
+{
+    //Записываем файл в оперативную память
+    char* buffer = (char*) malloc (bytesToBuffer);
+    fseek(currentFile, currentFileBytePosition, SEEK_SET);
+    size_t result = fread (buffer, 1, bytesToBuffer, currentFile);
+
+    VideoPatchData data(buffer, (qint32)result);
+    mImemData->videoPatches.push_back(data);
+
+    totalBytesBuffered += result;
+    currentFileBytePosition += result;
+}
 
 StreamController::StreamController(QObject *parent) : QObject(parent)
 {
-    //Формирование строки выхода
-    //std::string dstParam = "rtp{sdp=rtsp://localhost:5544/}";
-    //string soutLine = "--sout=#transcode{vcodec=h264,vb=0,scale=1,acodec=mpga,ab=128,channels=2,samplerate=44100}:";
-    //std::string soutLine = "--sout=";
-    //soutLine.append(dstParam);
-
-    std::string soutLine = "--sout=#rtp{dst=localhost,port=5544,sdp=rtsp://localhost:5544/}";
-    //Объекты libVLC для стрима
-    const char * const vlc_args[] = {
-        "--verbose=2",
-        soutLine.c_str()};
-    mVlcInstance=libvlc_new(sizeof(vlc_args) / sizeof(vlc_args[0]), vlc_args);
-    mMediaPlayer = libvlc_media_player_new (mVlcInstance);
+    mImemData = new ImemData();
+    mImemData->cookieString = "TM_SC_Instance";
 }
 
+/**
+ * Данная функция осуществляет остановку и пересоздание инстанса LibVLC
+ *
+ * @brief StreamController::requestedToObtainSource
+ * @param requestTime
+ * @param playSpeed
+ */
 void StreamController::requestedToObtainSource(quint32 requestTime, float playSpeed)
 {
-    libvlc_media_player_stop(mMediaPlayer);
+    //libvlc_media_player_stop(mMediaPlayer);
 
-    //Получение данных из БД
-    sourceFileName = Select::selectFile(requestTime).toStdString().c_str();
-    //sourceMargin = Select::selectDateTime(requestTime);
+    //Получение данных из БД и буфферизация
+    currentFilename = Select::selectFile(requestTime).toStdString().c_str();
+    percentOffset = Select::selectPercentOffset(requestTime);
 
-    //Запускаем проигрывание
-    mMedia = libvlc_media_new_path(mVlcInstance, sourceFileName);
-    libvlc_media_player_set_media (mMediaPlayer, mMedia);
+    //Буфферизуем видеопатчи
+    totalBytesBuffered = 0;
+    mImemData->videoPatches.clear();
+    openFileForBuffering(currentFilename, true);
+    replenishVideoPatchesBuffer();
 
-    //Получаем продолжительность
-    libvlc_media_parse(mMedia);
-    float duration = libvlc_media_get_duration(mMedia);
-    duration *= 0.001;
+    //Задаём параметры LibVLC
+    std::vector<const char*> options;
+    std::vector<const char*>::iterator option;
 
+    std::string soutLine = "--sout=#rtp{dst=localhost,port=5544,sdp=rtsp://localhost:5544/}";
+    options.push_back(soutLine.c_str());
+
+    options.push_back("--no-video-title-show");
+
+    char imemDataArg[256];
+    sprintf(imemDataArg, "--imem-data=%#p", mImemData);
+    options.push_back(imemDataArg);
+
+    char imemGetArg[256];
+    sprintf(imemGetArg, "--imem-get=%#p", MyImemGetCallback);
+    options.push_back(imemGetArg);
+
+    char imemReleaseArg[256];
+    sprintf(imemReleaseArg, "--imem-release=%#p", MyImemReleaseCallback);
+    options.push_back(imemReleaseArg);
+
+    options.push_back("--imem-cookie=timemachine");
+    options.push_back("--imem-codec=undf");
+    options.push_back("--imem-cat=4");
+    options.push_back("--verbose=2");
+    options.push_back("--demux=ts");
+
+    mVlcInstance = libvlc_new (int(options.size()), options.data());
+    mMedia = libvlc_media_new_location (mVlcInstance, "imem://");
+    mMediaPlayer = libvlc_media_player_new_from_media (mMedia);
+
+    //TODO::Определить, зачем. Задаём опции медиа
+    for(option = options.begin(); option != options.end(); option++)
+    {
+        libvlc_media_add_option(mMedia, *option);
+    }
+
+    //TODO::В целях теста проигрывание начинается сразу
     libvlc_media_player_play(mMediaPlayer);
-    float position = sourceMargin / duration;
-    libvlc_media_player_set_position(mMediaPlayer, position);
-
-    libvlc_media_player_pause(mMediaPlayer);
 
     //Отправить сигнал о получении данных об источнике
     emit signalSourceObtained();
@@ -54,8 +186,8 @@ void StreamController::requestedToObtainSource(quint32 requestTime, float playSp
 void StreamController::requestedToStream(float playSpeed)
 {
     QString source = "rtsp://ewns-hls-b-stream.hexaglobe.net/rtpeuronewslive/en_vidan750_rtp.sdp";
-    sourceFileName = source.toStdString().c_str();
-    mMedia = libvlc_media_new_location(mVlcInstance, sourceFileName);
+    currentFilename = source.toStdString().c_str();
+    mMedia = libvlc_media_new_location(mVlcInstance, currentFilename);
     libvlc_media_player_set_media (mMediaPlayer, mMedia);
     libvlc_media_player_play(mMediaPlayer);
 

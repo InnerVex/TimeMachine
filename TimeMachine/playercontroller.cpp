@@ -100,8 +100,8 @@ void PlayerController::playButtonClicked()
 //TOTALLY TEST CODE
 void PlayerController::testInputButtonClicked()
 {
-    quint32 requestedTime = player->ui->testTimeInput->dateTime().toTime_t();
-    player->showMessageInStatusBar("RequestedTime: " + QString::number(requestedTime));
+    quint32 requestedTime = 0;player->ui->testTimeInput->dateTime().toTime_t();
+    //player->showMessageInStatusBar("RequestedTime: " + QString::number(requestedTime));
 
     emit requestToObtainSource(requestedTime, 1);
 }

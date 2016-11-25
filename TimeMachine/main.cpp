@@ -45,6 +45,7 @@ int main(int argc, char *argv[])
         }
         */
     }
+/*
         QDateTime InsertDateTime(QDate(2000,01,01),QTime(00,00,00));
         quint32 time = InsertDateTime.toTime_t();
         QString iFileName = "EXAMPLE_FILE_NAME";
@@ -65,7 +66,7 @@ int main(int argc, char *argv[])
                   << " Offset:"      << Select::selectOffset(time)
                   << " PercenOffset:"<< Select::selectPercentOffset(time)
                                      << std::endl;
-
+*/
     QApplication a(argc, argv);
 
     Player player;

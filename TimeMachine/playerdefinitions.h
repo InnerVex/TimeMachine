@@ -14,3 +14,12 @@ struct SourceData {
     long sourceStartTime;
     long sourceEndTime;
 }; 
+
+struct VideoPatchData
+{
+    VideoPatchData(){}
+    VideoPatchData(const VideoPatchData &_data) : videoPatch(_data.videoPatch), bytes(_data.bytes) {}
+    VideoPatchData(char* _videoPatch, qint32 _bytes) : videoPatch(_videoPatch), bytes(_bytes) {}
+    char* videoPatch;
+    qint32 bytes;
+};
