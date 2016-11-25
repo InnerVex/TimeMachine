@@ -28,8 +28,9 @@ class file
 public:
     file (const QString name,
           qint32  pathId,
-          qint32 sourceId)
-        : name_ (name), pathId_ (pathId), sourceId_ (sourceId)
+          qint32 sourceId,
+          qint32 duration)
+        : name_ (name), pathId_ (pathId), sourceId_ (sourceId), duration_ (duration)
   {
   }
   qint32
@@ -72,6 +73,17 @@ public:
   {
     sourceId_ = sourceId;
   }
+  qint32
+  duration () const
+  {
+    return duration_;
+  }
+
+  void
+  duration (qint32 duration)
+  {
+    duration_ = duration;
+  }
 
 private:
   friend class odb::access;
@@ -86,6 +98,8 @@ private:
   qint32 pathId_;
 
   qint32 sourceId_;
+
+  qint32 duration_;
 };
 
 #endif // FILE_HXX

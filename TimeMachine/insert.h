@@ -13,14 +13,14 @@ public:
            QString iSourceName,
            QString iSourceAdress,
            QString iFilePath,
-           qint32 iOffset);
+           qint32  iDuration);
 
     static void insert(quint32 iDateTime,
                 QString iFileName,
                 QString iSourceName,
                 QString iSourceAdress,
                 QString iFilePath,
-                qint32 iOffset);
+                qint32  iDuration);
 };
 
 #endif // INSERT_H

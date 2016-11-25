@@ -26,119 +26,49 @@
 using namespace std;
 using namespace odb::core;
 
-Select::Select(quint32 sDateTime)
-{
-    //select(sDateTime);
-    selectFile(sDateTime);
-    selectPath(sDateTime);
-    selectSourceName(sDateTime);
-    selectSourceAdress(sDateTime);
-    selectOffset(sDateTime);
-}
-/*
-void Select::select(QDateTime sDateTime)
+qint32 Select::selectDateTime(quint32 sDateTime)
 {
     auto_ptr<database> db (create_database ());
-
-    qint32 sFileId = 0,sPathId = 0,sSourceId = 0,sOffset = 0;
-    QString sPath,sFileName,sSourceAdress,sSourceName,e;
-    try
+    QString e;
+    qint32 sNewDateTime;
+    while (sDateTime > sNewDateTime)
     {
-
+        try
         {
-            typedef odb::query<timeStamp> query;
-            typedef odb::result<timeStamp> result;
-
-            transaction t (db->begin ());
-            result r (db->query<timeStamp> (query::dateTime == sDateTime));
-
-            for (result::iterator i (r.begin()); i != r.end(); ++i)
             {
-                sFileId = i->fileId();
-                sOffset = i->offset();
-            }
-            t.commit();
+                typedef odb::query<timeStamp> query;
+                typedef odb::result<timeStamp> result;
 
-            if (sFileId == 0)
-            {
-                e = "File with time:" + sDateTime.toString(Qt::ISODate) + " does't found";
-                throw e;
-            }
-            if (sOffset == 0)
-            {
-                e = "Offset in file for time" +sDateTime.toString() +"does't found";
-            }
-        }
-        {
-            typedef odb::query<file> query;
-            typedef odb::result<file> result;
+                transaction t2 (db->begin ());
+                result r (db->query<timeStamp> (query::dateTime == sDateTime));
 
-            transaction t (db->begin ());
-            result r (db->query<file> (query::id == sFileId));
-
-            for (result::iterator i (r.begin()); i != r.end(); ++i)
-            {
-                sPathId = i->pathId();
-                sSourceId = i->sourceId();
-                sFileName = i->name();
-
-                if(sPathId == 0)
+                for (result::iterator i (r.begin()); i != r.end(); ++i)
                 {
-                    e = "Path to file for time = " +sDateTime.toString() +" does't found";
+                    sNewDateTime = i->dateTime();
+                }
+                t2.commit();
+
+                if (sNewDateTime == -1)
+                {
+                    e = "File with time:" + QString::number(sNewDateTime) + " wasn't found";
                     throw e;
                 }
-
-                if(sSourceId == 0)
-                {
-                    e = "Source for time = " + sDateTime.toString() +" does't found";
-                }
             }
-            t.commit();
         }
+        catch(QString e)
         {
-            typedef odb::query<source> query;
-            typedef odb::result<source> result;
-
-            transaction t (db->begin ());
-            result r (db->query<source> (query::id == sSourceId));
-
-            for (result::iterator i (r.begin()); i != r.end(); ++i)
-            {
-                sSourceName = i->name();
-                sSourceAdress = i->adress();
-
-            }
-            t.commit();
+            cout << e.toStdString().c_str() << endl;
         }
-        {
-            typedef odb::query<path> query;
-            typedef odb::result<path> result;
-
-            transaction t (db->begin ());
-            result r (db->query<path> (query::id == sPathId));
-
-            for (result::iterator i (r.begin()); i != r.end(); ++i)
-            {
-                sPath = i->filePath();
-            }
-            t.commit();
-        }
-        cout << "OUTPUT : "
-             << "Path: " <<  sPath.toStdString().c_str()
-             << " File: " << sFileName.toStdString().c_str()
-             << " Offset: " << sOffset << endl;
-
-}
-    catch(QString e)
-    {
-        cout << e.toStdString().c_str() << endl;
+       --sDateTime;
     }
-}*/
+    return sNewDateTime;
+}
 qint32 Select::selectFileId(quint32 sDateTime)
 {
     auto_ptr<database> db (create_database ());
     QString e;
-    qint32 sFileId = -1,sOffset = -1;
+    sDateTime = selectDateTime(sDateTime);
+    qint32 sFileId = -1;
     try
     {
 
@@ -152,7 +82,6 @@ qint32 Select::selectFileId(quint32 sDateTime)
             for (result::iterator i (r.begin()); i != r.end(); ++i)
             {
                 sFileId = i->fileId();
-                sOffset = i->offset();
             }
             t1.commit();
 
@@ -160,10 +89,6 @@ qint32 Select::selectFileId(quint32 sDateTime)
             {
                 e = "File with time:" + QString::number(sDateTime) + " does't found";
                 throw e;
-            }
-            if (sOffset == -1)
-            {
-                e = "Offset in file for time" +QString::number(sDateTime) +"does't found";
             }
 
             return sFileId;
@@ -175,45 +100,40 @@ qint32 Select::selectFileId(quint32 sDateTime)
         }
 
 }
-qint32 Select::selectOffset(quint32 sDateTime)
+qint32 Select::selectDuration(quint32 sDateTime)
 {
     auto_ptr<database> db (create_database ());
-
-    qint32 sFileId = -1,sOffset = -1;
+    qint32 sFileId = selectFileId(sDateTime);
+    qint32 sDuration = -1;
     QString e;
 
     try
     {
-        typedef odb::query<timeStamp> query;
-        typedef odb::result<timeStamp> result;
+        typedef odb::query<file> query;
+        typedef odb::result<file> result;
 
         transaction t (db->begin ());
-        result r (db->query<timeStamp> (query::dateTime == sDateTime));
+        result r (db->query<file> (query::id == sFileId));
 
         for (result::iterator i (r.begin()); i != r.end(); ++i)
         {
-            sFileId = i->fileId();
-            sOffset = i->offset();
+            sDuration = i->duration();
+
         }
         t.commit();
 
-        if (sFileId == -1)
+        if (sDuration == -1)
         {
-            e = "File with time:" + QDateTime::fromTime_t(sDateTime).toString() +"wasn't found";
+            e = "Duration of file for time: " + QDateTime::fromTime_t(sDateTime).toString() +"wasn't found";
             throw e;
         }
-        if (sOffset == -1)
-        {
-            e = "Offset in file for time" + QDateTime::fromTime_t(sDateTime).toString() +"wasn't found";
-        }
 
-        return sOffset;
+        return sDuration;
     }
     catch(QString e)
     {
         cout << e.toStdString().c_str() << endl;
     }
-
 }
 qint32 Select::selectPathId(quint32 sDateTime)
 {
@@ -284,7 +204,14 @@ qint32 Select::selectSourceId(quint32 sDateTime)
     catch(QString e)
     {
         cout << e.toStdString().c_str() << endl;
-    }}
+    }
+}
+qint32 Select::selectOffset(quint32 sDateTime)
+{
+    qint32 offset = sDateTime - selectDateTime(sDateTime);
+
+    return offset;
+}
 QString Select::selectFile(quint32 sDateTime)
 {
     auto_ptr<database> db (create_database ());
@@ -396,6 +323,27 @@ QString Select::selectSourceAdress(quint32 sDateTime){
         }
 
         return sSourceAdress;
+    }
+    catch(QString e)
+    {
+        cout << e.toStdString().c_str() << endl;
+    }
+}
+float Select::selectPercentOffset(quint32 sDateTime)
+{
+    try
+    {
+        float sOffset = selectOffset(sDateTime);
+        float sDuration = selectDuration(sDateTime);
+        float percentOffset = sOffset*1000/sDuration;
+
+        if (sOffset > sDuration)
+        {
+            QString e = "Error in the calculation";
+            throw e;
+        }
+
+        return percentOffset;
     }
     catch(QString e)
     {

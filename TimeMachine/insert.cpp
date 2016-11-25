@@ -31,9 +31,9 @@ Insert::Insert(quint32 iDateTime,
                QString iSourceName,
                QString iSourceAdress,
                QString iFilePath,
-               qint32 iOffset)
+               qint32  iDuration)
 {
-    insert(iDateTime,iFileName,iSourceName,iSourceAdress,iFilePath,iOffset);
+    insert(iDateTime,iFileName,iSourceName,iSourceAdress,iFilePath,iDuration);
 }
 
 void Insert::insert(quint32 iDateTime,
@@ -41,7 +41,7 @@ void Insert::insert(quint32 iDateTime,
                     QString iSourceName,
                     QString iSourceAdress,
                     QString iFilePath,
-                    qint32 iOffset)
+                    qint32 iDuration)
 {
     auto_ptr<database> db (create_database ());
     //Ввод
@@ -166,7 +166,7 @@ void Insert::insert(quint32 iDateTime,
             }
             t.commit();
         }
-        file eFile (iFileName,iPathId,iSourceId);
+        file eFile (iFileName,iPathId,iSourceId,iDuration);
         transaction t (db->begin ());
         fileId = db ->persist(eFile);
         t.commit();
@@ -199,7 +199,7 @@ void Insert::insert(quint32 iDateTime,
 
             transaction t (db->begin ());
 
-            result r (db->query<timeStamp> (query::fileId == iFileId && query::offset == iOffset));
+            result r (db->query<timeStamp> (query::fileId == iFileId));
 
             for (result::iterator i (r.begin()); i != r.end(); ++i)
             {
@@ -210,17 +210,17 @@ void Insert::insert(quint32 iDateTime,
 
             if (iTimeStampId != 0)
             {
-                throw iFileName,iOffset;
+                throw iFileName;
             }
         }
 
-        timeStamp eTimeStamp (iFileId,iDateTime,iOffset);
+        timeStamp eTimeStamp (iFileId,iDateTime);
         transaction t (db->begin ());
         timeStampId = db ->persist(eTimeStamp);
         t.commit();
     }
     catch(QString iFileName)
     {
-        //cout << "Offset: " << iOffset << " in " << iFileName.toStdString().c_str() << " already exists. " << endl;
+        cout << "Date: " << iDateTime << " in " << iFileName.toStdString().c_str() << " already exists. " << endl;
     }
 }

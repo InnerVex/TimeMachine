@@ -3,53 +3,69 @@
 #include "player.h"
 #include "insert.h"
 #include "select.h"
+#include "slicer.h"
 #include <iostream>
 #include <QApplication>
 #include <QObject>
 
 int main(int argc, char *argv[])
 {
-    {
-        QDateTime firstDateTime(QDate(2000,01,01),QTime(00,00,00));
-        quint32 time = firstDateTime.toTime_t();
-        QString iFileName = "slice_0-5.ts";
-        //QDir iFilePath = QFileInfo("slice_0-5.ts").dir();
-        QString iSourceName = "CAM01";
-        QString iSourceAdress = "1.1.1.1";
-        qint32  iOffset = 0;
-        for(int i = 0; i < 366; ++i)
-        {
-            iOffset++;
-            Insert::insert(++time,iFileName,iSourceName,iSourceAdress,"home/",iOffset);
-        }
-    }
-    {
-        QDateTime firstDateTime(QDate(2000,01,01),QTime(00,06,07));
-        quint32 time = firstDateTime.toTime_t();
-        QString iFileName = "slice_5-10.ts";
-        //QDir iFilePath = QFileInfo("slice_5-10.ts").dir();
-        QString iSourceName = "CAM01";
-        QString iSourceAdress = "1.1.1.1";
-        qint32  iOffset = 0;
-        for(int i = 0; i < 306; ++i)
-        {
-            iOffset++;
-            Insert::insert(++time,iFileName,iSourceName,iSourceAdress,"home/",iOffset);
-        }
-    }
-    /*
-    qint32 offset = Select::selectOffset(time-66);
-    QString path = Select::selectPath(time-66);
-    QString sourceAdress = Select::selectSourceAdress(time-66);
-    QString sourseName = Select::selectSourceName(time-66);
-    QString file = Select::selectFile(time-66);
 
-    std::cout << "Offset:"       << offset
-              << " Path:"        << path.toStdString()
-              << " SourceAdress:"<< sourceAdress.toStdString()
-              << " SourceName:"  << sourseName.toStdString()
-              << " File:"        << file.toStdString() << std::endl;
-    */
+
+    {
+        /*
+        Slicer slicer;
+        const char* input ="rtsp://ewns-hls-b-stream.hexaglobe.net/rtpeuronewslive/en_vidan750_rtp.sdp";
+        const char* output ="testOutput.ts";
+        const char* outputFromStream = "examples/testOutputFromStream.ts";
+        //slicer.convertToTS(input,output);
+        uint start = 0;
+        uint stop = 300;
+        //slicer.makeSlice(input,start,stop,output);
+
+        //qDebug()<< slicer.getDuration(output);
+        //slicer.convertToTsFromStream(input,outputFromStream); // there is no stop yet, so turn it off by yourself
+        //slicer.makeSliceFromStream();
+        int numberOfSlices = 3;
+        slicer.makeMultipleSlices(input, numberOfSlices);
+        */
+        /*{
+            QDateTime DateTime(QDate(2002,01,01),QTime(00,00,01));
+            quint32 time = DateTime.toTime_t();
+            QString iFileName = output1;
+            //QString iFilePath = QFileInfo("slice_0-5.ts").dir();
+            QString iSourceName = "CAM01";
+            QString iSourceAdress = "1.1.1.1";
+            quint32 iDuration = 333333;
+            for(int i = 0; i < stop; ++i)
+            {
+                iOffset++;
+                Insert::insert(++time,iFileName,iSourceName,iSourceAdress,"home/",iDuration);
+            }
+        }
+        */
+    }
+        QDateTime InsertDateTime(QDate(2000,01,01),QTime(00,00,00));
+        quint32 time = InsertDateTime.toTime_t();
+        QString iFileName = "EXAMPLE_FILE_NAME";
+        //QString iFilePath = QFileInfo("slice_0-5.ts").dir();
+        QString iSourceName = "CAM_01";
+        QString iSourceAdress = "1.1.1.1";
+        quint32 iDuration = 600000;
+        Insert::insert(time,iFileName,iSourceName,iSourceAdress,"EXAMPLE_FILE_PATH",iDuration);
+        QDateTime SelectDateTime(QDate(2000,01,01),QTime(00,05,00));
+        time = SelectDateTime.toTime_t();
+
+        std::cout << "DateTime:"     << Select::selectDateTime(time)
+                  << " Duration:"    << Select::selectDuration(time)
+                  << " Path:"        << Select::selectPath(time).toStdString()
+                  << " SourceAdress:"<< Select::selectSourceAdress(time).toStdString()
+                  << " SourceName:"  << Select::selectSourceName(time).toStdString()
+                  << " File:"        << Select::selectFile(time).toStdString()
+                  << " Offset:"      << Select::selectOffset(time)
+                  << " PercenOffset:"<< Select::selectPercentOffset(time)
+                                     << std::endl;
+
     QApplication a(argc, argv);
 
     Player player;
