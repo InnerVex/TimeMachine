@@ -48,12 +48,11 @@ PlayerController::PlayerController(Player *_player, QObject *parent) :
 
 void PlayerController::handleSourceObtained()
 {
-    //Воспроизведение продолжается, если воспроизводилось до этого
+    //TODO::Воспроизведение продолжается, если воспроизводилось до этого
     //if(isIntendedToPlay && !isPlaying)
     {
-        //Запрос стримеру на начало стрима и старт попыток подхватить стрим
-        //emit requestToStream(playSpeed);
-        //startAttemptsToPlayStream();
+        //Запрос стримеру на начало стрима
+        emit requestToStream(playSpeed);
     }
 }
 
@@ -108,6 +107,14 @@ void PlayerController::playTimerShot()
 void PlayerController::playButtonClicked()
 {
     //TODO::Различные действия в зависимости от того, воспроизводится ли стрим
+    /*
+     *  Вообще действий может быть три:
+     * Старт после паузы
+     * Старт с нуля
+     * Пауза
+     *
+     * Пока что старт с нуля
+     * */
     //Запрос стримеру на начало стрима и старт попыток подхватить стрим
     //libvlc_media_player_stop(mMediaPlayer);
     //emit requestToStream(playSpeed);
@@ -119,7 +126,7 @@ void PlayerController::playButtonClicked()
 //TOTALLY TEST CODE
 void PlayerController::testInputButtonClicked()
 {
-    quint32 requestedTime = 0;player->ui->testTimeInput->dateTime().toTime_t();
+    quint32 requestedTime = player->ui->testTimeInput->dateTime().toTime_t();
     //player->showMessageInStatusBar("RequestedTime: " + QString::number(requestedTime));
 
     emit requestToObtainSource(requestedTime, 1);

@@ -51,21 +51,21 @@
             {
                 InsertDateTime;
                 qint32 time1 = InsertDateTime.toTime_t();
-                QString iFileName = "examples/slice_0-5";
-                //QString iFilePath = QFileInfo("slice_0-5.ts").dir();
+                QString iFileName = "slice_0-5.ts";
+                QString iFilePath = QFileInfo("slice_0-5.ts").dir().path();
                 QString iSourceName = "CAM_01";
                 QString iSourceAdress = "1.1.1.1";
                 quint32 iDuration = 600000;
-                Insert::insert(time1,iFileName,iSourceName,iSourceAdress,"EXAMPLE_FILE_PATH",iDuration);
+                Insert::insert(time1,iFileName,iSourceName,iSourceAdress,iFilePath,iDuration);
             }
             {
                 qint32 time2 = InsertDateTime.addMSecs(600000).toTime_t();
-                QString iFileName = "examples/slice_5-10";
-                //QString iFilePath = QFileInfo("slice_0-5.ts").dir();
+                QString iFileName = "slice_5-10.ts";
+                QString iFilePath = QFileInfo("slice_5-10.ts").dir().path();
                 QString iSourceName = "CAM_01";
                 QString iSourceAdress = "1.1.1.1";
                 quint32 iDuration = 600000;
-                Insert::insert(time2,iFileName,iSourceName,iSourceAdress,"EXAMPLE_FILE_PATH",iDuration);
+                Insert::insert(time2,iFileName,iSourceName,iSourceAdress,iFilePath,iDuration);
             }
 
             QDateTime SelectDateTime(QDate(2000,01,01),QTime(00,05,00));
@@ -88,14 +88,21 @@
         StreamController *streamController = new StreamController();
         player.show();
 
+        //Сигналы от PlayerController к StreamController
         QObject::connect(playerController, &PlayerController::requestToObtainSource,
                         streamController, &StreamController::requestedToObtainSource);
         QObject::connect(playerController, &PlayerController::requestToStream,
                         streamController, &StreamController::requestedToStream);
+        QObject::connect(playerController, &PlayerController::requestToRealTimeStream,
+                        streamController, &StreamController::requestedToStreamRealTime);
         QObject::connect(playerController, &PlayerController::requestToPauseStream,
                         streamController, &StreamController::requestedToPauseStream);
+
+        //Сигналы от StreamController к PlayerController
         QObject::connect(streamController, &StreamController::signalSourceObtained,
                         playerController, &PlayerController::handleSourceObtained);
+        QObject::connect(streamController, &StreamController::signalStreamStarted,
+                        playerController, &PlayerController::attemptToPlayStream);
 
 
 

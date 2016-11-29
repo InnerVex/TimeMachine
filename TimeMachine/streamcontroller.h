@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QObject>
+#include <QTimer>
 
 #include "vlc/vlc.h"
 #include <unistd.h>
@@ -51,14 +52,22 @@ private:
     float percentOffset;
     qint32 totalBytesBuffered;
 
+    QTimer *mAttemptTimer;
+    bool attemptingToStartStream;
+    bool streaming;
+
+    void startWaitingForStreamStart();
+
 signals:
     //Сигнал проигрывателю о том, что запущен новый источник
     void signalSourceObtained();
+    void signalStreamStarted();
 
 public slots:
     //Слот по сигналам от проигрывателя
     void requestedToObtainSource(quint32 requestTime, float playSpeed);
     void requestedToStream(float playSpeed);
+    void requestedToStreamRealTime();
     void requestedToPauseStream();
 
 };
