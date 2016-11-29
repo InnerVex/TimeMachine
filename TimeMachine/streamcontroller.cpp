@@ -43,7 +43,8 @@ void StreamController::replenishVideoPatchesBuffer()
     //Цикл по файлам
     while(true)
     {
-        bool eof, maxBuffered;
+        bool eof = false;
+        bool maxBuffered = false;
 
         //Цикл по видеопатчам
         while(true)
@@ -60,6 +61,11 @@ void StreamController::replenishVideoPatchesBuffer()
             if(totalBytesBuffered > VIDEO_PATCHES_TOTAL_BYTES - VIDEO_PATCH_BYTES)
             {
                 maxBuffered = true;
+                break;
+            }
+
+            if(eof)
+            {
                 break;
             }
         }
@@ -136,7 +142,8 @@ void StreamController::requestedToObtainSource(quint32 requestTime, float playSp
     //Буфферизуем видеопатчи
     totalBytesBuffered = 0;
     mImemData->videoPatches.clear();
-    openFileForBuffering(currentFilename, true);
+    //openFileForBuffering(currentFilename, true);
+    openFileForBuffering(currentFilename, false);
     replenishVideoPatchesBuffer();
 
     //Задаём параметры LibVLC

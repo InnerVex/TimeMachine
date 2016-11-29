@@ -32,8 +32,8 @@ int main(int argc, char *argv[])
         /*{
             QDateTime DateTime(QDate(2002,01,01),QTime(00,00,01));
             quint32 time = DateTime.toTime_t();
-            QString iFileName = output1;
-            //QString iFilePath = QFileInfo("slice_0-5.ts").dir();
+            //QString iFileName = output1;
+            QString iFilePath = QFileInfo("slice_0-5.ts").dir();
             QString iSourceName = "CAM01";
             QString iSourceAdress = "1.1.1.1";
             quint32 iDuration = 333333;
@@ -43,29 +43,29 @@ int main(int argc, char *argv[])
                 Insert::insert(++time,iFileName,iSourceName,iSourceAdress,"home/",iDuration);
             }
         }
-        */
+*/
     }
     //Тест ввода-вывода и бд
-    {
+    /*{
         QDateTime InsertDateTime(QDate(2000,01,01),QTime(00,00,00));
         {
             InsertDateTime;
             qint32 time1 = InsertDateTime.toTime_t();
-            QString iFileName = "EXAMPLE_FILE_NAME";
-            //QString iFilePath = QFileInfo("slice_0-5.ts").dir();
+            QString iFileName = "slice_0-5.ts";
+            QString iFilePath = QFileInfo("slice_0-5.ts").dir().path();
             QString iSourceName = "CAM_01";
             QString iSourceAdress = "1.1.1.1";
             quint32 iDuration = 600000;
-            Insert::insert(time1,iFileName,iSourceName,iSourceAdress,"EXAMPLE_FILE_PATH",iDuration);
+            Insert::insert(time1,iFileName,iSourceName,iSourceAdress,iFilePath,iDuration);
         }
         {
             qint32 time2 = InsertDateTime.addMSecs(600000).toTime_t();
-            QString iFileName = "EXAMPLE_NEXT_FILE";
-            //QString iFilePath = QFileInfo("slice_0-5.ts").dir();
+            QString iFileName = "slice_5-10.ts";
+            QString iFilePath = QFileInfo("slice_5-10.ts").dir().path();
             QString iSourceName = "CAM_01";
             QString iSourceAdress = "1.1.1.1";
             quint32 iDuration = 600000;
-            Insert::insert(time2,iFileName,iSourceName,iSourceAdress,"EXAMPLE_FILE_PATH",iDuration);
+            Insert::insert(time2,iFileName,iSourceName,iSourceAdress,iFilePath,iDuration);
         }
 
         QDateTime SelectDateTime(QDate(2000,01,01),QTime(00,05,00));
@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
                   << " PercenOffset:"<< Select::selectPercentOffset(time)
                   << " NextFile:"    << Select::selectNextFile(Select::selectFile(time)).toStdString()
                                      << std::endl;
-    }
+    }*/
 
     QApplication a(argc, argv);
     Player player;

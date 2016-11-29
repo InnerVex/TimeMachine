@@ -35,8 +35,8 @@ void PlayerController::handleSourceObtained()
     //if(isIntendedToPlay && !isPlaying)
     {
         //Запрос стримеру на начало стрима и старт попыток подхватить стрим
-        emit requestToStream(playSpeed);
-        startAttemptsToPlayStream();
+        //emit requestToStream(playSpeed);
+        //startAttemptsToPlayStream();
     }
 }
 
@@ -92,9 +92,11 @@ void PlayerController::playButtonClicked()
 {
     //TODO::Различные действия в зависимости от того, воспроизводится ли стрим
     //Запрос стримеру на начало стрима и старт попыток подхватить стрим
-    libvlc_media_player_stop(mMediaPlayer);
-    emit requestToStream(playSpeed);
-    startAttemptsToPlayStream();
+    //libvlc_media_player_stop(mMediaPlayer);
+    //emit requestToStream(playSpeed);
+
+    //startAttemptsToPlayStream();
+    attemptToPlayStream();
 }
 
 //TOTALLY TEST CODE
