@@ -137,6 +137,24 @@ void PlayerController::startToPlayRealTimeStream()
 
 }
 
+void PlayerController::stepBackButtonClicked()
+{
+
+}
+void PlayerController::stepForwardButtonClicked()
+{
+
+}
+void PlayerController::speedUpButtonClicked()
+{
+
+}
+void PlayerController::speedDownButtonClicked()
+{
+
+}
+
+
 /*
 void TestPlayer::updateInterface()
 {
