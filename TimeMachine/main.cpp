@@ -51,7 +51,7 @@
             {
                 InsertDateTime;
                 qint32 time1 = InsertDateTime.toTime_t();
-                QString iFileName = "EXAMPLE_FILE_NAME";
+                QString iFileName = "examples/slice_0-5";
                 //QString iFilePath = QFileInfo("slice_0-5.ts").dir();
                 QString iSourceName = "CAM_01";
                 QString iSourceAdress = "1.1.1.1";
@@ -60,7 +60,7 @@
             }
             {
                 qint32 time2 = InsertDateTime.addMSecs(600000).toTime_t();
-                QString iFileName = "EXAMPLE_NEXT_FILE";
+                QString iFileName = "examples/slice_5-10";
                 //QString iFilePath = QFileInfo("slice_0-5.ts").dir();
                 QString iSourceName = "CAM_01";
                 QString iSourceAdress = "1.1.1.1";

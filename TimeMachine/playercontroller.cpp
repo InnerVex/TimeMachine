@@ -25,11 +25,24 @@ PlayerController::PlayerController(Player *_player, QObject *parent) :
     connect(player->ui->testTimeButton, &QPushButton::clicked,
             this, &PlayerController::testInputButtonClicked);
 
+    connect(player->ui->buttonStepBack, &QPushButton::clicked,
+            this, &PlayerController::stepBackButtonClicked);
+
+    connect(player->ui->buttonStepForward, &QPushButton::clicked,
+            this, &PlayerController::stepForwardButtonClicked);
+
+    connect(player->ui->buttonSpeedUp, &QPushButton::clicked,
+            this, &PlayerController::speedUpButtonClicked);
+
+    connect(player->ui->buttonSpeedDown, &QPushButton::clicked,
+            this, &PlayerController::speedDownButtonClicked);
+
     connect(player->ui->buttonRealTime, &QPushButton::clicked,
             this, &PlayerController::playRealTimeButtonClicked);
 
     connect(player->timeBar, &TimeBar::sendMessageToStatusBar,
             player, &Player::showMessageInStatusBar);
+
 }
 
 
@@ -46,7 +59,7 @@ void PlayerController::handleSourceObtained()
 
 void PlayerController::startAttemptsToPlayStream()
 {
-    mAttemptTimer = new QTimer();
+    /*mAttemptTimer = new QTimer();
     connect(mAttemptTimer, &QTimer::timeout, [=]()
     {
         if(libvlc_media_player_is_playing(mMediaPlayer) != 0)
@@ -63,7 +76,7 @@ void PlayerController::startAttemptsToPlayStream()
         }
     });
 
-    mAttemptTimer->start(3000);
+    mAttemptTimer->start(3000);*/
 }
 
 void PlayerController::attemptToPlayStream()
@@ -114,9 +127,9 @@ void PlayerController::testInputButtonClicked()
 //Real Time Stream
 void PlayerController::playRealTimeButtonClicked()
 {
-    libvlc_media_player_stop(mMediaPlayer);
-    emit requestToStream(playSpeed);
-    startAttemptsToPlayStream();
+    //libvlc_media_player_stop(mMediaPlayer);
+    emit requestToRealTimeStream();
+    //startAttemptsToPlayStream();
 }
 
 void PlayerController::startToPlayRealTimeStream()

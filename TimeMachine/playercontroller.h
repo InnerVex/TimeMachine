@@ -41,6 +41,10 @@ signals:
     void requestToStream(float playSpeed);
     void requestToPauseStream();
     void requestToRealTimeStream();
+    void requestStepForward(quint32 step);
+    void requestStepBack(quint32 step);
+    void requestSpeedUp(float currentPlaySpeed);
+    void requestSpeedDown(float currentPlaySpeed);
 
 public slots:
     //Слот по сигналу от контроллера к продолжению воспроизведения
@@ -61,4 +65,8 @@ public slots:
     void playButtonClicked();
     void playRealTimeButtonClicked();
     void testInputButtonClicked();
+    void stepForwardButtonClicked();
+    void stepBackButtonClicked();
+    void speedUpButtonClicked();
+    void speedDownButtonClicked();
 };
