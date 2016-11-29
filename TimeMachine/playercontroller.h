@@ -45,7 +45,7 @@ signals:
     void requestStepBack(quint32 step);
     void requestSpeedUp(float currentPlaySpeed);
     void requestSpeedDown(float currentPlaySpeed);
-    
+
 public slots:
     //Слот по сигналу от контроллера к продолжению воспроизведения
     void handleSourceObtained();
