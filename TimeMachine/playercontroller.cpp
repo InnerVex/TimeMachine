@@ -25,11 +25,24 @@ PlayerController::PlayerController(Player *_player, QObject *parent) :
     connect(player->ui->testTimeButton, &QPushButton::clicked,
             this, &PlayerController::testInputButtonClicked);
 
+    connect(player->ui->buttonStepBack, &QPushButton::clicked,
+            this, &PlayerController::stepBackButtonClicked);
+    
+    connect(player->ui->buttonStepForward, &QPushButton::clicked,
+            this, &PlayerController::stepForwardButtonClicked);
+    
+    connect(player->ui->buttonSpeedUp, &QPushButton::clicked,
+            this, &PlayerController::speedUpButtonClicked);
+    
+    connect(player->ui->buttonSpeedDown, &QPushButton::clicked,
+            this, &PlayerController::speedDownButtonClicked);
+    
     connect(player->ui->buttonRealTime, &QPushButton::clicked,
             this, &PlayerController::playRealTimeButtonClicked);
 
     connect(player->timeBar, &TimeBar::sendMessageToStatusBar,
             player, &Player::showMessageInStatusBar);
+    
 }
 
 
@@ -39,8 +52,8 @@ void PlayerController::handleSourceObtained()
     //if(isIntendedToPlay && !isPlaying)
     {
         //Запрос стримеру на начало стрима и старт попыток подхватить стрим
-        //emit requestToStream(playSpeed);
-        //startAttemptsToPlayStream();
+        emit requestToStream(playSpeed);
+        startAttemptsToPlayStream();
     }
 }
 
@@ -96,18 +109,16 @@ void PlayerController::playButtonClicked()
 {
     //TODO::Различные действия в зависимости от того, воспроизводится ли стрим
     //Запрос стримеру на начало стрима и старт попыток подхватить стрим
-    //libvlc_media_player_stop(mMediaPlayer);
-    //emit requestToStream(playSpeed);
-
-    //startAttemptsToPlayStream();
-    attemptToPlayStream();
+    libvlc_media_player_stop(mMediaPlayer);
+    emit requestToStream(playSpeed);
+    startAttemptsToPlayStream();
 }
 
 //TOTALLY TEST CODE
 void PlayerController::testInputButtonClicked()
 {
-    quint32 requestedTime = 0;player->ui->testTimeInput->dateTime().toTime_t();
-    //player->showMessageInStatusBar("RequestedTime: " + QString::number(requestedTime));
+    quint32 requestedTime = player->ui->testTimeInput->dateTime().toTime_t();
+    player->showMessageInStatusBar("RequestedTime: " + QString::number(requestedTime));
 
     emit requestToObtainSource(requestedTime, 1);
 }
@@ -115,7 +126,7 @@ void PlayerController::testInputButtonClicked()
 void PlayerController::playRealTimeButtonClicked()
 {
     libvlc_media_player_stop(mMediaPlayer);
-    emit requestToStream(playSpeed);
+    emit requestToRealTimeStream();
     startAttemptsToPlayStream();
 }
 
