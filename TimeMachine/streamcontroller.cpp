@@ -5,6 +5,9 @@
 #include <QDateTime>
 #include <QMessageBox>
 #include "select.h"
+#include <ui_player.h>
+#include <playerdefinitions.h>
+#include <player.h>
 
 #include "vlc/libvlc_events.h"
 
@@ -238,7 +241,7 @@ void StreamController::startWaitingForStreamStart()
     mAttemptTimer->start(wait);
 }
 
-void StreamController::requestedToStream(float playSpeed)
+void StreamController::requestedToStream()
 {
     libvlc_media_player_play(mMediaPlayer);
     streaming = true;

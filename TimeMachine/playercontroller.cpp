@@ -56,7 +56,7 @@ void PlayerController::handleSourceObtained()
     //if(isIntendedToPlay && !isPlaying)
     {
         //Запрос стримеру на начало стрима
-        emit requestToStream(playSpeed);
+        emit requestToStream();
     }
 }
 
@@ -122,9 +122,20 @@ void PlayerController::testInputButtonClicked()
 //Real Time Stream
 void PlayerController::playRealTimeButtonClicked()
 {
-    //libvlc_media_player_stop(mMediaPlayer);
-    emit requestToRealTimeStream();
-    //startAttemptsToPlayStream();
+
+    if (isPlaying = true)
+        libvlc_media_player_stop(mMediaPlayer);
+
+    const char * const vlc_args[] = {"--verbose=2"};
+    mVlcInstance=libvlc_new(sizeof(vlc_args) / sizeof(vlc_args[0]), vlc_args);
+    mMediaPlayer = libvlc_media_player_new (mVlcInstance);
+    mMedia = libvlc_media_new_location (mVlcInstance, "rtsp://ewns-hls-b-stream.hexaglobe.net/rtpeuronewslive/en_vidan750_rtp.sdp");
+    libvlc_media_player_set_media (mMediaPlayer, mMedia);
+    int windid = player->ui->videoFrame->winId();
+    libvlc_media_player_set_hwnd(mMediaPlayer, (void*)windid );
+    libvlc_media_player_play(mMediaPlayer);
+
+    isPlaying = true;
 }
 
 void PlayerController::startToPlayRealTimeStream()

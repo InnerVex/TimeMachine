@@ -7,7 +7,8 @@
 #include "vlc/vlc.h"
 #include <unistd.h>
 #include <assert.h>
-
+#include <player.h>
+#include <ui_player.h>
 #include <player.h>
 #include <playerdefinitions.h>
 
@@ -46,23 +47,21 @@ public:
     void loadVideoPatchInMemory(qint32 bytesToBuffer);
     void createImemInstance();
 
-    ImemData *mImemData;
     QString currentFilename;
-    FILE* currentFile;
     QFile *currentQFile;
     qint32 currentFileBytes;
     qint32 currentFileBytePosition;
     float percentOffset;
     qint32 totalBytesBuffered;
 
-    Player *player; //TODO::for test
+    Player *player;
 
 private:
     //Переменные libVLC
     libvlc_instance_t *mVlcInstance;
     libvlc_media_player_t *mMediaPlayer;
     libvlc_media_t *mMedia;
-    libvlc_event_manager_t *mEventManager;
+    ImemData *mImemData;
 
     QTimer *mAttemptTimer;
     QTimer *mReplenishTimer;
@@ -83,7 +82,7 @@ signals:
 public slots:
     //Слот по сигналам от проигрывателя
     void requestedToObtainSource(quint32 requestTime, float playSpeed);
-    void requestedToStream(float playSpeed);
+    void requestedToStream();
     void requestedToStreamRealTime();
     void requestedToPauseStream();
 
