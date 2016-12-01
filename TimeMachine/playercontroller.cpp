@@ -52,7 +52,7 @@ void PlayerController::handleSourceObtained()
     //if(isIntendedToPlay && !isPlaying)
     {
         //Запрос стримеру на начало стрима
-        emit requestToStream(playSpeed);
+        emit requestToStream();
     }
 }
 

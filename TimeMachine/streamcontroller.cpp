@@ -194,11 +194,6 @@ void StreamController::requestedToObtainSource(quint32 requestTime, float playSp
     emit signalSourceObtained();
 }
 
-<<<<<<< HEAD
-void StreamController::requestedToStream()
-{
-
-=======
 void StreamController::startWaitingForStreamStart()
 {
     //Дожидаемся начала стрима и отправляем сигнал проигрывателю
@@ -219,7 +214,7 @@ void StreamController::startWaitingForStreamStart()
     mAttemptTimer->start(1000);
 }
 
-void StreamController::requestedToStream(float playSpeed)
+void StreamController::requestedToStream()
 {
     libvlc_media_player_play(mMediaPlayer);
     streaming = true;
@@ -236,7 +231,6 @@ void StreamController::requestedToStreamRealTime()
     libvlc_media_player_play(mMediaPlayer);
 
     startWaitingForStreamStart();
->>>>>>> refs/remotes/origin/master
 }
 void StreamController::requestedToPauseStream()
 {

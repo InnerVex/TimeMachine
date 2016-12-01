@@ -68,12 +68,8 @@ signals:
 public slots:
     //Слот по сигналам от проигрывателя
     void requestedToObtainSource(quint32 requestTime, float playSpeed);
-<<<<<<< HEAD
     void requestedToStream();
-=======
-    void requestedToStream(float playSpeed);
     void requestedToStreamRealTime();
->>>>>>> refs/remotes/origin/master
     void requestedToPauseStream();
 
 };
