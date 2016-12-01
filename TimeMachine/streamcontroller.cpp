@@ -4,6 +4,9 @@
 #include <QTimer>
 #include <QDateTime>
 #include "select.h"
+#include <ui_player.h>
+#include <playerdefinitions.h>
+#include <player.h>
 
 //Get и Release коллбэки для IMEM
 int MyImemGetCallback (void *data,
@@ -211,7 +214,7 @@ void StreamController::startWaitingForStreamStart()
     mAttemptTimer->start(1000);
 }
 
-void StreamController::requestedToStream(float playSpeed)
+void StreamController::requestedToStream()
 {
     libvlc_media_player_play(mMediaPlayer);
     streaming = true;

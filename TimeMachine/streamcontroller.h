@@ -6,7 +6,8 @@
 #include "vlc/vlc.h"
 #include <unistd.h>
 #include <assert.h>
-
+#include <player.h>
+#include <ui_player.h>
 #include <playerdefinitions.h>
 
 
@@ -39,6 +40,7 @@ public:
     void loadVideoPatchInMemory(qint32 bytesToBuffer);
 
 private:
+    Player *player;
     //Переменные libVLC
     libvlc_instance_t *mVlcInstance;
     libvlc_media_player_t *mMediaPlayer;
@@ -66,7 +68,7 @@ signals:
 public slots:
     //Слот по сигналам от проигрывателя
     void requestedToObtainSource(quint32 requestTime, float playSpeed);
-    void requestedToStream(float playSpeed);
+    void requestedToStream();
     void requestedToStreamRealTime();
     void requestedToPauseStream();
 
