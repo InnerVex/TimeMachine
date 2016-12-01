@@ -177,7 +177,7 @@ void Slicer::convertToTsFromStream(const char* input, const char* output)
 void Slicer::makeMultipleSlices(const char* input, int number)
 {
     char output[1000];
-    int duration_of_slice = 30000; // in milliseconds
+    int duration_of_slice = 60000; // in milliseconds
     for (long long int i=0;i<number;i++)
     {
         sprintf(output

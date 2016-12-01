@@ -131,7 +131,7 @@ void PlayerController::playRealTimeButtonClicked()
     if (isPlaying = true)
         libvlc_media_player_stop(mMediaPlayer);
 
-    const char * const vlc_args[] = {"--verbose=0"};
+    const char * const vlc_args[] = {"--verbose=2"};
     mVlcInstance=libvlc_new(sizeof(vlc_args) / sizeof(vlc_args[0]), vlc_args);
     mMediaPlayer = libvlc_media_player_new (mVlcInstance);
     mMedia = libvlc_media_new_location (mVlcInstance, "rtsp://ewns-hls-b-stream.hexaglobe.net/rtpeuronewslive/en_vidan750_rtp.sdp");
