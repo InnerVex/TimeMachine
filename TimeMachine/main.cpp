@@ -39,6 +39,7 @@ int main(int argc, char *argv[])
     {
         QDateTime InsertDateTime(QDate(2000,01,01),QTime(00,00,00));
         {
+<<<<<<< HEAD
             InsertDateTime;
             qint32 time1 = InsertDateTime.toTime_t();
             QString iFileName = "outputFromStream_0.ts";
@@ -56,6 +57,41 @@ int main(int argc, char *argv[])
             QString iSourceAdress = "1.1.1.1";
             quint32 iDuration = 600000;
             Insert::insert(time2,iFileName,iSourceName,iSourceAdress,"EXAMPLE_FILE_PATH",iDuration);
+=======
+            QDateTime InsertDateTime(QDate(2000,01,01),QTime(00,00,00));
+            {
+                InsertDateTime;
+                qint32 time1 = InsertDateTime.toTime_t();
+                QString iFileName = "slice_0-5.ts";
+                QString iFilePath = QFileInfo("slice_0-5.ts").dir().path();
+                QString iSourceName = "CAM_01";
+                QString iSourceAdress = "1.1.1.1";
+                quint32 iDuration = 600000;
+                Insert::insert(time1,iFileName,iSourceName,iSourceAdress,iFilePath,iDuration);
+            }
+            {
+                qint32 time2 = InsertDateTime.addMSecs(600000).toTime_t();
+                QString iFileName = "slice_5-10.ts";
+                QString iFilePath = QFileInfo("slice_5-10.ts").dir().path();
+                QString iSourceName = "CAM_01";
+                QString iSourceAdress = "1.1.1.1";
+                quint32 iDuration = 600000;
+                Insert::insert(time2,iFileName,iSourceName,iSourceAdress,iFilePath,iDuration);
+            }
+
+            QDateTime SelectDateTime(QDate(2000,01,01),QTime(00,05,00));
+            qint32 time = SelectDateTime.toTime_t();
+            std::cout << "DateTime:"     << Select::selectPreviousDateTime(time)
+                      << " Duration:"    << Select::selectDuration(time)
+                      << " Path:"        << Select::selectPath(time).toStdString()
+                      << " SourceAdress:"<< Select::selectSourceAdress(time).toStdString()
+                      << " SourceName:"  << Select::selectSourceName(time).toStdString()
+                      << " File:"        << Select::selectFile(time).toStdString()
+                      << " Offset:"      << Select::selectOffset(time)
+                      << " PercenOffset:"<< Select::selectPercentOffset(time)
+                      << " NextFile:"    << Select::selectNextFile(Select::selectFile(time)).toStdString()
+                                         << std::endl;
+>>>>>>> refs/remotes/origin/master
         }
 
         QDateTime SelectDateTime(QDate(2000,01,01),QTime(00,05,00));
@@ -77,6 +113,7 @@ int main(int argc, char *argv[])
     StreamController *streamController = new StreamController();
     player.show();
 
+<<<<<<< HEAD
     QObject::connect(playerController, &PlayerController::requestToObtainSource,
                     streamController, &StreamController::requestedToObtainSource);
     QObject::connect(playerController, &PlayerController::requestToStream,
@@ -85,6 +122,23 @@ int main(int argc, char *argv[])
                     streamController, &StreamController::requestedToPauseStream);
     QObject::connect(streamController, &StreamController::signalSourceObtained,
                     playerController, &PlayerController::handleSourceObtained);
+=======
+        //Сигналы от PlayerController к StreamController
+        QObject::connect(playerController, &PlayerController::requestToObtainSource,
+                        streamController, &StreamController::requestedToObtainSource);
+        QObject::connect(playerController, &PlayerController::requestToStream,
+                        streamController, &StreamController::requestedToStream);
+        QObject::connect(playerController, &PlayerController::requestToRealTimeStream,
+                        streamController, &StreamController::requestedToStreamRealTime);
+        QObject::connect(playerController, &PlayerController::requestToPauseStream,
+                        streamController, &StreamController::requestedToPauseStream);
+
+        //Сигналы от StreamController к PlayerController
+        QObject::connect(streamController, &StreamController::signalSourceObtained,
+                        playerController, &PlayerController::handleSourceObtained);
+        QObject::connect(streamController, &StreamController::signalStreamStarted,
+                        playerController, &PlayerController::attemptToPlayStream);
+>>>>>>> refs/remotes/origin/master
 
 
 

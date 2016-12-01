@@ -125,6 +125,7 @@ StreamController::StreamController(QObject *parent) : QObject(parent)
 {
     mImemData = new ImemData();
     mImemData->cookieString = "TM_SC_Instance";
+    attemptingToStartStream = streaming = false;
 }
 
 /**
@@ -136,7 +137,11 @@ StreamController::StreamController(QObject *parent) : QObject(parent)
  */
 void StreamController::requestedToObtainSource(quint32 requestTime, float playSpeed)
 {
-    //libvlc_media_player_stop(mMediaPlayer);
+    if(streaming)
+    {
+        libvlc_media_player_stop(mMediaPlayer);
+        streaming = false;
+    }
 
     //Получение данных из БД и буфферизация
     currentFilename = Select::selectFile(requestTime).toStdString().c_str();
@@ -145,8 +150,8 @@ void StreamController::requestedToObtainSource(quint32 requestTime, float playSp
     //Буфферизуем видеопатчи
     totalBytesBuffered = 0;
     mImemData->videoPatches.clear();
-    //openFileForBuffering(currentFilename, true);
-    openFileForBuffering(currentFilename, false);
+    openFileForBuffering(currentFilename, true);
+    //openFileForBuffering(currentFilename, false);
     replenishVideoPatchesBuffer();
 
     //Задаём параметры LibVLC
@@ -180,22 +185,58 @@ void StreamController::requestedToObtainSource(quint32 requestTime, float playSp
     mMedia = libvlc_media_new_location (mVlcInstance, "imem://");
     mMediaPlayer = libvlc_media_player_new_from_media (mMedia);
 
-    //TODO::Определить, зачем. Задаём опции медиа
     for(option = options.begin(); option != options.end(); option++)
     {
         libvlc_media_add_option(mMedia, *option);
     }
 
-    //TODO::В целях теста проигрывание начинается сразу
-    libvlc_media_player_play(mMediaPlayer);
-
     //Отправить сигнал о получении данных об источнике
     emit signalSourceObtained();
 }
 
+<<<<<<< HEAD
 void StreamController::requestedToStream()
 {
 
+=======
+void StreamController::startWaitingForStreamStart()
+{
+    //Дожидаемся начала стрима и отправляем сигнал проигрывателю
+    mAttemptTimer = new QTimer();
+    connect(mAttemptTimer, &QTimer::timeout, [=]()
+    {
+        if(libvlc_media_player_is_playing(mMediaPlayer) != 0)
+        {
+            emit signalStreamStarted();
+            attemptingToStartStream = false;
+        }
+        if(!attemptingToStartStream)
+        {
+            mAttemptTimer->stop();
+        }
+    });
+    attemptingToStartStream = true;
+    mAttemptTimer->start(1000);
+}
+
+void StreamController::requestedToStream(float playSpeed)
+{
+    libvlc_media_player_play(mMediaPlayer);
+    streaming = true;
+
+    startWaitingForStreamStart();
+}
+void StreamController::requestedToStreamRealTime()
+{
+    //TODO::Сюда добавить код создания инстанса LibVLC
+    QString source = "rtsp://ewns-hls-b-stream.hexaglobe.net/rtpeuronewslive/en_vidan750_rtp.sdp";
+    currentFilename = source.toStdString().c_str();
+    mMedia = libvlc_media_new_location(mVlcInstance, currentFilename);
+    libvlc_media_player_set_media (mMediaPlayer, mMedia);
+    libvlc_media_player_play(mMediaPlayer);
+
+    startWaitingForStreamStart();
+>>>>>>> refs/remotes/origin/master
 }
 void StreamController::requestedToPauseStream()
 {

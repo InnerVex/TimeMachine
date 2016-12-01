@@ -16,7 +16,8 @@ public:
     void convertToTsFromStream(const char* input, const char* output);
     void makeSliceFromStreamSmem();
     void makeSliceFromStreamDirty(const char* input, const char* output, int duration);
-    void makeMultipleSlices(const char* input, int number);
+    void makeMultipleSlices(const char* input, const char* output_location, int number);
+    void testFunc();
 };
 
 
