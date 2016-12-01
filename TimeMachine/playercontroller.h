@@ -19,7 +19,7 @@ private:
     Player *player;
 
     long sourceMargin;
-
+    //
     //Параметры воспроизведения
     bool isPlaying = false;
     bool isIntendedToPlay = false;
@@ -38,9 +38,8 @@ private:
 signals:
     //Запросить изменение параметров источника
     void requestToObtainSource(quint32 requestTime, float playSpeed);
-    void requestToStream(float playSpeed);
+    void requestToStream();
     void requestToPauseStream();
-    void requestToRealTimeStream();
     void requestStepForward(quint32 step);
     void requestStepBack(quint32 step);
     void requestSpeedUp(float currentPlaySpeed);

@@ -4,6 +4,9 @@
 #include <QTimer>
 #include <QDateTime>
 #include "select.h"
+#include <ui_player.h>
+#include <playerdefinitions.h>
+#include <player.h>
 
 //Get и Release коллбэки для IMEM
 int MyImemGetCallback (void *data,
@@ -190,14 +193,8 @@ void StreamController::requestedToObtainSource(quint32 requestTime, float playSp
     emit signalSourceObtained();
 }
 
-void StreamController::requestedToStream(float playSpeed)
+void StreamController::requestedToStream()
 {
-    QString source = "rtsp://ewns-hls-b-stream.hexaglobe.net/rtpeuronewslive/en_vidan750_rtp.sdp";
-    currentFilename = source.toStdString().c_str();
-    mMedia = libvlc_media_new_location(mVlcInstance, currentFilename);
-    libvlc_media_player_set_media (mMediaPlayer, mMedia);
-    libvlc_media_player_play(mMediaPlayer);
-
 
 }
 void StreamController::requestedToPauseStream()
