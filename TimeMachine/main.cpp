@@ -39,18 +39,24 @@ int main(int argc, char *argv[])
     {
         QDateTime InsertDateTime(QDate(2000,01,01),QTime(00,00,00));
         {
-            InsertDateTime;
             qint32 time1 = InsertDateTime.toTime_t();
+            QString iFileName = "slice_0-5.ts";
+            QString iFilePath = QFileInfo("slice_0-5.ts").dir().path();
             QString iSourceName = "CAM_01";
             QString iSourceAdress = "1.1.1.1";
             quint32 iDuration = 600000;
+            Insert::insert(time1,iFileName,iSourceName,iSourceAdress,iFilePath,iDuration);
         }
         {
             qint32 time2 = InsertDateTime.addMSecs(600000).toTime_t();
+            QString iFileName = "slice_5-10.ts";
+            QString iFilePath = QFileInfo("slice_5-10.ts").dir().path();
             QString iSourceName = "CAM_01";
             QString iSourceAdress = "1.1.1.1";
             quint32 iDuration = 600000;
+            Insert::insert(time2,iFileName,iSourceName,iSourceAdress,iFilePath,iDuration);
         }
+        {
         QDateTime SelectDateTime(QDate(2000,01,01),QTime(00,05,00));
         qint32 time = SelectDateTime.toTime_t();
         std::cout << "DateTime:"     << Select::selectPreviousDateTime(time)
@@ -61,8 +67,10 @@ int main(int argc, char *argv[])
                   << " File:"        << Select::selectFile(time).toStdString()
                   << " Offset:"      << Select::selectOffset(time)
                   << " PercenOffset:"<< Select::selectPercentOffset(time)
+                  << " NextFile:"    << Select::selectNextFile(Select::selectFile(time)).toStdString()
+                                     << std::endl;
+        }
     }
-
     QApplication a(argc, argv);
     Player player;
     PlayerController *playerController = new PlayerController(&player);
