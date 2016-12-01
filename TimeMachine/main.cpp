@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
 
 
     {
-
+        /*
         Slicer slicer;
         const char* input ="rtsp://ewns-hls-b-stream.hexaglobe.net/rtpeuronewslive/en_vidan750_rtp.sdp";
         int numberOfSlices = 3;
@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
         {
             InsertDateTime;
             qint32 time1 = InsertDateTime.toTime_t();
-            QString iFileName = "examples/slice_0-5";
+            QString iFileName = "outputFromStream_0.ts";
             //QString iFilePath = QFileInfo("slice_0-5.ts").dir();
             QString iSourceName = "CAM_01";
             QString iSourceAdress = "1.1.1.1";
@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
         }
         {
             qint32 time2 = InsertDateTime.addMSecs(600000).toTime_t();
-            QString iFileName = "examples/slice_5-10";
+            QString iFileName = "outputFromStream_1.ts";
             //QString iFilePath = QFileInfo("slice_0-5.ts").dir();
             QString iSourceName = "CAM_01";
             QString iSourceAdress = "1.1.1.1";
