@@ -44,6 +44,7 @@ void Insert::insert(quint32 iDateTime,
                     qint32 iDuration)
 {
     auto_ptr<database> db (create_database ());
+    QString e;
     //Ввод
     qint32 iPathId = 0,
             iSourceId = 0,
@@ -213,14 +214,34 @@ void Insert::insert(quint32 iDateTime,
                 throw iFileName;
             }
         }
+        {
+            typedef odb::query<timeStamp> query;
+            typedef odb::result<timeStamp> result;
+
+            transaction t (db->begin ());
+
+            result r (db->query<timeStamp> (query::dateTime == iDateTime));
+
+            for (result::iterator i (r.begin()); i != r.end(); ++i)
+            {
+                iDateTime = i->dateTime();
+
+            }
+            t.commit();
+
+            if (iTimeStampId != 0)
+            {
+                e = iDateTime + " alredy exists.";
+            }
+        }
 
         timeStamp eTimeStamp (iFileId,iDateTime);
         transaction t (db->begin ());
         timeStampId = db ->persist(eTimeStamp);
         t.commit();
     }
-    catch(QString iFileName)
+    catch(QString e)
     {
-        cout << "Date: " << iDateTime << " in " << iFileName.toStdString().c_str() << " already exists. " << endl;
+        cout << e.toStdString().c_str() << endl;
     }
 }

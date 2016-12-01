@@ -108,6 +108,10 @@
          <property name="text">
           <string/>
          </property>
+         <property name="icon">
+          <iconset resource="playerresources.qrc">
+           <normaloff>:/player/icons/stop</normaloff>:/player/icons/stop</iconset>
+         </property>
         </widget>
        </item>
        <item>

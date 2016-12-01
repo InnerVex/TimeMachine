@@ -36,6 +36,7 @@ int main(int argc, char *argv[])
         */
     }
     //Тест ввода-вывода и бд
+    /*
     {
         QDateTime InsertDateTime(QDate(2000,01,01),QTime(00,00,00));
         {
@@ -56,8 +57,9 @@ int main(int argc, char *argv[])
             quint32 iDuration = 600000;
             Insert::insert(time2,iFileName,iSourceName,iSourceAdress,iFilePath,iDuration);
         }
+        */
         {
-        QDateTime SelectDateTime(QDate(2000,01,01),QTime(00,05,00));
+        QDateTime SelectDateTime(QDate(2000,01,01),QTime(00,00,30));
         qint32 time = SelectDateTime.toTime_t();
         std::cout << "DateTime:"     << Select::selectPreviousDateTime(time)
                   << " Duration:"    << Select::selectDuration(time)
@@ -70,7 +72,7 @@ int main(int argc, char *argv[])
                   << " NextFile:"    << Select::selectNextFile(Select::selectFile(time)).toStdString()
                                      << std::endl;
         }
-    }
+
     QApplication a(argc, argv);
     Player player;
     PlayerController *playerController = new PlayerController(&player);

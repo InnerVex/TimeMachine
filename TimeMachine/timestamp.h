@@ -64,7 +64,7 @@ private:
   qint32 id_;
 
   qint32 fileId_;
-
+  #pragma db unique
   quint32 dateTime_;
 };
 #endif // TIMESTAMP_HXX

@@ -8,6 +8,7 @@
         <file alias="stop">resources/icons/icon_stop.png</file>
         <file alias="realtime">resources/icons/icon_realtime.png</file>
         <file alias="eye">resources/icons/icon_eye.png</file>
+        <file alias="pause">resources/icons/icon_pause.png</file>
     </qresource>
     <qresource prefix="/player/images">
         <file alias="scroller">resources/images/timebar_scroller.png</file>
