@@ -47,28 +47,36 @@
         }
         //Тест ввода-вывода и бд
         {
-            QDateTime InsertDateTime(QDate(2000,01,01),QTime(00,00,00));
+            /*QDateTime InsertDateTime(QDate(2000,01,01),QTime(00,00,00));
             {
-                InsertDateTime;
                 qint32 time1 = InsertDateTime.toTime_t();
-                QString iFileName = "slice_0-5.ts";
-                QString iFilePath = QFileInfo("slice_0-5.ts").dir().path();
+                QString iFileName = "outputFromStream_0.ts";
+                QString iFilePath = QFileInfo("outputFromStream_0.ts").dir().path();
                 QString iSourceName = "CAM_01";
                 QString iSourceAdress = "1.1.1.1";
-                quint32 iDuration = 600000;
+                quint32 iDuration = 44297;
                 Insert::insert(time1,iFileName,iSourceName,iSourceAdress,iFilePath,iDuration);
             }
             {
-                qint32 time2 = InsertDateTime.addMSecs(600000).toTime_t();
-                QString iFileName = "slice_5-10.ts";
-                QString iFilePath = QFileInfo("slice_5-10.ts").dir().path();
+                qint32 time2 = InsertDateTime.addMSecs(44297).toTime_t();
+                QString iFileName = "outputFromStream_1.ts";
+                QString iFilePath = QFileInfo("outputFromStream_1.ts").dir().path();
                 QString iSourceName = "CAM_01";
                 QString iSourceAdress = "1.1.1.1";
-                quint32 iDuration = 600000;
+                quint32 iDuration = 44372;
                 Insert::insert(time2,iFileName,iSourceName,iSourceAdress,iFilePath,iDuration);
             }
+            {
+                qint32 time3 = InsertDateTime.addMSecs(44372).toTime_t();
+                QString iFileName = "outputFromStream_2.ts";
+                QString iFilePath = QFileInfo("outputFromStream_2.ts").dir().path();
+                QString iSourceName = "CAM_01";
+                QString iSourceAdress = "1.1.1.1";
+                quint32 iDuration = 44524;
+                Insert::insert(time3,iFileName,iSourceName,iSourceAdress,iFilePath,iDuration);
+            }*/
 
-            QDateTime SelectDateTime(QDate(2000,01,01),QTime(00,05,00));
+            /*QDateTime SelectDateTime(QDate(2000,01,01),QTime(00,01,00));
             qint32 time = SelectDateTime.toTime_t();
             std::cout << "DateTime:"     << Select::selectPreviousDateTime(time)
                       << " Duration:"    << Select::selectDuration(time)
@@ -79,13 +87,14 @@
                       << " Offset:"      << Select::selectOffset(time)
                       << " PercenOffset:"<< Select::selectPercentOffset(time)
                       << " NextFile:"    << Select::selectNextFile(Select::selectFile(time)).toStdString()
-                                         << std::endl;
+                                         << std::endl;*/
         }
 
         QApplication a(argc, argv);
         Player player;
         PlayerController *playerController = new PlayerController(&player);
         StreamController *streamController = new StreamController();
+        streamController->player = &player; //TODO::for test
         player.show();
 
         //Сигналы от PlayerController к StreamController
@@ -103,6 +112,8 @@
                         playerController, &PlayerController::handleSourceObtained);
         QObject::connect(streamController, &StreamController::signalStreamStarted,
                         playerController, &PlayerController::attemptToPlayStream);
+        QObject::connect(streamController, &StreamController::signalTimerStart,
+                        playerController, &PlayerController::startPlayTimer);
 
 
 

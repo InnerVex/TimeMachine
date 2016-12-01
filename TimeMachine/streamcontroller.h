@@ -2,16 +2,22 @@
 
 #include <QObject>
 #include <QTimer>
+#include <QFile>
 
 #include "vlc/vlc.h"
 #include <unistd.h>
 #include <assert.h>
 
+#include <player.h>
 #include <playerdefinitions.h>
 
 
-#define VIDEO_PATCH_BYTES 10485760
-#define VIDEO_PATCHES_TOTAL_BYTES 52428800
+#define VIDEO_PATCH_BYTES 128000
+#define VIDEO_PATCHES_TOTAL_BYTES 640000
+#define START_SIGNAL_DELAY_INITIAL 10000
+#define START_SIGNAL_DELAY 1000
+
+class StreamController;
 
 class ImemData
 {
@@ -20,6 +26,7 @@ public:
     ~ImemData() {}
     std::vector<VideoPatchData> videoPatches;
     char* cookieString;
+    StreamController *controller;
 };
 
 template<typename T>
@@ -35,26 +42,35 @@ class StreamController : public QObject
 public:
     explicit StreamController(QObject *parent = 0);
     void replenishVideoPatchesBuffer();
-    void openFileForBuffering(const char* filename, bool withOffset = false);
+    void openFileForBuffering(QString filename, bool withOffset = false);
     void loadVideoPatchInMemory(qint32 bytesToBuffer);
+    void createImemInstance();
+
+    ImemData *mImemData;
+    QString currentFilename;
+    FILE* currentFile;
+    QFile *currentQFile;
+    qint32 currentFileBytes;
+    qint32 currentFileBytePosition;
+    float percentOffset;
+    qint32 totalBytesBuffered;
+
+    Player *player; //TODO::for test
 
 private:
     //Переменные libVLC
     libvlc_instance_t *mVlcInstance;
     libvlc_media_player_t *mMediaPlayer;
     libvlc_media_t *mMedia;
-    ImemData *mImemData;
-
-    const char* currentFilename;
-    FILE* currentFile;
-    qint32 currentFileBytes;
-    qint32 currentFileBytePosition;
-    float percentOffset;
-    qint32 totalBytesBuffered;
+    libvlc_event_manager_t *mEventManager;
 
     QTimer *mAttemptTimer;
+    QTimer *mReplenishTimer;
+    qint32 requestTime;
     bool attemptingToStartStream;
     bool streaming;
+    bool signalledStartTimer;
+    bool imemStreamReady;
 
     void startWaitingForStreamStart();
 
@@ -62,6 +78,7 @@ signals:
     //Сигнал проигрывателю о том, что запущен новый источник
     void signalSourceObtained();
     void signalStreamStarted();
+    void signalTimerStart(qint32 startTime);
 
 public slots:
     //Слот по сигналам от проигрывателя
