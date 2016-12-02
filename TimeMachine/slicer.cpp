@@ -7,6 +7,7 @@
 //#include <QtTest/QTest>
 #include <chrono>
 #include <thread>
+#include "insert.h"
 
 
 void Slicer::convertToTS(const char* input, const char* output)
@@ -176,18 +177,21 @@ void Slicer::convertToTsFromStream(const char* input, const char* output)
 
 void Slicer::makeMultipleSlices(const char* input, int number)
 {
+    qint32 time = QDateTime(QDate(2000,01,01),QTime(00,00,00)).toTime_t();
     char output[1000];
-    int duration_of_slice = 60000; // in milliseconds
+    int duration_of_slice = 30000; // in milliseconds
     for (long long int i=0;i<number;i++)
     {
         sprintf(output
-                ,"examples/outputFromStream_%lld"
+                ,"qweroutputFromStream_%lld"
                 ".ts"
                 ,i
                 );
         //qDebug()<<output;
         this->makeSliceFromStreamDirty(input,output,duration_of_slice);
         qDebug()<<"Duration of"<<output<<"is"<<getDuration(output);
+        Insert(time,output,"EXAMPLE_SOURCE_NAME","EXAMPLE_SOURCE_ADRESS","EXAMPLE_FILE_PATH",getDuration(output));
+        time = time + getDuration(output)/1000;
     }
 }
 
