@@ -5,20 +5,22 @@
 #include <ctime>
 
 #include <QWidget>
+#include <QDateTimeEdit>
 
 class TimeBar : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit TimeBar(QWidget *parent = 0);
+    explicit TimeBar(QDateTimeEdit *_fvtEdit, QWidget *parent = 0);
     QSize sizeHint() const Q_DECL_OVERRIDE;
-
-public slots:
+    bool canRequestTime;
+    QDateTimeEdit *fvtEdit;
 
 signals:
 
     void sendMessageToStatusBar(QString message);
+    void setPlayTime(qint32 requestTime);
 
 protected:
     void dragMoveEvent(QDragMoveEvent *event) Q_DECL_OVERRIDE;
@@ -30,11 +32,14 @@ protected:
 private:
     QWidget *mainWindow;
 
+    int cursorX;
+    bool cursorHover;
+
     //Параметры шкалы
     int widgetWidth;
-    int scale = 8;
+    int scale = 0;
     int divValue;
-    quint32 firstVisibleTime = 1477980226;
+    quint32 firstVisibleTime;
     int minDivSignPeriod;
 
     //Параметры деления шкалы
@@ -47,4 +52,7 @@ private:
 
     //Функция отрисовки подписи под шкалой
     void drawDivSign(QPainter &painter, const char* format);
+
+public slots:
+    void setFVT(const QDateTime & datetime);
 };

@@ -6,10 +6,14 @@
 #include <QMouseEvent>
 #include <QWheelEvent>
 
-TimeBar::TimeBar(QWidget *parent) :
-    QWidget(parent)
+TimeBar::TimeBar(QDateTimeEdit *_fvtEdit, QWidget *parent) :
+    QWidget(parent), fvtEdit(_fvtEdit)
 {
+    setMouseTracking(true);
 
+    firstVisibleTime = fvtEdit->dateTime().toTime_t();
+    canRequestTime = true;
+    cursorHover = false;
 }
 
 QSize TimeBar::sizeHint() const
@@ -25,15 +29,29 @@ void TimeBar::dragMoveEvent(QDragMoveEvent *event)
 void TimeBar::mouseMoveEvent(QMouseEvent *event)
 {
     QPoint cursorPos = event->pos();
-    //QToolTip::showText(mapToGlobal(cursorPos), "TOOLTIP");
-    //emit sendMessageToStatusBar("CursorPos: " + QString::number(cursorPos.x()) + ", " + QString::number(cursorPos.y()));
+    //Отрисовываем полоску под курсором
+    if(canRequestTime && cursorPos.y() <= TB_TIME_SLIDER_HEIGHT)
+    {
+        cursorX = cursorPos.x();
+        cursorHover = true;
+    }
+    else
+    {
+        cursorHover = false;
+    }
+    repaint();
 }
 
 void TimeBar::mousePressEvent(QMouseEvent *event)
 {
     QPoint cursorPos = event->pos();
-
-    //emit sendMessageToStatusBar("Clicked: ");
+    //Запрашиваем время по клику на полосе проигрывания
+    if(canRequestTime && cursorPos.y() <= TB_TIME_SLIDER_HEIGHT)
+    {
+        qint32 requestTime = firstVisibleTime + (cursorPos.x() / mDivWidth) * divValue;
+        emit setPlayTime(requestTime);
+        qDebug() << ("Requested Time: " + QString::number(requestTime));
+    }
 }
 
 void TimeBar::wheelEvent(QWheelEvent *event)
@@ -57,6 +75,12 @@ void TimeBar::wheelEvent(QWheelEvent *event)
         emit sendMessageToStatusBar("FirstVisibleTime: " + QString::number(firstVisibleTime));
     }
 
+    repaint();
+}
+
+void TimeBar::setFVT(const QDateTime &datetime)
+{
+    firstVisibleTime = datetime.toTime_t();
     repaint();
 }
 
@@ -234,7 +258,19 @@ void TimeBar::paintEvent(QPaintEvent *event)
     QRect source(0, 0, 0, 0);
     QPixmap pixmap(":/player/images/scroller");
 
-    painter.drawPixmap(target, pixmap, source);
+    //TODO::Отрисовка кирпича
+    //painter.drawPixmap(target, pixmap, source);
+
+    if(cursorHover)
+    {
+        qDebug() << "Hovering";
+        divPen.setWidth(10);
+        //painter.setPen(divPen);
+
+        painter.drawLine(
+                    QPoint(cursorX, 0),
+                    QPoint(cursorX, TB_TIME_SLIDER_HEIGHT));
+    }
 }
 
 void TimeBar::drawDivSign(QPainter &painter, const char* format)

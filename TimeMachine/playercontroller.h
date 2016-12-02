@@ -55,8 +55,8 @@ public slots:
     void attemptToPlayStream();
     void startToPlayRealTimeStream();
 
-    //Запрос пользователя на новый момент воспроизведения
-    void setPlayPosition(quint32 requestTime);
+    //Функции, связанные с таймбаром
+    void setPlayPosition(qint32 requestTime);
 
     //Слот таймера синхронизации интерфейса с воспроизведением
     void startPlayTimer(qint32 startTime);

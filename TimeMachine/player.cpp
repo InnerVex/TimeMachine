@@ -14,7 +14,7 @@ Player::Player(QWidget *parent) :
     ui->videoFrame->setPalette(Pal);
 
     //Создание элементов управления
-    timeBar = new TimeBar(ui->centralwidget);
+    timeBar = new TimeBar(ui->dateTimeEdit, ui->centralwidget);
     timeBar->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     ui->timeBarContainerWidget->layout()->addWidget(timeBar);
 }

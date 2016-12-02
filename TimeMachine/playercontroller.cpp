@@ -43,6 +43,10 @@ PlayerController::PlayerController(Player *_player, QObject *parent) :
     connect(player->timeBar, &TimeBar::sendMessageToStatusBar,
             player, &Player::showMessageInStatusBar);
 
+    connect(player->timeBar, &TimeBar::setPlayTime,
+            this, &PlayerController::setPlayPosition);
+    connect(player->ui->dateTimeEdit, &QDateTimeEdit::dateTimeChanged,
+            player->timeBar, &TimeBar::setFVT);
 
     mPlayTimer = new QTimer();
     connect(mPlayTimer, &QTimer::timeout,
@@ -74,10 +78,9 @@ void PlayerController::attemptToPlayStream()
     libvlc_media_player_play(mMediaPlayer);*/
 }
 
-void PlayerController::setPlayPosition(quint32 requestTime)
+void PlayerController::setPlayPosition(qint32 requestTime)
 {
-    //TODO::Отправка запроса на обновление стрима
-
+    emit requestToObtainSource(requestTime, 1);
 }
 
 void PlayerController::startPlayTimer(qint32 startTime)
