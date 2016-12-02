@@ -43,6 +43,10 @@ PlayerController::PlayerController(Player *_player, QObject *parent) :
     connect(player->timeBar, &TimeBar::sendMessageToStatusBar,
             player, &Player::showMessageInStatusBar);
 
+
+    mPlayTimer = new QTimer();
+    connect(mPlayTimer, &QTimer::timeout,
+            this, &PlayerController::playTimerShot);
 }
 
 
@@ -56,32 +60,10 @@ void PlayerController::handleSourceObtained()
     }
 }
 
-void PlayerController::startAttemptsToPlayStream()
-{
-    /*mAttemptTimer = new QTimer();
-    connect(mAttemptTimer, &QTimer::timeout, [=]()
-    {
-        if(libvlc_media_player_is_playing(mMediaPlayer) != 0)
-        {
-            //attemptToPlayStream();
-            player->showMessageInStatusBar("Stream started");
-            mAttemptTimer->stop();
-            isPlaying=true;
-            isIntendedToPlay = true;
-        }
-        else
-        {
-            attemptToPlayStream();
-        }
-    });
-
-    mAttemptTimer->start(3000);*/
-}
-
 void PlayerController::attemptToPlayStream()
 {
     //Объект медиаданных из источника
-    mMedia = libvlc_media_new_location(mVlcInstance, inputLocation.c_str());
+    /*mMedia = libvlc_media_new_location(mVlcInstance, inputLocation.c_str());
     libvlc_media_player_set_media (mMediaPlayer, mMedia);
 
     //Дескриптор окна
@@ -89,7 +71,7 @@ void PlayerController::attemptToPlayStream()
     libvlc_media_player_set_hwnd(mMediaPlayer, (void*)windid );
 
     //Старт проигрывания
-    libvlc_media_player_play(mMediaPlayer);
+    libvlc_media_player_play(mMediaPlayer);*/
 }
 
 void PlayerController::setPlayPosition(quint32 requestTime)
@@ -98,10 +80,17 @@ void PlayerController::setPlayPosition(quint32 requestTime)
 
 }
 
+void PlayerController::startPlayTimer(qint32 startTime)
+{
+    currentPlayTime = startTime;
+    mPlayTimer->start(1000);
+}
+
 void PlayerController::playTimerShot()
 {
+    currentPlayTime++;
+    qDebug() << currentPlayTime;
     //TODO::Синхронизация с интерфейсом
-
 }
 
 void PlayerController::playButtonClicked()
@@ -127,10 +116,9 @@ void PlayerController::playButtonClicked()
 void PlayerController::testInputButtonClicked()
 {
     quint32 requestedTime = player->ui->testTimeInput->dateTime().toTime_t();
-    //player->showMessageInStatusBar("RequestedTime: " + QString::number(requestedTime));
-
     emit requestToObtainSource(requestedTime, 1);
 }
+
 //Real Time Stream
 void PlayerController::playRealTimeButtonClicked()
 {

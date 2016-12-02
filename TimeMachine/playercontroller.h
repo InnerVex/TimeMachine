@@ -25,6 +25,7 @@ private:
     bool isIntendedToPlay = false;
     float playSpeed = 1;
     std::string inputLocation;
+    qint32 currentPlayTime;
 
     //Переменные libVLC
     libvlc_instance_t *mVlcInstance;
@@ -38,6 +39,7 @@ private:
 signals:
     //Запросить изменение параметров источника
     void requestToObtainSource(quint32 requestTime, float playSpeed);
+    void requestToRealTimeStream();
     void requestToStream();
     void requestToPauseStream();
     void requestStepForward(quint32 step);
@@ -50,7 +52,6 @@ public slots:
     void handleSourceObtained();
 
     //Начать воспроизведение из источника
-    void startAttemptsToPlayStream();
     void attemptToPlayStream();
     void startToPlayRealTimeStream();
 
@@ -58,6 +59,7 @@ public slots:
     void setPlayPosition(quint32 requestTime);
 
     //Слот таймера синхронизации интерфейса с воспроизведением
+    void startPlayTimer(qint32 startTime);
     void playTimerShot();
 
     //Слоты кнопок управления воспроизведением

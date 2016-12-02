@@ -183,7 +183,7 @@ void Slicer::makeMultipleSlices(const char* input, int number)
     for (long long int i=0;i<number;i++)
     {
         sprintf(output
-                ,"outputFromStream_%lld"
+                ,"example/outputFromStream_%lld"
                 ".ts"
                 ,i
                 );
