@@ -10,6 +10,7 @@
 
     int main(int argc, char *argv[])
     {
+
         {
 
             Slicer slicer;
@@ -18,6 +19,7 @@
             slicer.makeMultipleSlices(input, numberOfSlices);
 
         }
+
         {
         QDateTime SelectDateTime(QDate(2000,01,01),QTime(00,00,30));
         qint32 time = SelectDateTime.toTime_t();
