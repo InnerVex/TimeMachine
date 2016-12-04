@@ -40,10 +40,10 @@
         Player player;
         PlayerController *playerController = new PlayerController(&player);
         StreamController *streamController = new StreamController();
-        streamController->player = &player; //TODO::for test
+        streamController->player = &player; //TMP::Для прямого воспроизведения Дешинковщиком
         player.show();
 
-        //Сигналы от PlayerController к StreamController
+        //Сигналы от Проигрывателя и GUI к Дешинковщику
         QObject::connect(playerController, &PlayerController::requestToObtainSource,
                         streamController, &StreamController::requestedToObtainSource);
         QObject::connect(playerController, &PlayerController::requestToStream,
@@ -52,14 +52,22 @@
                         streamController, &StreamController::requestedToStreamRealTime);
         QObject::connect(playerController, &PlayerController::requestToPauseStream,
                         streamController, &StreamController::requestedToPauseStream);
+        QObject::connect(player.ui->buttonSpeedUp, &QPushButton::clicked,
+                        streamController, &StreamController::streamSpeedUp);
+        QObject::connect(player.ui->buttonSpeedDown, &QPushButton::clicked,
+                        streamController, &StreamController::streamSpeedDown);
 
-        //Сигналы от StreamController к PlayerController
+        //Сигналы от Дешинковщика к Проигрывателю и GUI
         QObject::connect(streamController, &StreamController::signalSourceObtained,
                         playerController, &PlayerController::handleSourceObtained);
         QObject::connect(streamController, &StreamController::signalStreamStarted,
                         playerController, &PlayerController::attemptToPlayStream);
         QObject::connect(streamController, &StreamController::signalTimerStart,
                         playerController, &PlayerController::startPlayTimer);
+        QObject::connect(streamController, &StreamController::signalUpdateRate,
+                        playerController, &PlayerController::updateRate);
+        QObject::connect(streamController, &StreamController::sendMessageToStatusBar,
+                        &player, &Player::showMessageInStatusBar);
 
         return a.exec();
     }

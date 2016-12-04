@@ -178,6 +178,7 @@ StreamController::StreamController(QObject *parent) : QObject(parent)
     attemptingToStartStream = false;
     streaming = false;
     imemStreamReady = false;
+    currentRate = 1;
 }
 
 void StreamController::requestedToObtainSource(quint32 _requestTime, float playSpeed)
@@ -253,4 +254,32 @@ void StreamController::requestedToPauseStream()
 {
     //TODO::Остановить стрим
 
+}
+
+void StreamController::streamSpeedUp()
+{
+    if(streaming && imemStreamReady)
+    {
+        if(currentRate < RATE_MAX)
+        {
+            currentRate *= RATE_MULTIPLY;
+            libvlc_media_player_set_rate(mMediaPlayer, currentRate);
+            emit signalUpdateRate(currentRate);
+            emit sendMessageToStatusBar("Current rate: " + QString::number(currentRate));
+        }
+    }
+}
+
+void StreamController::streamSpeedDown()
+{
+    if(streaming && imemStreamReady)
+    {
+        if(currentRate > RATE_MIN)
+        {
+            currentRate /= RATE_MULTIPLY;
+            libvlc_media_player_set_rate(mMediaPlayer, currentRate);
+            emit signalUpdateRate(currentRate);
+            emit sendMessageToStatusBar("Current rate: " + QString::number(currentRate));
+        }
+    }
 }

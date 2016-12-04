@@ -26,6 +26,7 @@ private:
     float playSpeed = 1;
     std::string inputLocation;
     qint32 currentPlayTime;
+    float currentRate;
 
     //Переменные libVLC
     libvlc_instance_t *mVlcInstance;
@@ -44,8 +45,6 @@ signals:
     void requestToPauseStream();
     void requestStepForward(quint32 step);
     void requestStepBack(quint32 step);
-    void requestSpeedUp(float currentPlaySpeed);
-    void requestSpeedDown(float currentPlaySpeed);
 
     void updateTimeBarScroller(qint32 playTime);
 
@@ -62,6 +61,8 @@ public slots:
 
     //Слот таймера синхронизации интерфейса с воспроизведением
     void startPlayTimer(qint32 startTime);
+    void stopPlayTimer();
+    void updateRate(float rate);
     void playTimerShot();
 
     //Слоты кнопок управления воспроизведением
@@ -70,6 +71,6 @@ public slots:
     void testInputButtonClicked();
     void stepForwardButtonClicked();
     void stepBackButtonClicked();
-    void speedUpButtonClicked();
-    void speedDownButtonClicked();
+
+
 };

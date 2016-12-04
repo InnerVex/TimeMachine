@@ -18,6 +18,8 @@ PlayerController::PlayerController(Player *_player, QObject *parent) :
 
     inputLocation = "rtsp://localhost:5544/";
 
+    currentRate = 1;
+
     //Коннекты элементов управления
     connect(player->ui->buttonPlay, &QPushButton::clicked,
             this, &PlayerController::playButtonClicked);
@@ -31,11 +33,7 @@ PlayerController::PlayerController(Player *_player, QObject *parent) :
     connect(player->ui->buttonStepForward, &QPushButton::clicked,
             this, &PlayerController::stepForwardButtonClicked);
 
-    connect(player->ui->buttonSpeedUp, &QPushButton::clicked,
-            this, &PlayerController::speedUpButtonClicked);
 
-    connect(player->ui->buttonSpeedDown, &QPushButton::clicked,
-            this, &PlayerController::speedDownButtonClicked);
 
     connect(player->ui->buttonRealTime, &QPushButton::clicked,
             this, &PlayerController::playRealTimeButtonClicked);
@@ -89,6 +87,17 @@ void PlayerController::startPlayTimer(qint32 startTime)
 {
     currentPlayTime = startTime;
     mPlayTimer->start(1000);
+}
+
+void PlayerController::stopPlayTimer()
+{
+
+}
+
+void PlayerController::updateRate(float rate)
+{
+    currentRate = rate;
+    mPlayTimer->setInterval(1000 / currentRate);
 }
 
 void PlayerController::playTimerShot()
@@ -153,14 +162,6 @@ void PlayerController::stepBackButtonClicked()
 
 }
 void PlayerController::stepForwardButtonClicked()
-{
-
-}
-void PlayerController::speedUpButtonClicked()
-{
-
-}
-void PlayerController::speedDownButtonClicked()
 {
 
 }

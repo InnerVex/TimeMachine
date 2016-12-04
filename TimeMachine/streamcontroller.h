@@ -13,10 +13,13 @@
 #include <playerdefinitions.h>
 
 
-#define VIDEO_PATCH_BYTES 128000
-#define VIDEO_PATCHES_TOTAL_BYTES 640000
-#define START_SIGNAL_DELAY_INITIAL 10000
-#define START_SIGNAL_DELAY 500
+#define VIDEO_PATCH_BYTES           128000
+#define VIDEO_PATCHES_TOTAL_BYTES   640000
+#define START_SIGNAL_DELAY          500
+
+#define RATE_MULTIPLY   2
+#define RATE_MAX        4
+#define RATE_MIN        0.25
 
 class StreamController;
 
@@ -54,6 +57,8 @@ public:
     float percentOffset;
     qint32 totalBytesBuffered;
 
+    float currentRate;
+
     Player *player;
 
 private:
@@ -78,6 +83,8 @@ signals:
     void signalSourceObtained();
     void signalStreamStarted();
     void signalTimerStart(qint32 startTime);
+    void signalUpdateRate(float rate);
+    void sendMessageToStatusBar(QString message);
 
 public slots:
     //Слот по сигналам от проигрывателя
@@ -85,5 +92,6 @@ public slots:
     void requestedToStream();
     void requestedToStreamRealTime();
     void requestedToPauseStream();
-
+    void streamSpeedUp();
+    void streamSpeedDown();
 };
