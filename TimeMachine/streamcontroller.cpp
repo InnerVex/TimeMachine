@@ -166,6 +166,8 @@ void StreamController::createImemInstance()
     {
         libvlc_media_add_option(mMedia, *option);
     }
+
+    imemStreamReady = true;
 }
 
 StreamController::StreamController(QObject *parent) : QObject(parent)
@@ -210,16 +212,11 @@ void StreamController::startWaitingForStreamStart()
 {
     //Дожидаемся начала стрима и отправляем сигнал проигрывателю
     mAttemptTimer = new QTimer();
-    signalledStartTimer = false;
     connect(mAttemptTimer, &QTimer::timeout, [=]()
     {
-        if(!signalledStartTimer)
-        {
-            emit signalTimerStart(requestTime);
-            signalledStartTimer = true;
-        }
         if(libvlc_media_player_is_playing(mMediaPlayer) != 0)
         {
+            emit signalTimerStart(requestTime);
             emit signalStreamStarted();
             attemptingToStartStream = false;
         }
@@ -230,15 +227,7 @@ void StreamController::startWaitingForStreamStart()
     });
     attemptingToStartStream = true;
 
-    //TODO::Для видео с большим расстоянием между айфреймами
-    int wait = START_SIGNAL_DELAY;
-    if(!imemStreamReady)
-    {
-        imemStreamReady = true;
-        wait = START_SIGNAL_DELAY_INITIAL;
-    }
-
-    mAttemptTimer->start(wait);
+    mAttemptTimer->start(START_SIGNAL_DELAY);
 }
 
 void StreamController::requestedToStream()
@@ -251,6 +240,8 @@ void StreamController::requestedToStream()
 void StreamController::requestedToStreamRealTime()
 {
     //TODO::Сюда добавить код создания инстанса LibVLC
+    imemStreamReady = false;
+
     QString source = "rtsp://ewns-hls-b-stream.hexaglobe.net/rtpeuronewslive/en_vidan750_rtp.sdp";
     mMedia = libvlc_media_new_location(mVlcInstance, currentFilename.toStdString().c_str());
     libvlc_media_player_set_media (mMediaPlayer, mMedia);

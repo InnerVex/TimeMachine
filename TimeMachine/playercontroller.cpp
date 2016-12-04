@@ -47,6 +47,8 @@ PlayerController::PlayerController(Player *_player, QObject *parent) :
             this, &PlayerController::setPlayPosition);
     connect(player->ui->dateTimeEdit, &QDateTimeEdit::dateTimeChanged,
             player->timeBar, &TimeBar::setFVT);
+    connect(this, &PlayerController::updateTimeBarScroller,
+            player->timeBar, &TimeBar::setSliderPosition);
 
     mPlayTimer = new QTimer();
     connect(mPlayTimer, &QTimer::timeout,
@@ -93,7 +95,7 @@ void PlayerController::playTimerShot()
 {
     currentPlayTime++;
     qDebug() << currentPlayTime;
-    //TODO::Синхронизация с интерфейсом
+    emit updateTimeBarScroller(currentPlayTime);
 }
 
 void PlayerController::playButtonClicked()
@@ -115,7 +117,7 @@ void PlayerController::playButtonClicked()
     attemptToPlayStream();
 }
 
-//TOTALLY TEST CODE
+//Перемотка при помощи тестовых элементов управления
 void PlayerController::testInputButtonClicked()
 {
     quint32 requestedTime = player->ui->testTimeInput->dateTime().toTime_t();

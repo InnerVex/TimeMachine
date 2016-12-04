@@ -1,4 +1,4 @@
-#pragma once
+ #pragma once
 
 #include <timebarconstants.h>
 
@@ -33,26 +33,32 @@ private:
     QWidget *mainWindow;
 
     int cursorX;
+    qint32 playTime;
     bool cursorHover;
+    bool drawSlider;
+    QPoint tooltipPoint;
 
     //Параметры шкалы
     int widgetWidth;
     int scale = 0;
     int divValue;
-    quint32 firstVisibleTime;
+    qint32 firstVisibleTime;
+    qint32 lastVisibleTime;
+    qint32 hoverTime;
     int minDivSignPeriod;
 
     //Параметры деления шкалы
     int divXPos;
     int divHeight;
     bool divSigned;
-    quint32 unixtime;
-    struct tm *tm;
+    qint32 unixtime;
+    QDateTime tm;
     double mDivWidth;
 
-    //Функция отрисовки подписи под шкалой
-    void drawDivSign(QPainter &painter, const char* format);
+    void drawDivSign(QPainter &painter, QString format);
+    void updateFVT();
 
 public slots:
-    void setFVT(const QDateTime & datetime);
+    void setFVT(const QDateTime &datetime);
+    void setSliderPosition(const qint32 playTime);
 };

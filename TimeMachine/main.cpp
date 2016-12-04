@@ -10,7 +10,7 @@
 
     int main(int argc, char *argv[])
     {
-
+        /*
         {
 
             Slicer slicer;
@@ -34,32 +34,32 @@
                   << " NextFile:"    << Select::selectNextFile(Select::selectFile(time)).toStdString()
                                      << std::endl;
         }
+        */
 
+        QApplication a(argc, argv);
+        Player player;
+        PlayerController *playerController = new PlayerController(&player);
+        StreamController *streamController = new StreamController();
+        streamController->player = &player; //TODO::for test
+        player.show();
 
-    QApplication a(argc, argv);
-    Player player;
-    PlayerController *playerController = new PlayerController(&player);
-    StreamController *streamController = new StreamController();
-    streamController->player = &player; //TODO::for test
-    player.show();
+        //Сигналы от PlayerController к StreamController
+        QObject::connect(playerController, &PlayerController::requestToObtainSource,
+                        streamController, &StreamController::requestedToObtainSource);
+        QObject::connect(playerController, &PlayerController::requestToStream,
+                        streamController, &StreamController::requestedToStream);
+        QObject::connect(playerController, &PlayerController::requestToRealTimeStream,
+                        streamController, &StreamController::requestedToStreamRealTime);
+        QObject::connect(playerController, &PlayerController::requestToPauseStream,
+                        streamController, &StreamController::requestedToPauseStream);
 
-    //Сигналы от PlayerController к StreamController
-    QObject::connect(playerController, &PlayerController::requestToObtainSource,
-                    streamController, &StreamController::requestedToObtainSource);
-    QObject::connect(playerController, &PlayerController::requestToStream,
-                    streamController, &StreamController::requestedToStream);
-    QObject::connect(playerController, &PlayerController::requestToRealTimeStream,
-                    streamController, &StreamController::requestedToStreamRealTime);
-    QObject::connect(playerController, &PlayerController::requestToPauseStream,
-                    streamController, &StreamController::requestedToPauseStream);
-
-    //Сигналы от StreamController к PlayerController
-    QObject::connect(streamController, &StreamController::signalSourceObtained,
-                    playerController, &PlayerController::handleSourceObtained);
-    QObject::connect(streamController, &StreamController::signalStreamStarted,
-                    playerController, &PlayerController::attemptToPlayStream);
-    QObject::connect(streamController, &StreamController::signalTimerStart,
-                    playerController, &PlayerController::startPlayTimer);
+        //Сигналы от StreamController к PlayerController
+        QObject::connect(streamController, &StreamController::signalSourceObtained,
+                        playerController, &PlayerController::handleSourceObtained);
+        QObject::connect(streamController, &StreamController::signalStreamStarted,
+                        playerController, &PlayerController::attemptToPlayStream);
+        QObject::connect(streamController, &StreamController::signalTimerStart,
+                        playerController, &PlayerController::startPlayTimer);
 
         return a.exec();
     }

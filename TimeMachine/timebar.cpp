@@ -14,6 +14,7 @@ TimeBar::TimeBar(QDateTimeEdit *_fvtEdit, QWidget *parent) :
     firstVisibleTime = fvtEdit->dateTime().toTime_t();
     canRequestTime = true;
     cursorHover = false;
+    drawSlider = false;
 }
 
 QSize TimeBar::sizeHint() const
@@ -30,7 +31,7 @@ void TimeBar::mouseMoveEvent(QMouseEvent *event)
 {
     QPoint cursorPos = event->pos();
     //Отрисовываем полоску под курсором
-    if(canRequestTime && cursorPos.y() <= TB_TIME_SLIDER_HEIGHT)
+    if(canRequestTime && cursorPos.y() > 0 && cursorPos.y() <= TB_TIME_SLIDER_HEIGHT)
     {
         cursorX = cursorPos.x();
         cursorHover = true;
@@ -39,6 +40,21 @@ void TimeBar::mouseMoveEvent(QMouseEvent *event)
     {
         cursorHover = false;
     }
+
+    if(cursorPos.y() > 0 && cursorPos.y() <= TB_TIME_BAR_HEIGHT)
+    {
+        hoverTime = firstVisibleTime + ((float)cursorPos.x() / mDivWidth) * divValue;
+        tooltipPoint = QPoint(event->globalPos().x() - TB_TOOLTIP_OFFSET_X,
+                              QWidget::mapToGlobal(this->pos()).y() - TB_TOOLTIP_OFFSET_Y);
+        QToolTip::showText(tooltipPoint,
+                               QDateTime::fromTime_t(hoverTime).toString("dd'.'MM'.'yyyy' 'hh':'mm':'ss"),
+                               this, rect() );
+    }
+    else
+    {
+        QToolTip::hideText();
+    }
+
     repaint();
 }
 
@@ -48,9 +64,8 @@ void TimeBar::mousePressEvent(QMouseEvent *event)
     //Запрашиваем время по клику на полосе проигрывания
     if(canRequestTime && cursorPos.y() <= TB_TIME_SLIDER_HEIGHT)
     {
-        qint32 requestTime = firstVisibleTime + (cursorPos.x() / mDivWidth) * divValue;
-        emit setPlayTime(requestTime);
-        qDebug() << ("Requested Time: " + QString::number(requestTime));
+        hoverTime = firstVisibleTime + ((float)cursorPos.x() / mDivWidth) * divValue;
+        emit setPlayTime(hoverTime);
     }
 }
 
@@ -75,12 +90,27 @@ void TimeBar::wheelEvent(QWheelEvent *event)
         emit sendMessageToStatusBar("FirstVisibleTime: " + QString::number(firstVisibleTime));
     }
 
+    updateFVT();
     repaint();
 }
 
 void TimeBar::setFVT(const QDateTime &datetime)
 {
     firstVisibleTime = datetime.toTime_t();
+    repaint();
+}
+
+void TimeBar::setSliderPosition(const qint32 _playTime)
+{
+    if(_playTime == -1)
+    {
+        drawSlider = false;
+    }
+    else
+    {
+        playTime = _playTime;
+        drawSlider = true;
+    }
     repaint();
 }
 
@@ -96,6 +126,7 @@ void TimeBar::paintEvent(QPaintEvent *event)
     {
         divValue = TB_DIV_VALUE_S1;
         minDivSignPeriod = TB_SCALE_S1_MIN_DIV_SIGN;
+
     }
     else if (scale <= TB_SCALE_S10)
     {
@@ -143,6 +174,7 @@ void TimeBar::paintEvent(QPaintEvent *event)
 
     //Крайнее левое положение должно быть кратно цене деления
     firstVisibleTime -= firstVisibleTime % divValue;
+    updateFVT();
 
     //Отрисовываем деления
     QPen divPen(Qt::black);
@@ -156,34 +188,24 @@ void TimeBar::paintEvent(QPaintEvent *event)
 
         //Соответствующее делению время
         unixtime = firstVisibleTime + divValue * idiv;;
-        time_t t = unixtime;
-        tm = localtime(&t);
 
         //Отрисовка подписи под делением
         painter.setFont(QFont("Sans-serif", 10));
         divSigned = false;
 
-        if (tm->tm_sec == 0)
+        tm = QDateTime::fromTime_t(unixtime);
+        if (tm.time().second() == 0)
         {
-            if (tm->tm_min == 0)
+            if (tm.time().minute() == 0)
             {
-                if (tm->tm_hour == 0)
+                if (tm.time().hour() == 0)
                 {
-                    if (tm->tm_mday == 1)
+                    if (tm.date().day() == 1)
                     {
-                        if (tm->tm_mon == 0)
-                        {
-                            //Деление соответствует началу года
-                            divHeight = TB_DIVISION_HEIGHT_YEAR;
-                            drawDivSign(painter, "%Y г.");
-                        }
-                        else
-                        {
-                            //Деление соответствует началу месяца
-                            divPen.setWidth(2);
-                            divHeight = TB_DIVISION_HEIGHT_BIG;
-                            drawDivSign(painter, "%m.%Y");
-                        }
+                        //Деление соответствует началу месяца
+                        divPen.setWidth(2);
+                        divHeight = TB_DIVISION_HEIGHT_BIG;
+                        drawDivSign(painter, "MM'.'yyyy");
                     }
                     else
                     {
@@ -191,7 +213,7 @@ void TimeBar::paintEvent(QPaintEvent *event)
                         divPen.setWidth(2);
                         divHeight = TB_DIVISION_HEIGHT_BIG;
                         if(minDivSignPeriod <= SECONDS_IN_DAY)
-                            drawDivSign(painter, "%d.%m.%Y");
+                            drawDivSign(painter, "dd'.'MM'.'yyyy");
                     }
                 }
                 else
@@ -200,7 +222,7 @@ void TimeBar::paintEvent(QPaintEvent *event)
                     divPen.setWidth(2);
                     divHeight = TB_DIVISION_HEIGHT_MEDIUM;
                     if(minDivSignPeriod <= SECONDS_IN_HOUR)
-                        drawDivSign(painter, "%H:%M:%S");
+                        drawDivSign(painter, "hh':'mm':'ss");
                 }
             }
             else
@@ -208,7 +230,7 @@ void TimeBar::paintEvent(QPaintEvent *event)
                 //Деление соответствует началу минуты
                 divHeight = TB_DIVISION_HEIGHT_MEDIUM;
                 if(minDivSignPeriod <= SECONDS_IN_MINUTE)
-                    drawDivSign(painter, "%H:%M:%S");
+                    drawDivSign(painter, "hh':'mm':'ss");
             }
         }
 
@@ -221,24 +243,24 @@ void TimeBar::paintEvent(QPaintEvent *event)
                 //Кратно дням
                 divPen.setWidth(2);
                 divHeight = TB_DIVISION_HEIGHT_BIG;
-                drawDivSign(painter, "%d.%m.%Y");
+                drawDivSign(painter, "dd'.'MM'.'yyyy");
             }
             else if (minDivSignPeriod >= 3600)
             {
                 //Кратно часам
                 divPen.setWidth(2);
                 divHeight = TB_DIVISION_HEIGHT_MEDIUM;
-                drawDivSign(painter, "%H:%M:%S");
+                drawDivSign(painter, "hh':'mm':'ss");
             }
             else if (minDivSignPeriod >= 60)
             {
                 //Кратно минутам
                 divHeight = TB_DIVISION_HEIGHT_MEDIUM;
-                drawDivSign(painter, "%H:%M:%S");
+                drawDivSign(painter, "hh':'mm':'ss");
             }
             else
             {
-                drawDivSign(painter, "%H:%M:%S");
+                drawDivSign(painter, "hh':'mm':'ss");
             }
         }
 
@@ -254,35 +276,45 @@ void TimeBar::paintEvent(QPaintEvent *event)
     painter.setBrush(QBrush(Qt::lightGray));
     painter.drawRect(QRect(0, 0, widgetWidth - 1, TB_TIME_SLIDER_HEIGHT));
 
-    QRect target(50, 0, TB_TIME_SLIDER_WIDTH, TB_TIME_SLIDER_HEIGHT);
-    QRect source(0, 0, 0, 0);
-    QPixmap pixmap(":/player/images/scroller");
-
-    //TODO::Отрисовка кирпича
-    //painter.drawPixmap(target, pixmap, source);
+    lastVisibleTime = firstVisibleTime + divAmount * divValue;
 
     if(cursorHover)
     {
-        qDebug() << "Hovering";
         divPen.setWidth(10);
-        //painter.setPen(divPen);
-
         painter.drawLine(
                     QPoint(cursorX, 0),
                     QPoint(cursorX, TB_TIME_SLIDER_HEIGHT));
     }
+
+    if(drawSlider)
+    {
+
+        if(playTime >= firstVisibleTime && playTime <= lastVisibleTime)
+        {
+            int xSPos = ((float)(playTime - firstVisibleTime) / (lastVisibleTime - firstVisibleTime)) * widgetWidth;
+            QRect target(xSPos, 0, TB_TIME_SLIDER_WIDTH, TB_TIME_SLIDER_HEIGHT);
+            QRect source(0, 0, 0, 0);
+            QPixmap pixmap(":/player/images/scroller");
+            painter.drawPixmap(target, pixmap, source);
+        }
+    }
 }
 
-void TimeBar::drawDivSign(QPainter &painter, const char* format)
+void TimeBar::drawDivSign(QPainter &painter, QString format)
 {
-    char sign[20];
-    strftime(sign, sizeof(sign), format, tm);
     painter.drawText(
                 divXPos - 100,
                 TB_TIME_SLIDER_HEIGHT + divHeight,
                 200,
                 100,
                 Qt::AlignHCenter,
-                sign);
+                tm.toString(format));
     divSigned = true;
+}
+
+void TimeBar::updateFVT()
+{
+    fvtEdit->blockSignals(true);
+    fvtEdit->setDateTime(QDateTime::fromTime_t(firstVisibleTime));
+    fvtEdit->blockSignals(false);
 }

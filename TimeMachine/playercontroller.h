@@ -47,6 +47,8 @@ signals:
     void requestSpeedUp(float currentPlaySpeed);
     void requestSpeedDown(float currentPlaySpeed);
 
+    void updateTimeBarScroller(qint32 playTime);
+
 public slots:
     //Слот по сигналу от контроллера к продолжению воспроизведения
     void handleSourceObtained();

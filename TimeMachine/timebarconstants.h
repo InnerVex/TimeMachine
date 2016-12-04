@@ -11,13 +11,14 @@
 //Размеры частей виджета
 #define TB_AVAILABILITY_AREA_HEIGHT 6
 #define TB_TIME_SCALE_AREA_HEIGHT   30
-#define TB_TIME_SLIDER_HEIGHT       9
-#define TB_TIME_SLIDER_WIDTH        24
+#define TB_TIME_SLIDER_HEIGHT       10
+#define TB_TIME_SLIDER_WIDTH        10
 #define TB_TIME_BAR_HEIGHT          50
+#define TB_TOOLTIP_OFFSET_Y         40
+#define TB_TOOLTIP_OFFSET_X         60
 
 //Размеры делений
 #define TB_DIVISION_MIN_WIDTH       6
-#define TB_DIVISION_HEIGHT_YEAR     37
 #define TB_DIVISION_HEIGHT_BIG      25
 #define TB_DIVISION_HEIGHT_MEDIUM   13
 #define TB_DIVISION_HEIGHT_MINOR    8
