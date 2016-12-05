@@ -7,6 +7,43 @@
 //#include <QtTest/QTest>
 #include <chrono>
 #include <thread>
+#include <pipe_server.h>
+#include <socket_server.h>
+#include <QThread>
+
+void Slicer::makeSlicesUsingSocket(const char *input, const char *output_location, int number)
+{
+    /*
+    //Socket_Server server;
+    //QThread serv(Socket_Server::start_Server);
+    std::thread serv(Socket_Server::start_Server);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    std::thread writer(Socket_Server::write);
+    //std::thread reader(Socket_Server::read);
+
+    writer.join();
+    //reader.join();
+    serv.join();
+    */
+
+    Server server;
+    server.show();
+    //qsrand(QTime(0,0,0).secsTo(QTime::currentTime()));
+}
+
+void Slicer::makeSlicesUsingPipe(const char *input, const char *output_location, int number)
+{
+    Pipe_Server pipe;
+    std::thread server(Pipe_Server::createPipe);
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    //std::thread writer(Pipe_Server::writeToPipe);
+    //std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    std::thread reader(Pipe_Server::readFromPipe);
+    server.join();
+    //writer.join();
+    reader.join();
+    //pipe.createPipe();
+}
 
 void Slicer::convertToTS(const char* input, const char* output)
 {

@@ -8,6 +8,9 @@ class Slicer
     libvlc_media_t *m;
 public:
     //Slicer();
+
+    void makeSlicesUsingPipe(const char* input, const char* output_location, int number);
+
     void convertToTS(const char* input, const char* output);
     void splitTS(const char* input); //depricated
     void parseTS(const char* input);
@@ -18,6 +21,7 @@ public:
     void makeSliceFromStreamDirty(const char* input, const char* output, int duration);
     void makeMultipleSlices(const char* input, const char* output_location, int number);
     void testFunc();
+    void makeSlicesUsingSocket(const char *input, const char *output_location, int number);
 };
 
 
