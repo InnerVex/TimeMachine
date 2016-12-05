@@ -11,6 +11,8 @@
 #include <QDataStream>
 #include <QFile>
 #include <QtWidgets>
+#include "slicer.h"
+#include "string.h"
 
 /*void socket_server::incomingConnection(int socketDescriptor) {
     QLocalServer::incomingConnection(socketDescriptor);
@@ -252,9 +254,10 @@ void Server::sendFortune()
 {
     QByteArray block;
     QDataStream out(&block, QIODevice::WriteOnly);
-    out.setVersion(QDataStream::Qt_4_0);
+    //out.setVersion(QDataStream::Qt_4_0);
     out << (quint16)0;
-    out << fortunes.at(qrand() % fortunes.size());
+    //out << fortunes.at(qrand() % fortunes.size());
+    out << tr("Hello socket!");
     out.device()->seek(0);
     out << (quint16)(block.size() - sizeof(quint16));
 
@@ -265,4 +268,147 @@ void Server::sendFortune()
     clientConnection->write(block);
     clientConnection->flush();
     clientConnection->disconnectFromServer();
+}
+
+New_Socket_Server::New_Socket_Server()
+{
+    server = new QLocalServer(this);
+    if (!server->listen(socket_name))
+    {
+        qDebug()<<"Server is not started";
+    }
+    else
+    {
+        qDebug()<<"Server started";
+    }
+
+    server->connect(server, SIGNAL(newConnection()), this, SLOT(sendMsg()));
+    //server->connect(server, SIGNAL(newConnection()), this, SLOT(recieveMsg()));
+    //connect()
+
+    //qDebug()<<sendMsg();
+    //system("pause");
+
+}
+void New_Socket_Server::test()
+{
+    Slicer slicer;
+    const char* input ="rtsp://ewns-hls-b-stream.hexaglobe.net/rtpeuronewslive/en_vidan750_rtp.sdp";
+    std::string str = server->fullServerName().toStdString();
+    char *param2;
+    param2 = new char[str.length()];
+    strcpy(param2,str.data());
+    qDebug()<<param2;
+    slicer.makeSliceFromStreamDirty(input,param2,10);
+}
+
+int New_Socket_Server::sendMsg()
+{
+    //QLocalSocket *clientConnection = server->nextPendingConnection();
+
+    /*Slicer slicer;
+    const char* input ="rtsp://ewns-hls-b-stream.hexaglobe.net/rtpeuronewslive/en_vidan750_rtp.sdp";
+    std::string str = server->fullServerName().toStdString();
+    char *param2;
+    param2 = new char[str.length()];
+    strcpy(param2,str.data());
+    slicer.makeSliceFromStreamDirty(input,param2,10);*/
+
+
+
+    /*qDebug()<<"Msg sender started";
+    QByteArray block;
+    QDataStream out(&block, QIODevice::WriteOnly);
+    //out.setVersion(QDataStream::Qt_4_0);
+    out << (quint16)0;
+    //out << fortunes.at(qrand() % fortunes.size());
+    out << "Hello socket!";
+    out.device()->seek(0);
+    out << (quint16)(block.size() - sizeof(quint16));
+
+
+    QLocalSocket *clientConnection = server->nextPendingConnection();
+    clientConnection->connect(clientConnection, SIGNAL(disconnected()), clientConnection, SLOT(deleteLater()));
+    //QLocalSocket *clientConnection = new QLocalSocket();
+    //qDebug()<<clientConnection->socketDescriptor();
+    //clientConnection->connectToServer(socket_name);
+    //qDebug()<<clientConnection->socketDescriptor();
+    //clientConnection->connectToServer();
+    //clientConnection->connect(clientConnection, SIGNAL(disconnected()),clientConnection, SLOT(deleteLater()));
+    //qDebug()<<clientConnection->fullServerName();
+    /*if(!clientConnection->waitForConnected())
+    {
+        qDebug()<<"Client connection problem";
+        return 1;
+    }
+    else
+    {
+        qDebug()<<"Client connected";
+    }*/
+
+    /*qDebug()<<clientConnection->write(block);
+    //qDebug()<<clientConnection->bytesAvailable();
+    clientConnection->flush();
+    //qDebug()<<clientConnection->bytesAvailable();
+    clientConnection->disconnectFromServer();
+    //qDebug()<<clientConnection->bytesAvailable();
+
+    /*if(!clientConnection->waitForDisconnected())
+    {
+        qDebug()<<"Cant disconnect";
+        clientConnection->commitTransaction();
+        clientConnection->close();
+    }
+
+    qDebug()<<clientConnection->socketDescriptor();
+    qDebug()<<clientConnection->serverName();
+
+
+    */
+    return 0;
+
+}
+
+int New_Socket_Server::recieveMsg()
+{
+    qDebug()<<"Reciever started";
+    QLocalSocket *clientConnection = new QLocalSocket();
+
+    clientConnection->connectToServer(socket_name);
+
+    if(!clientConnection->waitForConnected())
+    {
+        qDebug()<<"Reciever connection problem";
+        return 1;
+    }
+    else
+    {
+        qDebug()<<"Reciever connected";
+    }
+
+    //qDebug()<<"After wFRR"<<clientConnection->waitForReadyRead();
+
+    QDataStream in(clientConnection);
+    in.setVersion(QDataStream::Qt_4_0);
+
+    blockSize = 0;
+    qDebug()<<clientConnection->bytesAvailable();
+    if (blockSize == 0) {
+        if (clientConnection->bytesAvailable() < (int)sizeof(quint16))
+            return 3;
+        in >> blockSize;
+
+    }
+
+    qDebug()<<blockSize;
+
+    if (in.atEnd())
+        return 2;
+
+    QString nextFortune;
+    in >> nextFortune;
+
+    qDebug()<<nextFortune;
+    return 0;
+
 }

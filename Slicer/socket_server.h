@@ -1,8 +1,10 @@
 #pragma once
 #include <QtNetwork/qlocalserver.h>
 #include <QtNetwork/QLocalSocket>
+#include <QtWidgets/QDialog>
 class Socket_Server
 {
+
     //QLocalServer *server;
     //QLocalSocket *writer;
 
@@ -15,7 +17,25 @@ public:
 
 };
 
-#include <QtWidgets/QDialog>
+class New_Socket_Server : public QObject
+{
+    Q_OBJECT
+    QLocalServer *server;
+    QLocalSocket *socket;
+    QString currentFortune;
+    quint16 blockSize;
+    //QLocalSocket *writer;
+public:
+    New_Socket_Server();
+    void test();
+    //int sendMsg();
+//private slots:
+    int recieveMsg();
+private slots:
+    int sendMsg();
+};
+
+
 
 class QLabel;
 class QPushButton;

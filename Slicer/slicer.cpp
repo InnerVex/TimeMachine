@@ -2,7 +2,7 @@
 #include <QDebug>
 #include <string>
 #include <string.h>
-#include <include/vlc/vlc.h>
+#include <vlc/vlc.h>
 #include <mutex>
 //#include <QtTest/QTest>
 #include <chrono>
@@ -269,14 +269,15 @@ void Slicer::makeMultipleSlices(const char* input, const char* output_location, 
 
 void Slicer::makeSliceFromStreamDirty(const char *input, const char *output, int duration)
 {
-    //const char* sout="--sout=#standard{access=file,mux=ts,dst=\"";
-    const char* sout="--sout=#file{mux=ps,dst=";
-    const char* ending="}";
+    const char* sout="--sout=#standard{access=file,mux=ts,dst=\"\\";
+    //const char* sout="--sout=#file{mux=ps,dst=";
+    const char* ending="\"}";
     char *param;
     param = new char[strlen(sout)+strlen(output)+strlen(ending)];
     strcat(strcpy(param,sout),output);
     strcat(param,ending);
 
+    qDebug()<<param;
     std::string stop_time = "--run-time=";
     stop_time+=std::to_string(duration);
     char *param2;

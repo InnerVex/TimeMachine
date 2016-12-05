@@ -9,17 +9,13 @@ CONFIG -= app_bundle
 
 TEMPLATE = app
 
-SOURCES += main.cpp \
+SOURCES += main_old.cpp \
     slicer.cpp \
     parser.cpp \
     pipe_server.cpp \
     socket_server.cpp \
-    client.cpp
+    client.cpp \
 
-unix|win32: LIBS += -L$$PWD/../../Libraries/libvlc/ -llibvlc
-
-INCLUDEPATH += $$PWD/../../Libraries/libvlc
-DEPENDPATH += $$PWD/../../Libraries/libvlc
 
 HEADERS += \
     slicer.h \
@@ -37,3 +33,8 @@ QT           += network widgets
 # install
 target.path = $$[QT_INSTALL_EXAMPLES]/corelib/ipc/localfortuneserver
 INSTALLS += target
+
+unix|win32: LIBS += -L$$PWD/../../../Libraries/libvlc/ -llibvlc
+
+INCLUDEPATH += $$PWD/../../../Libraries/libvlc/include
+DEPENDPATH += $$PWD/../../../Libraries/libvlc/include

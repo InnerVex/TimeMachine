@@ -6,11 +6,24 @@
 #include <QtCore>
 #include "socket_server.h"
 #include "client.h"
+#include <QThread>
+#include <thread>
 int main(int argc, char *argv[])
 {
-    //QCoreApplication a(argc, argv);
+    QCoreApplication a(argc, argv);
 
-    QApplication app(argc, argv);
+    New_Socket_Server server;
+    //server.sendMsg();
+    //qDebug()<<server.recieveMsg();
+    My_Client client;
+    server.test();
+    //QThread for_vlc;
+    //std::thread for_vlc(New_Socket_Server::test,server);
+    qDebug()<<"test";
+    //for_vlc.join();
+    //qDebug()<<server.recieveMsg();
+
+    /*QApplication app(argc, argv);
     Server server;
     server.show();
     qsrand(QTime(0,0,0).secsTo(QTime::currentTime()));
@@ -21,7 +34,7 @@ int main(int argc, char *argv[])
     return a.exec();
 
 
-    return app.exec();
+    return app.exec();*/
 
     Slicer slicer;    
     const char* input ="rtsp://ewns-hls-b-stream.hexaglobe.net/rtpeuronewslive/en_vidan750_rtp.sdp"; //"http://ar.solumedia.com.ar:1935/cool/hd/playlist.m3u8"; //"D:\\Work\\TD\\test\\Projects\\TestLibVLC\\video\\output4.ts";
@@ -49,5 +62,5 @@ int main(int argc, char *argv[])
 
     qDebug()<<"End of main";
 
-    //return a.exec();
+    return a.exec();
 }

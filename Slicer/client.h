@@ -38,4 +38,18 @@ private:
     quint16 blockSize;
 };
 
+class My_Client : public QObject
+{
+    Q_OBJECT
+    QLocalSocket *socket;
+    QString currentFortune;
+    quint16 blockSize;
+public:
+    My_Client();
+private slots:
+    void recieve();
+
+
+};
+
 #endif // CLIENT_H

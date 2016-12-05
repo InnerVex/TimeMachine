@@ -1,5 +1,5 @@
 #pragma once
-#include <include/vlc/vlc.h>
+#include <vlc/vlc.h>
 
 class Slicer
 {
