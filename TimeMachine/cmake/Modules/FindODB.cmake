@@ -47,6 +47,7 @@ foreach(_odb_h ${ARGN})
     --schema-name ${SCHEMA_NAME}
     --generate-session
     -x -std=c++11
+    -x -fPIC
     ${_abs_odb_h}
     DEPENDS ${_abs_odb_h}
     COMMENT "Running C++ ODB compiler on ${_odb_h}")

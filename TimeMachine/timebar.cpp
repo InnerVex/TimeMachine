@@ -14,6 +14,7 @@ TimeBar::TimeBar(QDateTimeEdit *_fvtEdit, QWidget *parent) :
     setMouseTracking(true);
 
     firstVisibleTime = fvtEdit->dateTime().toTime_t();
+    minimumAvailableTime = 946659600;
     canRequestTime = true;
     cursorHover = false;
     drawSlider = false;
@@ -83,12 +84,14 @@ void TimeBar::wheelEvent(QWheelEvent *event)
     {
         firstVisibleTime -= (event->delta()/120) * divValue * 10;
         firstVisibleTime = (firstVisibleTime < 0) ? 0 : firstVisibleTime;
+        if(firstVisibleTime < minimumAvailableTime) firstVisibleTime = minimumAvailableTime;
         emit sendMessageToStatusBar("FirstVisibleTime: " + QString::number(firstVisibleTime));
     }
     else
     {
         firstVisibleTime -= (event->delta()/120) * divValue;
         firstVisibleTime = (firstVisibleTime < 0) ? 0 : firstVisibleTime;
+        if(firstVisibleTime < minimumAvailableTime) firstVisibleTime = minimumAvailableTime;
         emit sendMessageToStatusBar("FirstVisibleTime: " + QString::number(firstVisibleTime));
     }
 
@@ -176,6 +179,10 @@ void TimeBar::paintEvent(QPaintEvent *event)
 
     //Крайнее левое положение должно быть кратно цене деления
     firstVisibleTime -= firstVisibleTime % divValue;
+    while(firstVisibleTime < minimumAvailableTime)
+    {
+        firstVisibleTime += divValue;
+    }
     updateFVT();
 
     //Отрисовываем деления
@@ -278,29 +285,13 @@ void TimeBar::paintEvent(QPaintEvent *event)
     painter.setBrush(QBrush(Qt::lightGray));
     painter.drawRect(QRect(0, 0, widgetWidth - 1, TB_TIME_SLIDER_HEIGHT));
 
-    lastVisibleTime = firstVisibleTime + divAmount * divValue;
-
-    //Отрисовка областей доступности
-    updateAvailability();
-    for (int iarea = 0; iarea < availabilityVector.size(); iarea++)
-    {
-        int left = widgetWidth *
-                (float)(availabilityVector[iarea].first - firstVisibleTime) / (lastVisibleTime - firstVisibleTime);
-        int right = widgetWidth *
-                (float)(availabilityVector[iarea].second - firstVisibleTime) / (lastVisibleTime - firstVisibleTime);
-
-        divPen.setWidth(10);
-        painter.setPen(divPen);
-        painter.drawLine(
-                    QPoint(left, 20),
-                    QPoint(right, 20));
-    }
-
+    lastVisibleTime = firstVisibleTime + ((float)widgetWidth / mDivWidth) * divValue;
 
     //Отрисовка подсказывающей полосочки под курсором
     if(cursorHover)
     {
-        divPen.setWidth(3);
+        divPen.setStyle(Qt::SolidLine);
+        divPen.setWidth(2);
         painter.setPen(divPen);
         painter.drawLine(
                     QPoint(cursorX, 0),
@@ -319,6 +310,44 @@ void TimeBar::paintEvent(QPaintEvent *event)
             painter.drawPixmap(target, pixmap, source);
         }
     }
+
+    //Отрисовка областей доступности
+    updateAvailability();
+    int prevRight = 0;
+    for (int iarea = 0; iarea < availabilityVector.size(); iarea++)
+    {
+        int left = widgetWidth *
+                (float)(availabilityVector[iarea].first - firstVisibleTime) / (lastVisibleTime - firstVisibleTime);
+        int right = widgetWidth *
+                (float)(availabilityVector[iarea].second - firstVisibleTime) / (lastVisibleTime - firstVisibleTime);
+
+        divPen.setStyle(Qt::NoPen);
+        painter.setPen(divPen);
+        painter.setBrush(QBrush(Qt::green));
+        painter.drawRect(QRect(left, TB_TIME_SLIDER_HEIGHT, (right - left), TB_AVAILABILITY_AREA_HEIGHT));
+
+        if(prevRight != left)
+        {
+            painter.setBrush(QBrush(Qt::red));
+            painter.drawRect(QRect(prevRight, TB_TIME_SLIDER_HEIGHT, (left - prevRight), TB_AVAILABILITY_AREA_HEIGHT));
+        }
+
+        prevRight = right;
+    }
+    currentTime = QDateTime::currentDateTimeUtc().toTime_t();
+    if(availabilityVector.last().second < lastVisibleTime)
+    {
+        int right = widgetWidth;
+        if(currentTime < lastVisibleTime)
+        {
+            right = widgetWidth *
+                    (float)(currentTime - firstVisibleTime) / (lastVisibleTime - firstVisibleTime);
+
+        }
+        painter.setBrush(QBrush(Qt::red));
+        painter.drawRect(QRect(prevRight, TB_TIME_SLIDER_HEIGHT, (right - prevRight), TB_AVAILABILITY_AREA_HEIGHT));
+    }
+    divPen.setStyle(Qt::SolidLine);
 }
 
 void TimeBar::drawDivSign(QPainter &painter, QString format)

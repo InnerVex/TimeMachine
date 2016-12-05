@@ -81,7 +81,7 @@ void PlayerController::setPlayPosition(qint32 requestTime)
 void PlayerController::startPlayTimer(qint32 startTime)
 {
     currentPlayTime = startTime;
-    mPlayTimer->start(1000);
+    mPlayTimer->start(1000 / currentRate);
 }
 
 void PlayerController::stopPlayTimer()

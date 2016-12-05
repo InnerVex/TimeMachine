@@ -42,8 +42,10 @@ private:
     int widgetWidth;
     int scale = 0;
     int divValue;
+    qint32 minimumAvailableTime;
     qint32 firstVisibleTime;
     qint32 lastVisibleTime;
+    qint32 currentTime;
     qint32 hoverTime;
     int minDivSignPeriod;
     QVector<QPair<qint32, qint32>> availabilityVector;
