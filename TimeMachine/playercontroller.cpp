@@ -5,8 +5,6 @@
 
 #include <ui_player.h>
 
-
-
 PlayerController::PlayerController(Player *_player, QObject *parent) :
     QObject(parent),
     player(_player)
@@ -23,13 +21,10 @@ PlayerController::PlayerController(Player *_player, QObject *parent) :
     //Коннекты элементов управления
     connect(player->ui->buttonPlay, &QPushButton::clicked,
             this, &PlayerController::playButtonClicked);
-
     connect(player->ui->testTimeButton, &QPushButton::clicked,
             this, &PlayerController::testInputButtonClicked);
-
     connect(player->ui->buttonStepBack, &QPushButton::clicked,
             this, &PlayerController::stepBackButtonClicked);
-
     connect(player->ui->buttonStepForward, &QPushButton::clicked,
             this, &PlayerController::stepForwardButtonClicked);
 
@@ -40,13 +35,13 @@ PlayerController::PlayerController(Player *_player, QObject *parent) :
 
     connect(player->timeBar, &TimeBar::sendMessageToStatusBar,
             player, &Player::showMessageInStatusBar);
-
     connect(player->timeBar, &TimeBar::setPlayTime,
             this, &PlayerController::setPlayPosition);
     connect(player->ui->dateTimeEdit, &QDateTimeEdit::dateTimeChanged,
             player->timeBar, &TimeBar::setFVT);
     connect(this, &PlayerController::updateTimeBarScroller,
             player->timeBar, &TimeBar::setSliderPosition);
+
 
     mPlayTimer = new QTimer();
     connect(mPlayTimer, &QTimer::timeout,

@@ -207,35 +207,30 @@ qint32 Select::selectOffset(quint32 sDateTime)
 }
 QString Select::selectFile(quint32 sDateTime)
 {
+    //TODO::Сюда тоже проверка на границу (минимальную) //Казиев
     auto_ptr<database> db (create_database ());
     qint32 sFileId;
     QString sFileName = "",e;
-    try
+
+    typedef odb::query<file> query;
+    typedef odb::result<file> result;
+    sFileId = Select::selectFileId(sDateTime);
+    transaction t (db->begin ());
+    result r (db->query<file> (query::id == sFileId));
+
+    for (result::iterator i (r.begin()); i != r.end(); ++i)
     {
-        typedef odb::query<file> query;
-        typedef odb::result<file> result;
-        sFileId = Select::selectFileId(sDateTime);
-        transaction t (db->begin ());
-        result r (db->query<file> (query::id == sFileId));
-
-        for (result::iterator i (r.begin()); i != r.end(); ++i)
-        {
-            sFileName = i->name();
-        }
-        t.commit();
-
-        if(sFileName == "")
-        {
-            e = "File for time = " + QDateTime::fromTime_t(sDateTime).toString() +"wasn't found";
-            throw e;
-        }
-
-        return sFileName;
+        sFileName = i->name();
     }
-    catch(QString e)
+    t.commit();
+
+    if(sFileName == "")
     {
-        cout << e.toStdString().c_str() << endl;
+        e = "File for time = " + QDateTime::fromTime_t(sDateTime).toString() +"wasn't found";
+        //cout << e.toStdString().c_str() << endl;
     }
+
+    return sFileName;
 }
 QString Select::selectPath(quint32 sDateTime)
 {
@@ -341,72 +336,77 @@ float Select::selectPercentOffset(quint32 sDateTime)
 }
 QString Select::selectNextFile(QString fileName)
 {
+    //TODO::В selectNextFile, selectNextDateTime и selectFile убрал TRY-CATCH, в случае ненайденного файла возвращается ''.
+    //Нужно сделать так же везде.
+    //Также операторы после return не выполняются
+    //Также сообщения нужно убрать, так как запросы вызываются теперь при каждой отрисовке - очень много спама //Казиевы
+    QString sFileName = "", e;
+
     auto_ptr<database> db (create_database ());
     qint32 sDateTime = selectNextDateTime(fileName);
-    qint32 sFileId = selectFileId(sDateTime);
-    QString sFileName = "",e;
-    try
+    if(sDateTime == -1)
     {
-        typedef odb::query<file> query;
-        typedef odb::result<file> result;
-        transaction t (db->begin ());
-        result r (db->query<file> (query::id == sFileId));
-
-        for (result::iterator i (r.begin()); i != r.end(); ++i)
-        {
-            sFileName = i->name();
-        }
-
-        if(sFileName == "")
-        {
-            e = "File for time = " + QDateTime::fromTime_t(sDateTime).toString() +"wasn't found";
-            throw e;
-        }
-
         return sFileName;
-        t.commit();
-}
-    catch(QString e)
-    {
-        cout << e.toStdString().c_str() << endl;
     }
+    qint32 sFileId = selectFileId(sDateTime);
+
+
+    typedef odb::query<file> query;
+    typedef odb::result<file> result;
+    transaction t (db->begin ());
+    result r (db->query<file> (query::id == sFileId));
+
+    for (result::iterator i (r.begin()); i != r.end(); ++i)
+    {
+        sFileName = i->name();
+    }
+
+    if(sFileName == "")
+    {
+        e = "File for time = " + QDateTime::fromTime_t(sDateTime).toString() +"wasn't found";
+        //cout << e.toStdString().c_str() << endl;
+    }
+
+    t.commit();
+    return sFileName;
 }
 qint32  Select::selectNextDateTime(QString fileName)
 {
     auto_ptr<database> db (create_database ());
     QString e;
-    qint32 sDateTime = selectDateTime(fileName)+1;
+    qint32 sDateTime = selectDateTime(fileName);
     qint32 sNewDateTime = -1;
     while (sDateTime != sNewDateTime)
     {
-        try
+        typedef odb::query<timeStamp> query;
+        typedef odb::result<timeStamp> result;
+
+        ++sDateTime;
+
+        transaction t2 (db->begin ());
+        result r (db->query<timeStamp> (query::dateTime == sDateTime));
+
+
+        for (result::iterator i (r.begin()); i != r.end(); ++i)
         {
-            typedef odb::query<timeStamp> query;
-            typedef odb::result<timeStamp> result;
-
-            transaction t2 (db->begin ());
-            result r (db->query<timeStamp> (query::dateTime == sDateTime));
-
-            for (result::iterator i (r.begin()); i != r.end(); ++i)
-            {
-                sNewDateTime = i->dateTime();
-            }
-            t2.commit();
-
-            if (sNewDateTime == -1)
-            {
-                // e = "File with time:" + QString::number(sDateTime) + " wasn't found";
-                throw e;
-            }
-
-            return sNewDateTime;
+            sNewDateTime = i->dateTime();
         }
-        catch(QString e)
+        t2.commit();
+
+        //TODO::Сюда добавил заглушку вместо max-значения //Казиев
+        qint32 maxDateTime = 946660000;
+        if(sDateTime > maxDateTime)
         {
-            //cout << e.toStdString().c_str() << endl;
+            break;
         }
-       ++sDateTime;
     }
+    if (sNewDateTime == -1)
+    {
+        e = "File with time:" + QString::number(sDateTime) + " wasn't found";
+        //cout << e.toStdString().c_str() << endl;
+    }
+
+    return sNewDateTime;
 }
 qint32  Select::selectDateTime(QString fileName)
 {

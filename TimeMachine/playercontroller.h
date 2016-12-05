@@ -58,8 +58,6 @@ public slots:
 
     //Функции, связанные с таймбаром
     void setPlayPosition(qint32 requestTime);
-
-    //Слот таймера синхронизации интерфейса с воспроизведением
     void startPlayTimer(qint32 startTime);
     void stopPlayTimer();
     void updateRate(float rate);

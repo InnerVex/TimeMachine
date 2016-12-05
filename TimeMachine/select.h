@@ -15,8 +15,8 @@ public:
     static qint32  selectOffset          (quint32 sDateTime);
     static float   selectPercentOffset   (quint32 sDateTime);
     static QString selectNextFile        (QString fileName);
-    static qint32  selectNextDateTime   (QString fileName);
-    static qint32  selectDateTime       (QString fileName);
+    static qint32  selectNextDateTime    (QString fileName);
+    static qint32  selectDateTime        (QString fileName);
 
 
 private:

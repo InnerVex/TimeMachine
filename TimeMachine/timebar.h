@@ -46,6 +46,7 @@ private:
     qint32 lastVisibleTime;
     qint32 hoverTime;
     int minDivSignPeriod;
+    QVector<QPair<qint32, qint32>> availabilityVector;
 
     //Параметры деления шкалы
     int divXPos;
@@ -57,6 +58,7 @@ private:
 
     void drawDivSign(QPainter &painter, QString format);
     void updateFVT();
+    void updateAvailability();
 
 public slots:
     void setFVT(const QDateTime &datetime);

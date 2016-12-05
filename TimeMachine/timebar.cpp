@@ -6,6 +6,8 @@
 #include <QMouseEvent>
 #include <QWheelEvent>
 
+#include "select.h"
+
 TimeBar::TimeBar(QDateTimeEdit *_fvtEdit, QWidget *parent) :
     QWidget(parent), fvtEdit(_fvtEdit)
 {
@@ -278,17 +280,36 @@ void TimeBar::paintEvent(QPaintEvent *event)
 
     lastVisibleTime = firstVisibleTime + divAmount * divValue;
 
+    //Отрисовка областей доступности
+    updateAvailability();
+    for (int iarea = 0; iarea < availabilityVector.size(); iarea++)
+    {
+        int left = widgetWidth *
+                (float)(availabilityVector[iarea].first - firstVisibleTime) / (lastVisibleTime - firstVisibleTime);
+        int right = widgetWidth *
+                (float)(availabilityVector[iarea].second - firstVisibleTime) / (lastVisibleTime - firstVisibleTime);
+
+        divPen.setWidth(10);
+        painter.setPen(divPen);
+        painter.drawLine(
+                    QPoint(left, 20),
+                    QPoint(right, 20));
+    }
+
+
+    //Отрисовка подсказывающей полосочки под курсором
     if(cursorHover)
     {
-        divPen.setWidth(10);
+        divPen.setWidth(3);
+        painter.setPen(divPen);
         painter.drawLine(
                     QPoint(cursorX, 0),
                     QPoint(cursorX, TB_TIME_SLIDER_HEIGHT));
     }
 
+    //Отрисовка кирпича
     if(drawSlider)
     {
-
         if(playTime >= firstVisibleTime && playTime <= lastVisibleTime)
         {
             int xSPos = ((float)(playTime - firstVisibleTime) / (lastVisibleTime - firstVisibleTime)) * widgetWidth;
@@ -317,4 +338,40 @@ void TimeBar::updateFVT()
     fvtEdit->blockSignals(true);
     fvtEdit->setDateTime(QDateTime::fromTime_t(firstVisibleTime));
     fvtEdit->blockSignals(false);
+}
+
+void TimeBar::updateAvailability()
+{
+    availabilityVector.clear();
+
+    QString filename = Select::selectFile(firstVisibleTime);
+    qint32 fileStartTime = Select::selectDateTime(filename);
+    qint32 fileEndTime = fileStartTime + Select::selectDuration(fileStartTime) * 0.001;
+
+    if(fileEndTime > firstVisibleTime)
+    {
+        availabilityVector.append(QPair<qint32, qint32>(firstVisibleTime, fileEndTime));
+    }
+
+    while(true)
+    {
+        filename = Select::selectNextFile(filename);
+        if(QString::compare(filename, "", Qt::CaseInsensitive) == 0)
+        {
+            break;
+        }
+
+        fileStartTime = Select::selectDateTime(filename);
+        if(fileStartTime >= lastVisibleTime)
+        {
+            break;
+        }
+
+        fileEndTime = fileStartTime + Select::selectDuration(fileStartTime) * 0.001;
+        if(fileEndTime >= lastVisibleTime)
+        {
+            fileEndTime = lastVisibleTime;
+        }
+        availabilityVector.append(QPair<qint32, qint32>(fileStartTime, fileEndTime));
+    }
 }
