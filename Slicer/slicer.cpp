@@ -269,9 +269,9 @@ void Slicer::makeMultipleSlices(const char* input, const char* output_location, 
 
 void Slicer::makeSliceFromStreamDirty(const char *input, const char *output, int duration)
 {
-    const char* sout="--sout=#standard{access=file,mux=ts,dst=\"\\";
+    const char* sout="--sout=#standard{access=file,mux=ts,dst=\\\\";
     //const char* sout="--sout=#file{mux=ps,dst=";
-    const char* ending="\"}";
+    const char* ending="}";
     char *param;
     param = new char[strlen(sout)+strlen(output)+strlen(ending)];
     strcat(strcpy(param,sout),output);
@@ -288,8 +288,9 @@ void Slicer::makeSliceFromStreamDirty(const char *input, const char *output, int
 
     const char * const vlc_args[] =
     {
-        //"--verbose=2",
+        "--verbose=2",
         param,
+        //"--sout=#standard{access=file,mux=ts,dst=\\\\\\\\.\\pipe\\my_soket}",
         param2,
         //"--live-caching",
         //"--network-caching",
@@ -304,10 +305,11 @@ void Slicer::makeSliceFromStreamDirty(const char *input, const char *output, int
 
     //QTest::qSleep(10000);
 
-    std::this_thread::sleep_for(std::chrono::milliseconds((duration)*1000)); //TODO: Event catcher! or there might be some problems with threads
+    //std::this_thread::sleep_for(std::chrono::milliseconds((duration)*1500)); //TODO: Event catcher! or there might be some problems with threads
     qDebug()<<"Hi";
 
-    libvlc_media_player_stop(mp);
+    //libvlc_media_player_stop(mp);
+    qDebug()<<"Hi2";
     //libvlc_release(inst);
 }
 

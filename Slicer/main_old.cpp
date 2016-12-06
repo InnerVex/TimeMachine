@@ -1,25 +1,33 @@
 #include <QCoreApplication>
-#include "slicer.h"
-#include "parser.h"
+//#include "slicer.h"
+//#include "parser.h"
 #include "QDebug"
 #include <QApplication>
 #include <QtCore>
-#include "socket_server.h"
+//#include "socket_server.h"
+#include "clean_server.h"
 #include "client.h"
 #include <QThread>
-#include <thread>
+//#include <thread>
 int main(int argc, char *argv[])
 {
-    QCoreApplication a(argc, argv);
+    //QCoreApplication a(argc, argv);
 
-    New_Socket_Server server;
+    QApplication a(argc, argv);
+    Clean_Server server;
+    server.startVLC();
+     qDebug()<<"test";
+    //QApplication app(argc, argv);
+    //My_Client client;
+
+    //return app.exec();
     //server.sendMsg();
     //qDebug()<<server.recieveMsg();
-    My_Client client;
-    server.test();
+    //My_Client client;
+    //server.test();
     //QThread for_vlc;
     //std::thread for_vlc(New_Socket_Server::test,server);
-    qDebug()<<"test";
+
     //for_vlc.join();
     //qDebug()<<server.recieveMsg();
 
@@ -36,6 +44,7 @@ int main(int argc, char *argv[])
 
     return app.exec();*/
 
+    /*
     Slicer slicer;    
     const char* input ="rtsp://ewns-hls-b-stream.hexaglobe.net/rtpeuronewslive/en_vidan750_rtp.sdp"; //"http://ar.solumedia.com.ar:1935/cool/hd/playlist.m3u8"; //"D:\\Work\\TD\\test\\Projects\\TestLibVLC\\video\\output4.ts";
     const char* output ="D:\\Work\\TD\\test\\Projects\\TestLibVLC\\video\\slices\\slice_5-10.ts";
@@ -57,6 +66,7 @@ int main(int argc, char *argv[])
     //slicer.convertToTS("D:\\example\\outputFromStream.ts","D:\\example\\outputFromStream.ts");
     //slicer.makeSliceFromStreamSmem();
 
+    */
 
 
 

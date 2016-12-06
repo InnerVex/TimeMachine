@@ -24,7 +24,9 @@ class New_Socket_Server : public QObject
     QLocalSocket *socket;
     QString currentFortune;
     quint16 blockSize;
+    QLocalSocket *clientConnection;
     //QLocalSocket *writer;
+    bool work = true;
 public:
     New_Socket_Server();
     void test();
@@ -33,6 +35,7 @@ public:
     int recieveMsg();
 private slots:
     int sendMsg();
+    void onReadyRead();
 };
 
 

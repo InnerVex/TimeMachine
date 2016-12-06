@@ -112,12 +112,20 @@ void Client::enableGetFortuneButton()
     getFortuneButton->setEnabled(!hostLineEdit->text().isEmpty());
 }
 
-
+const QString socket_name = "my_soket";
 My_Client::My_Client()
 {
     socket = new QLocalSocket();
-    socket->connectToServer("my_socket");
     socket->connect(socket, SIGNAL(readyRead()), this, SLOT(recieve()));
+
+    socket->connectToServer(socket_name);
+    /*if(!socket->waitForConnected())
+    {
+        qDebug()<<"Error";
+        return;
+    }*/
+    qDebug()<<socket->fullServerName();
+
 
 }
 
@@ -127,21 +135,14 @@ void My_Client::recieve()
     QDataStream in(socket);
     in.setVersion(QDataStream::Qt_4_0);
 
-    /*if (blockSize == 0) {
-        if (socket->bytesAvailable() < (int)sizeof(quint16))
-            return;
-        in >> blockSize;
-    }*/
+    int limit = 1;
+    char ch[limit];
 
-    if (in.atEnd())
+    while (socket->bytesAvailable()>0)// && (int)(socket->bytesAvailable()/limit) > 0)
     {
-        qDebug()<<"Reciever atEnd";
-        return;
+        qDebug()<<socket->bytesAvailable()<<"left";
+        socket->read(ch,limit);
+        qDebug()<<"Recieved "<<(int)*ch;
     }
-
-    //QString nextFortune;
-    quint8 ch;
-    in >> ch;
-    qDebug()<<"Recieved ch"<<ch;
 
 }

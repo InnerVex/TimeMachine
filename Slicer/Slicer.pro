@@ -15,6 +15,8 @@ SOURCES += main_old.cpp \
     pipe_server.cpp \
     socket_server.cpp \
     client.cpp \
+    clean_server.cpp \
+    clean_slicer.cpp
 
 
 HEADERS += \
@@ -22,7 +24,9 @@ HEADERS += \
     parser.h \
     pipe_server.h \
     socket_server.h \
-    client.h
+    client.h \
+    clean_server.h \
+    clean_slicer.h
 
 
 unix|win32: LIBS += -lQt5Network

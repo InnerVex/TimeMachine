@@ -3,11 +3,11 @@
 #include <QtNetwork/qlocalserver.h>
 #include <qtnetwork/qlocalsocket.h>
 #include <qstring.h>
-#include <mutex>
+//#include <mutex>
 #include <qmutex.h>
 #include <qcoreapplication.h>
 #include <qdebug.h>
-#include <thread>
+//#include <thread>
 #include <QDataStream>
 #include <QFile>
 #include <QtWidgets>
@@ -196,7 +196,7 @@ int Socket_Server::read()
         return 1;
     }
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+    //std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 
     quint64 limit = 5;
     char data[limit]="";
@@ -272,7 +272,7 @@ void Server::sendFortune()
 
 New_Socket_Server::New_Socket_Server()
 {
-    server = new QLocalServer(this);
+    server = new QLocalServer();
     if (!server->listen(socket_name))
     {
         qDebug()<<"Server is not started";
@@ -280,18 +280,17 @@ New_Socket_Server::New_Socket_Server()
     else
     {
         qDebug()<<"Server started";
-    }
-
+    }    
     server->connect(server, SIGNAL(newConnection()), this, SLOT(sendMsg()));
     //server->connect(server, SIGNAL(newConnection()), this, SLOT(recieveMsg()));
-    //connect()
 
-    //qDebug()<<sendMsg();
+    qDebug()<<server->serverName();
     //system("pause");
 
 }
 void New_Socket_Server::test()
 {
+
     Slicer slicer;
     const char* input ="rtsp://ewns-hls-b-stream.hexaglobe.net/rtpeuronewslive/en_vidan750_rtp.sdp";
     std::string str = server->fullServerName().toStdString();
@@ -299,24 +298,32 @@ void New_Socket_Server::test()
     param2 = new char[str.length()];
     strcpy(param2,str.data());
     qDebug()<<param2;
-    slicer.makeSliceFromStreamDirty(input,param2,10);
+    slicer.makeSliceFromStreamDirty(input,param2,30);
+
 }
 
 int New_Socket_Server::sendMsg()
 {
     //QLocalSocket *clientConnection = server->nextPendingConnection();
 
-    /*Slicer slicer;
-    const char* input ="rtsp://ewns-hls-b-stream.hexaglobe.net/rtpeuronewslive/en_vidan750_rtp.sdp";
-    std::string str = server->fullServerName().toStdString();
-    char *param2;
-    param2 = new char[str.length()];
-    strcpy(param2,str.data());
-    slicer.makeSliceFromStreamDirty(input,param2,10);*/
+//    qDebug()<<"Sender";
+//    if(work)
+//    {
+//        work=false;
+//        Slicer slicer;
+//        const char* input ="rtsp://ewns-hls-b-stream.hexaglobe.net/rtpeuronewslive/en_vidan750_rtp.sdp";
+//        std::string str = server->fullServerName().toStdString();
+//        char *param2;
+//        param2 = new char[str.length()];
+//        strcpy(param2,str.data());
+//        slicer.makeSliceFromStreamDirty(input,param2,10);
+//    }
+//    qDebug()<<"End of sender";
 
 
+    /*
 
-    /*qDebug()<<"Msg sender started";
+    qDebug()<<"Msg sender started";
     QByteArray block;
     QDataStream out(&block, QIODevice::WriteOnly);
     //out.setVersion(QDataStream::Qt_4_0);
@@ -326,9 +333,10 @@ int New_Socket_Server::sendMsg()
     out.device()->seek(0);
     out << (quint16)(block.size() - sizeof(quint16));
 
-
-    QLocalSocket *clientConnection = server->nextPendingConnection();
-    clientConnection->connect(clientConnection, SIGNAL(disconnected()), clientConnection, SLOT(deleteLater()));
+*/
+    clientConnection = server->nextPendingConnection();
+    QObject::connect(clientConnection, SIGNAL(disconnected()), clientConnection, SLOT(deleteLater()));
+    QObject::connect(clientConnection, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
     //QLocalSocket *clientConnection = new QLocalSocket();
     //qDebug()<<clientConnection->socketDescriptor();
     //clientConnection->connectToServer(socket_name);
@@ -346,7 +354,8 @@ int New_Socket_Server::sendMsg()
         qDebug()<<"Client connected";
     }*/
 
-    /*qDebug()<<clientConnection->write(block);
+    /*
+    qDebug()<<clientConnection->write(block);
     //qDebug()<<clientConnection->bytesAvailable();
     clientConnection->flush();
     //qDebug()<<clientConnection->bytesAvailable();
@@ -366,6 +375,12 @@ int New_Socket_Server::sendMsg()
 
     */
     return 0;
+
+}
+
+void New_Socket_Server::onReadyRead()
+{
+    qDebug()<<"OnReadyRead"<<clientConnection->bytesAvailable();
 
 }
 
