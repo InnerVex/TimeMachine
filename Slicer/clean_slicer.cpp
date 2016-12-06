@@ -1,9 +1,9 @@
 #include "clean_slicer.h"
 #include <QDebug>
 
-void Clean_Slicer::makeSlicesFromStreamClean(const char *input, const char *output, int duration)
+void Clean_Slicer::makeSlicesFromStreamClean(const char *input, const char *output)
 {
-    const char* sout="--sout=#standard{access=file,mux=ts,dst=\\\\"; //not sure
+    const char* sout="--sout=#standard{access=file,mux=ts,dst=\\\\"; //not sure for unix
     //const char* sout="--sout=#file{mux=ps,dst=";
     const char* ending="}";
     char *param;
@@ -11,20 +11,10 @@ void Clean_Slicer::makeSlicesFromStreamClean(const char *input, const char *outp
     strcat(strcpy(param,sout),output);
     strcat(param,ending);
 
-    qDebug()<<param;
-    std::string stop_time = "--run-time=";
-    stop_time+=std::to_string(duration);
-    char *param2;
-    param2 = new char[stop_time.length()];
-    strcpy(param2,stop_time.data());
-
-    qDebug()<<param2;
-
     const char * const vlc_args[] =
     {
         //"--verbose=2",
         param,
-        param2,
         "vlc://quit",
     };
     inst=libvlc_new(sizeof(vlc_args) / sizeof(vlc_args[0]), vlc_args);
@@ -32,5 +22,5 @@ void Clean_Slicer::makeSlicesFromStreamClean(const char *input, const char *outp
     mp = libvlc_media_player_new_from_media (m);
     libvlc_media_player_play(mp);
 
-    qDebug()<<"Hi2";
+    qDebug()<<"VLC started";
 }
