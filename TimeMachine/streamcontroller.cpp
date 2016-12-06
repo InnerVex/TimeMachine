@@ -4,17 +4,17 @@
 #include <QTimer>
 #include <QDateTime>
 #include <QMessageBox>
-#include "select.h"
-#include <ui_player.h>
+#include <select.h>
 #include <playerdefinitions.h>
 #include <player.h>
 
-#include "vlc/libvlc_events.h"
-
-//TODO::for test
 #include <ui_player.h>
 
-//Get и Release коллбэки для IMEM
+/**
+ * @brief MyImemGetCallback
+ * TODO::Описание входных параметров по ссылке
+ * https://forum.videolan.org/viewtopic.php?t=93842
+ */
 int MyImemGetCallback (void *data,
                        const char *cookie,
                        int64_t *dts,
@@ -39,6 +39,11 @@ int MyImemGetCallback (void *data,
     return 0;
 }
 
+/**
+ * @brief MyImemReleaseCallback
+ * TODO::Описание входных параметров по ссылке
+ * https://forum.videolan.org/viewtopic.php?t=93842
+ */
 int MyImemReleaseCallback (void *data,
                            const char *cookie,
                            size_t bufferSize,
@@ -47,6 +52,10 @@ int MyImemReleaseCallback (void *data,
     return 0;
 }
 
+/**
+ * @brief StreamController::replenishVideoPatchesBuffer
+ * Буферизует кусочки видео в оперативной памяти, пока не будет буферизовано VIDEO_PATCHES_TOTAL_BYTES байт.
+ */
 void StreamController::replenishVideoPatchesBuffer()
 {
     //Цикл по файлам
@@ -84,6 +93,11 @@ void StreamController::replenishVideoPatchesBuffer()
             currentQFile->close();
             //Выбираем следующий файл
             currentFilename = Select::selectNextFile(currentFilename);
+            if(QString::compare(currentFilename, "", Qt::CaseInsensitive) == 0)
+            {
+                //Архив закончился
+                break;
+            }
             openFileForBuffering(currentFilename);
         }
 
@@ -94,6 +108,12 @@ void StreamController::replenishVideoPatchesBuffer()
     }
 }
 
+/**
+ * @brief StreamController::openFileForBuffering
+ * @param filename - имя файла.
+ * @param withOffset - начинать буферизовать с начала или с байтового смещения, рассчитанного по временному.
+ * Открывает файл для буферизации.
+ */
 void StreamController::openFileForBuffering(QString filename, bool withOffset)
 {
     currentQFile = new QFile(filename);
@@ -111,6 +131,11 @@ void StreamController::openFileForBuffering(QString filename, bool withOffset)
     }
 }
 
+/**
+ * @brief StreamController::loadVideoPatchInMemory
+ * @param bytesToBuffer - количество байт, которые нужно прочесть из файла и поместить в память.
+ * Записывает часть файла в оперативную память и увеличивает значение сдвига по файлу.
+ */
 void StreamController::loadVideoPatchInMemory(qint32 bytesToBuffer)
 {
     //Записываем файл в оперативную память
@@ -125,16 +150,20 @@ void StreamController::loadVideoPatchInMemory(qint32 bytesToBuffer)
     currentFileBytePosition += result;
 }
 
+/**
+ * @brief StreamController::createImemInstance
+ * Создаёт инстанс LibVLC для воспроизведения при помощи модуля Imem.
+ * Здесь же создаёт медиа, плеер и прикрепляет плеер к окну.
+ */
 void StreamController::createImemInstance()
 {
     //Задаём параметры LibVLC
     std::vector<const char*> options;
     std::vector<const char*>::iterator option;
 
+    //Параметры для вывода стрима по rtsp
     //std::string soutLine = "--sout=#rtp{dst=localhost,port=5544,sdp=rtsp://localhost:5544/}";
     //options.push_back(soutLine.c_str());
-
-    options.push_back("--no-video-title-show");
 
     char imemDataArg[256];
     sprintf(imemDataArg, "--imem-data=%#p", mImemData);
@@ -151,44 +180,77 @@ void StreamController::createImemInstance()
     options.push_back("--imem-cookie=timemachine");
     options.push_back("--imem-codec=undf");
     options.push_back("--imem-cat=4");
-    options.push_back("--verbose=2");
     options.push_back("--demux=ts");
 
-    mVlcInstance = libvlc_new (int(options.size()), options.data());
-    mMedia = libvlc_media_new_location (mVlcInstance, "imem://");
-    mMediaPlayer = libvlc_media_player_new_from_media (mMedia);
+    options.push_back("--no-video-title-show");
+    options.push_back("--verbose=2");
 
-    //TODO::for test
-    int windid = player->ui->videoFrame->winId();
-    libvlc_media_player_set_hwnd(mMediaPlayer, (void*)windid );
-
+    vlcInstanceImem = libvlc_new (int(options.size()), options.data());
+    mediaImem = libvlc_media_new_location (vlcInstanceImem, "imem://");
     for(option = options.begin(); option != options.end(); option++)
     {
-        libvlc_media_add_option(mMedia, *option);
+        libvlc_media_add_option(mediaImem, *option);
     }
+    mediaPlayerImem = libvlc_media_player_new_from_media (mediaImem);
 
-    imemStreamReady = true;
+    imemInstanceReady = true;
 }
 
-StreamController::StreamController(QObject *parent) : QObject(parent)
+/**
+ * @brief StreamController::createRTPSInstance
+ * Создаёт инстанс LibVLC для воспроизведения из внешнего источника по протоколу Rtsp
+ * Здесь же создаёт медиа, плеер и прикрепляет плеер к окну.
+ */
+void StreamController::createRTPSInstance()
+{
+    //Задаём параметры LibVLC
+    std::vector<const char*> options;
+    options.push_back("--no-video-title-show");
+    options.push_back("--verbose=2");
+
+    vlcInstanceRtsp = libvlc_new (int(options.size()), options.data());
+    QString source = "rtsp://ewns-hls-b-stream.hexaglobe.net/rtpeuronewslive/en_vidan750_rtp.sdp";
+    mediaRtsp = libvlc_media_new_location (vlcInstanceRtsp, source.toStdString().c_str());
+    mediaPlayerRtsp = libvlc_media_player_new_from_media(mediaRtsp);
+
+    rtspInstanceReady = true;
+}
+
+/**
+ * @brief StreamController::StreamController
+ * @param parent
+ * Конструктор.
+ */
+StreamController::StreamController(Player *_player, QObject *parent) :
+    QObject(parent),
+    player(_player)
 {
     mImemData = new ImemData();
     mImemData->cookieString = "TM_SC_Instance";
     mImemData->controller = this;
     attemptingToStartStream = false;
-    streaming = false;
-    imemStreamReady = false;
+    streamingImem = false;
+    imemInstanceReady = false;
+    rtspInstanceReady = false;
     currentRate = 1;
+
+    windid = player->ui->videoFrame->winId();
+
+    //Создаём инстанс LibVLC для воспроизведения реалтайма
+    if(!rtspInstanceReady)
+    {
+        createRTPSInstance();
+    }
 }
 
+/**
+ * @brief StreamController::requestedToObtainSource
+ * @param _requestTime - Какой момент из архивного видео буферизовать
+ * @param playSpeed - Deprecated
+ * Начинает буферизацию архивного видео в оперативной памяти по запросу времени.
+ */
 void StreamController::requestedToObtainSource(quint32 _requestTime, float playSpeed)
 {
-    if(streaming)
-    {
-        //libvlc_media_player_pause(mMediaPlayer);
-        //streaming = false;
-    }
-
     //Получение данных из БД и буфферизация
     requestTime = _requestTime;
     currentFilename = Select::selectFile(requestTime);
@@ -200,7 +262,8 @@ void StreamController::requestedToObtainSource(quint32 _requestTime, float playS
     openFileForBuffering(currentFilename, true);
     replenishVideoPatchesBuffer();
 
-    if(!imemStreamReady)
+    //Создаём инстанс LibVLC для воспроизведения архивов
+    if(!imemInstanceReady)
     {
         createImemInstance();
     }
@@ -209,16 +272,27 @@ void StreamController::requestedToObtainSource(quint32 _requestTime, float playS
     emit signalSourceObtained();
 }
 
-void StreamController::startWaitingForStreamStart()
+/**
+ * @brief StreamController::startWaitingForStreamStart
+ * @param isImem - Воспроизведение каким из инстансов LibVLC нужно проверять по таймеру.
+ * Проверяет начало воспроизведения одним из инстансов,
+ * чтобы отослать сигнал Проигрывателю на синхронизацию с GUI.
+ */
+void StreamController::startWaitingForStreamStart(bool isImem)
 {
     //Дожидаемся начала стрима и отправляем сигнал проигрывателю
+    libvlc_media_player_t *mediaPlayer = isImem ? mediaPlayerImem : mediaPlayerRtsp;
+
     mAttemptTimer = new QTimer();
     connect(mAttemptTimer, &QTimer::timeout, [=]()
     {
-        if(libvlc_media_player_is_playing(mMediaPlayer) != 0)
+        if(libvlc_media_player_is_playing(mediaPlayer) != 0)
         {
-            emit signalTimerStart(requestTime);
-            emit signalStreamStarted();
+            if(isImem)
+            {
+                emit signalTimerStart(requestTime);
+            }
+            //emit signalStreamStarted();
             attemptingToStartStream = false;
         }
         if(!attemptingToStartStream)
@@ -231,53 +305,81 @@ void StreamController::startWaitingForStreamStart()
     mAttemptTimer->start(START_SIGNAL_DELAY);
 }
 
-void StreamController::requestedToStream()
+/**
+ * @brief StreamController::requestedToStreamArchive
+ * Начинает воспроизведение архивов при помощи модуля Imem.
+ */
+void StreamController::requestedToStreamArchive()
 {
-    libvlc_media_player_play(mMediaPlayer);
-    streaming = true;
+    if(streamingRtsp)
+    {
+        libvlc_media_player_stop(mediaPlayerRtsp);
+        streamingRtsp = false;
+    }
 
-    startWaitingForStreamStart();
+    libvlc_media_player_set_hwnd(mediaPlayerImem, (void*)windid );
+    libvlc_media_player_play(mediaPlayerImem);
+    streamingImem = true;
+
+    startWaitingForStreamStart(true);
 }
+
+/**
+ * @brief StreamController::requestedToStreamRealTime
+ * Начинает воспроизведение видео из внешнего источника по протоколу Rtsp.
+ */
 void StreamController::requestedToStreamRealTime()
 {
-    //TODO::Сюда добавить код создания инстанса LibVLC
-    imemStreamReady = false;
+    if(streamingImem)
+    {
+        libvlc_media_player_stop(mediaPlayerImem);
+        streamingImem = false;
+    }
 
-    QString source = "rtsp://ewns-hls-b-stream.hexaglobe.net/rtpeuronewslive/en_vidan750_rtp.sdp";
-    mMedia = libvlc_media_new_location(mVlcInstance, currentFilename.toStdString().c_str());
-    libvlc_media_player_set_media (mMediaPlayer, mMedia);
-    libvlc_media_player_play(mMediaPlayer);
+    libvlc_media_player_set_hwnd(mediaPlayerRtsp, (void*)windid );
+    libvlc_media_player_play(mediaPlayerRtsp);
+    streamingRtsp = true;
 
-    startWaitingForStreamStart();
+    startWaitingForStreamStart(false);
 }
+
+
 void StreamController::requestedToPauseStream()
 {
     //TODO::Остановить стрим
 
 }
 
+/**
+ * @brief StreamController::streamSpeedUp
+ * Ускоряет воспроизведение. Сигнал на изменение значения скорости также посылается сигналом Проигрывателю.
+ */
 void StreamController::streamSpeedUp()
 {
-    if(streaming && imemStreamReady)
+    if(streamingImem && imemInstanceReady)
     {
         if(currentRate < RATE_MAX)
         {
             currentRate *= RATE_MULTIPLY;
-            libvlc_media_player_set_rate(mMediaPlayer, currentRate);
+            libvlc_media_player_set_rate(mediaPlayerImem, currentRate);
             emit signalUpdateRate(currentRate);
             emit sendMessageToStatusBar("Current rate: " + QString::number(currentRate));
         }
     }
 }
 
+/**
+ * @brief StreamController::streamSpeedDown Замедляет воспроизведение.
+ * Замедляет воспроизведение. Сигнал на изменение значения скорости также посылается сигналом Проигрывателю.
+ */
 void StreamController::streamSpeedDown()
 {
-    if(streaming && imemStreamReady)
+    if(streamingImem && imemInstanceReady)
     {
         if(currentRate > RATE_MIN)
         {
             currentRate /= RATE_MULTIPLY;
-            libvlc_media_player_set_rate(mMediaPlayer, currentRate);
+            libvlc_media_player_set_rate(mediaPlayerImem, currentRate);
             emit signalUpdateRate(currentRate);
             emit sendMessageToStatusBar("Current rate: " + QString::number(currentRate));
         }

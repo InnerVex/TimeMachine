@@ -3,6 +3,7 @@
 #include <chrono>
 #include <thread>
 
+#include <select.h>
 #include <ui_player.h>
 
 PlayerController::PlayerController(Player *_player, QObject *parent) :
@@ -55,7 +56,7 @@ void PlayerController::handleSourceObtained()
     //if(isIntendedToPlay && !isPlaying)
     {
         //Запрос стримеру на начало стрима
-        emit requestToStream();
+        emit requestToStreamArchive();
     }
 }
 
@@ -78,10 +79,20 @@ void PlayerController::setPlayPosition(qint32 requestTime)
     emit requestToObtainSource(requestTime, 1);
 }
 
+/**
+ * @brief PlayerController::startPlayTimer
+ * @param startTime - момент времени, с которого начал воспроизведение Дешинковщик.
+ * Запускает таймер для синхронизации интерфейса и
+ * определяет момент перехода к следующему архивному файлу.
+ */
 void PlayerController::startPlayTimer(qint32 startTime)
 {
     currentPlayTime = startTime;
     mPlayTimer->start(1000 / currentRate);
+
+    currentFilename = Select::selectFile(currentPlayTime);
+    currentFileEndTime = Select::selectDateTime(currentFilename) + Select::selectDuration(currentPlayTime) * 0.001;
+    nextFileStartTime = Select::selectNextDateTime(currentFilename);
 }
 
 void PlayerController::stopPlayTimer()
@@ -95,10 +106,30 @@ void PlayerController::updateRate(float rate)
     mPlayTimer->setInterval(1000 / currentRate);
 }
 
+/**
+ * @brief PlayerController::playTimerShot
+ * Инкремент момента проигрывания и проверка на переход между файлами архива/реалтаймом.
+ */
 void PlayerController::playTimerShot()
 {
     currentPlayTime++;
-    qDebug() << currentPlayTime;
+    if(currentPlayTime > currentFileEndTime)
+    {
+        if(nextFileStartTime == -1)
+        {
+            //Архив закончился
+            mPlayTimer->stop();
+            emit requestToStreamRealTime();
+        }
+        else
+        {
+            currentPlayTime = nextFileStartTime;
+            currentFilename = Select::selectFile(currentPlayTime);
+            currentFileEndTime = Select::selectDateTime(currentFilename) + Select::selectDuration(currentPlayTime) * 0.001;
+            nextFileStartTime = Select::selectNextDateTime(currentFilename);
+        }
+    }
+
     emit updateTimeBarScroller(currentPlayTime);
 }
 
@@ -131,8 +162,7 @@ void PlayerController::testInputButtonClicked()
 //Real Time Stream
 void PlayerController::playRealTimeButtonClicked()
 {
-
-    if (isPlaying = true)
+    /*if (isPlaying = true)
         libvlc_media_player_stop(mMediaPlayer);
 
     const char * const vlc_args[] = {"--verbose=2"};
@@ -142,9 +172,9 @@ void PlayerController::playRealTimeButtonClicked()
     libvlc_media_player_set_media (mMediaPlayer, mMedia);
     int windid = player->ui->videoFrame->winId();
     libvlc_media_player_set_hwnd(mMediaPlayer, (void*)windid );
-    libvlc_media_player_play(mMediaPlayer);
+    libvlc_media_player_play(mMediaPlayer);*/
 
-    isPlaying = true;
+    emit requestToStreamRealTime();
 }
 
 void PlayerController::startToPlayRealTimeStream()

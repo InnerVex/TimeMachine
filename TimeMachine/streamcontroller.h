@@ -44,11 +44,12 @@ class StreamController : public QObject
 {
     Q_OBJECT
 public:
-    explicit StreamController(QObject *parent = 0);
+    explicit StreamController(Player *_player, QObject *parent = 0);
     void replenishVideoPatchesBuffer();
     void openFileForBuffering(QString filename, bool withOffset = false);
     void loadVideoPatchInMemory(qint32 bytesToBuffer);
     void createImemInstance();
+    void createRTPSInstance();
 
     QString currentFilename;
     QFile *currentQFile;
@@ -57,29 +58,31 @@ public:
     float percentOffset;
     qint32 totalBytesBuffered;
 
-    float currentRate;
-
-    Player *player;
-
 private:
-    //Переменные libVLC
-    libvlc_instance_t *mVlcInstance;
-    libvlc_media_player_t *mMediaPlayer;
-    libvlc_media_t *mMedia;
+    libvlc_instance_t *vlcInstanceImem;
+    libvlc_instance_t *vlcInstanceRtsp;
+    libvlc_media_player_t *mediaPlayerImem;
+    libvlc_media_player_t *mediaPlayerRtsp;
+    libvlc_media_t *mediaImem;
+    libvlc_media_t *mediaRtsp;
     ImemData *mImemData;
 
     QTimer *mAttemptTimer;
     QTimer *mReplenishTimer;
     qint32 requestTime;
     bool attemptingToStartStream;
-    bool streaming;
+    bool streamingImem;
+    bool streamingRtsp;
     bool signalledStartTimer;
-    bool imemStreamReady;
+    bool imemInstanceReady;
+    bool rtspInstanceReady;
+    float currentRate;
+    Player *player;
+    int windid;
 
-    void startWaitingForStreamStart();
+    void startWaitingForStreamStart(bool isImem);
 
 signals:
-    //Сигнал проигрывателю о том, что запущен новый источник
     void signalSourceObtained();
     void signalStreamStarted();
     void signalTimerStart(qint32 startTime);
@@ -87,9 +90,8 @@ signals:
     void sendMessageToStatusBar(QString message);
 
 public slots:
-    //Слот по сигналам от проигрывателя
     void requestedToObtainSource(quint32 requestTime, float playSpeed);
-    void requestedToStream();
+    void requestedToStreamArchive();
     void requestedToStreamRealTime();
     void requestedToPauseStream();
     void streamSpeedUp();
