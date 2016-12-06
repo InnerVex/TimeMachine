@@ -2,26 +2,30 @@
 #include <QtNetwork/qlocalserver.h>
 #include <QtNetwork/QLocalSocket>
 #include <QtWidgets/QDialog>
+#include <QFile>
+#include <QDataStream>
 
-/*class Writer
+class Writer
 {
     int maxSize;
-    char *currentFile;
-    int writtenOnCurrentFile;
+    QFile *currFile;
+    QDataStream *stream;
+    char * dst;
+    int currNumber;
 public:
-    Writer();
-    void writeToFile(char* data);
-};*/
+    Writer(const char* destination, int wantedSize = 188 * 10000);
+    void writeToFile(char* data,int len);
+};
 
 class Clean_Server : public QObject
 {
     Q_OBJECT
     QLocalServer *server;
     QLocalSocket *clientConnection;
-    //Writer writer;
+    Writer *writer;
 public:
     Clean_Server();
-    void startVLC();
+    void startRecord(const char* input, const char* destination, int wantedSize = 188 * 10000);
 
 private slots:
     void onNewConnection();

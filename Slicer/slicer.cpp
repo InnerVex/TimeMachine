@@ -2,7 +2,8 @@
 #include <QDebug>
 #include <string>
 #include <string.h>
-#include <vlc/vlc.h>
+//#include <vlc/vlc.h>
+#include <include/vlc/vlc.h>
 #include <mutex>
 //#include <QtTest/QTest>
 #include <chrono>

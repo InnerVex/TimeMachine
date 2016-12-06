@@ -1,5 +1,6 @@
 #pragma once
-#include <vlc/vlc.h>
+//#include <vlc/vlc.h>
+#include <include/vlc/vlc.h>
 
 class Clean_Slicer
 {
@@ -7,5 +8,5 @@ class Clean_Slicer
     libvlc_media_player_t *mp;
     libvlc_media_t *m;
 public:
-    void makeSlicesFromStreamClean(const char* input, const char* output, int duration);
+    void makeSlicesFromStreamClean(const char* input, const char* output);
 };
