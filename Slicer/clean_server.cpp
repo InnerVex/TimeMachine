@@ -3,11 +3,20 @@
 #include "insert.h"
 #include <QFile>
 #include <QDataStream>
+#include <QTime>
 
 
-const QString socket_name = "my_socket";
+//const QString socket_name = "my_socket" + qrand();
 Clean_Server::Clean_Server()
 {
+    QTime tmp_time = QTime::currentTime();
+    qsrand((uint)tmp_time.msec());
+
+    char str[5];
+    sprintf(str, "%d", qrand());
+    socket_name = "my_socket";
+    socket_name.append(str);
+    qDebug()<<socket_name;
     server = new QLocalServer();
     if (!server->listen(socket_name))
     {

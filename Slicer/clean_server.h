@@ -4,6 +4,7 @@
 #include <QtWidgets/QDialog>
 #include <QFile>
 #include <QDataStream>
+#include <QString>
 
 class Writer
 {
@@ -26,6 +27,7 @@ class Clean_Server : public QObject
     QLocalServer *server;
     QLocalSocket *clientConnection;
     Writer *writer;
+    QString socket_name;
 public:
     Clean_Server();
     void startRecord(const char* input, const char* destination, int wantedSize = 188 * 10000);
