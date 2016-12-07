@@ -20,8 +20,9 @@ int main(int argc, char *argv[])
         slicer.makeMultipleSlices(input, numberOfSlices);
 
     }
-
+    */
     {
+        /*
     QDateTime SelectDateTime(QDate(2000,01,01),QTime(00,00,10));
     qint32 time = SelectDateTime.toTime_t();
     qint32 previousDateTime = Select::selectPreviousDateTime(time);
@@ -29,11 +30,11 @@ int main(int argc, char *argv[])
     QString path = Select::selectPath(time);
     QString sourceadress = Select::selectSourceAdress(time);
     QString sourceName = Select::selectSourceName(time);
-
-    QString file = Select::selectFile(time);
-    time = time + 10;
+    */
+    QString file = Select::selectFile(946659600);
+    qint32 time = 946659600 + 10;
     file = Select::selectFile(time);
-    time = time + 10;
+    time = 946659657;
     file = Select::selectFile(time);
     time = time + 10;
     file = Select::selectFile(time);
@@ -55,7 +56,7 @@ int main(int argc, char *argv[])
               << " NextFile:"    << Select::selectNextFile(Select::selectFile(time)).toStdString()
                                  << std::endl;
     }
-    */
+
     QApplication a(argc, argv);
     Player player;
     PlayerController *playerController = new PlayerController(&player);

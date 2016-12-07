@@ -119,33 +119,55 @@ qint32  Select::selectNextDateTime(quint32 sDateTime)
 qint32  Select::selectFileId(QString fileName)
 {
     auto_ptr<database> db (create_database ());
+
     qint32 sFileId = -1;
-    try
+
+    typedef odb::query<file> query;
+    typedef odb::result<file> result;
+
+    transaction t (db->begin ());
+    result r (db->query<file> (query::name == fileName));
+
+    for (result::iterator i (r.begin()); i != r.end(); ++i)
     {
-        typedef odb::query<file> query;
-        typedef odb::result<file> result;
-
-        transaction t (db->begin ());
-        result r (db->query<file> (query::name == fileName));
-
-        for (result::iterator i (r.begin()); i != r.end(); ++i)
-        {
-            sFileId = i->id();
-        }
-        t.commit();
-
-        return sFileId;
+        sFileId = i->id();
     }
-    catch(QString e)
+    t.commit();
+
+    return sFileId;
+}
+qint32  Select::selectFileId(quint32 sDateTime)
+{
+    auto_ptr<database> db (create_database ());
+
+    qint32 sFileId = -1;
+
+    typedef odb::query<timeStamp> query;
+    typedef odb::result<timeStamp> result;
+
+    transaction t (db->begin ());
+    result r (db->query<timeStamp> (query::dateTime == sDateTime));
+
+    for (result::iterator i (r.begin()); i != r.end(); ++i)
     {
-        cout << e.toStdString().c_str() << endl;
+        sFileId = i->fileId();
     }
+    t.commit();
+
+    return sFileId;
 }
 qint32  Select::selectPreviousFileId(quint32 sDateTime)
 {
+    qint32 sFileId = selectFileId(sDateTime);
+
+    if(sFileId != -1)
+    {
+        return sFileId;
+    }
+
     auto_ptr<database> db (create_database ());
+
     sDateTime = selectPreviousDateTime(sDateTime);
-    qint32 sFileId = -1;
 
     typedef odb::query<timeStamp> query;
     typedef odb::result<timeStamp> result;
@@ -195,7 +217,9 @@ QString Select::selectFile(quint32 sDateTime)
     if (sDateTime <= selectMaxDateTime() && sDateTime >= selectMinDateTime());
     {
         auto_ptr<database> db (create_database ());
+
         qint32 sFileId = Select::selectPreviousFileId(sDateTime);
+
         QString sFileName = "";
 
         typedef odb::query<file> query;
