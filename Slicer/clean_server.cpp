@@ -1,5 +1,6 @@
 #include "clean_server.h"
 #include "clean_slicer.h"
+#include "insert.h"
 #include <QFile>
 #include <QDataStream>
 
