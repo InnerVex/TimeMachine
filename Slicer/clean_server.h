@@ -14,6 +14,7 @@ class Writer
     int currNumber;
     qint32 time;
     char *currName;
+    int length_of_dst;
 public:
     Writer(const char* destination, int wantedSize = 188 * 10000);
     void writeToFile(char* data,int len);

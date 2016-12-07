@@ -1,6 +1,6 @@
 #include "clean_server.h"
 #include "clean_slicer.h"
-#include "insert.h"
+//#include "insert.h"
 #include <QFile>
 #include <QDataStream>
 
@@ -59,9 +59,9 @@ void Clean_Server::onReadyRead()
 Writer::Writer(const char* destination, int wantedSize)
 {
     currNumber = 0;
-    //maxSize = 188 * 10000;
     maxSize = wantedSize;
-    dst = new char[strlen(destination)];
+    length_of_dst = strlen(destination);
+    dst = new char[length_of_dst];
     strcpy(dst,destination);
     currFile = new QFile;
     time = QDateTime(QDate(2000,01,01),QTime(00,00,00)).toTime_t();
@@ -75,7 +75,7 @@ void Writer::writeToFile(char *data, int len)
         qDebug()<<"Creating file";
         const char* ending =".ts";
         int rank = 5;
-        *currName = new char[strlen(dst)+strlen(ending) + rank];
+        currName = new char[length_of_dst+strlen(ending) + rank];
         strcpy(currName,dst);
         char str[rank];
         sprintf(str, "%d", currNumber);
@@ -101,7 +101,8 @@ void Writer::writeToFile(char *data, int len)
     {
         currFile->close();
 
-        int duration = Clean_Slicer::getDuration(currName);
+        Clean_Slicer slicer;
+        int duration = slicer.getDuration(currName);
         Insert(time,currName,"EXAMPLE_SOURCE_NAME","EXAMPLE_SOURCE_ADRESS","EXAMPLE_FILE_PATH",duration);
         time = time + duration/1000;
 
