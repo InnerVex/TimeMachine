@@ -92,7 +92,7 @@ void PlayerController::startPlayTimer(qint32 startTime)
 
     currentFilename = Select::selectFile(currentPlayTime);
     currentFileEndTime = Select::selectDateTime(currentFilename) + Select::selectDuration(currentPlayTime) * 0.001;
-    nextFileStartTime = Select::selectNextDateTime(currentFilename);
+    nextFileStartTime = Select::selectNextDateTime(currentPlayTime);
 }
 
 void PlayerController::stopPlayTimer()
@@ -126,7 +126,7 @@ void PlayerController::playTimerShot()
             currentPlayTime = nextFileStartTime;
             currentFilename = Select::selectFile(currentPlayTime);
             currentFileEndTime = Select::selectDateTime(currentFilename) + Select::selectDuration(currentPlayTime) * 0.001;
-            nextFileStartTime = Select::selectNextDateTime(currentFilename);
+            nextFileStartTime = Select::selectNextDateTime(currentPlayTime);
         }
     }
 
