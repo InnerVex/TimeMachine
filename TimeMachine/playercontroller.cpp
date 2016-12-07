@@ -36,6 +36,8 @@ PlayerController::PlayerController(Player *_player, QObject *parent) :
             this, &PlayerController::stepForwardButtonClicked);
     connect(player->ui->buttonRealTime, &QPushButton::clicked,
             this, &PlayerController::playRealTimeButtonClicked);
+    connect(player->ui->buttonShowSlider, &QPushButton::clicked,
+            this, &PlayerController::showSliderButtonClicked);
 
     connect(player->timeBar, &TimeBar::sendMessageToStatusBar,
             player, &Player::showMessageInStatusBar);
@@ -103,6 +105,7 @@ void PlayerController::startPlayTimer(qint32 startTime)
     {
         currentPlayTime = startTime;
     }
+    setTimeLabelText(currentPlayTime);
     playTimer->start(1000 / currentRate);
 
     currentFilename = Select::selectFile(currentPlayTime);
@@ -132,13 +135,31 @@ void PlayerController::updateRate(float rate)
 }
 
 /**
+ * @brief PlayerController::setTimeLabelText
+ * @param text - текст для отображения рядом с таймбаром
+ */
+void PlayerController::setTimeLabelText(QString text)
+{
+    player->ui->playTimeLabel->setText(text);
+}
+
+/**
+ * @brief PlayerController::setTimeLabelText
+ * @param time - проигрываемое время для отображения рядом с таймбаром
+ */
+void PlayerController::setTimeLabelText(qint32 time)
+{
+    player->ui->playTimeLabel->setText(QDateTime::fromTime_t(time).toString("dd'.'MM'.'yyyy' 'hh':'mm':'ss"));
+}
+
+/**
  * @brief PlayerController::playTimerShot
  * Инкремент момента проигрывания и проверка на переход между файлами архива/реалтаймом.
  */
 void PlayerController::playTimerShot()
 {
     currentPlayTime++;
-    if(currentPlayTime > currentFileEndTime)
+    if(currentPlayTime >= currentFileEndTime)
     {
         if(nextFileStartTime == -1)
         {
@@ -155,6 +176,7 @@ void PlayerController::playTimerShot()
         }
     }
 
+    setTimeLabelText(currentPlayTime);
     emit updateTimeBarSlider(currentPlayTime);
 }
 
@@ -266,6 +288,18 @@ void PlayerController::stopButtonClicked()
 }
 
 /**
+ * @brief PlayerController::showSliderButtonClicked
+ * Показывает участок таймбара, начинающийся с момента, который воспроизводится в данный момент.
+ */
+void PlayerController::showSliderButtonClicked()
+{
+    if(playbackState == PlaybackState::playingImem)
+    {
+        player->ui->dateTimeEdit->setDateTime(QDateTime::fromTime_t(currentPlayTime));
+    }
+}
+
+/**
  * @brief PlayerController::updatePlaybackState
  * @param newState - новое состояние системы: что проигрывается и проигрывается ли вообще.
  * Изменяет состояние интерфейса в зависимости от состояния системы.
@@ -284,6 +318,7 @@ void PlayerController::updatePlaybackState(PlaybackState newState)
         player->ui->buttonSpeedUp->setEnabled(true);
         break;
     case playingRtsp:
+        setTimeLabelText("Камера");
         stopTimeSlider();
         icon = QIcon(":/player/icons/pause");
         player->ui->buttonPlay->setIcon(icon);
@@ -294,6 +329,7 @@ void PlayerController::updatePlaybackState(PlaybackState newState)
         player->ui->buttonSpeedUp->setEnabled(false);
         break;
     case pausedImem:
+        setTimeLabelText("Камера");
         playTimer->stop();
         icon = QIcon(":/player/icons/play");
         player->ui->buttonPlay->setIcon(icon);
@@ -304,6 +340,7 @@ void PlayerController::updatePlaybackState(PlaybackState newState)
         player->ui->buttonSpeedUp->setEnabled(false);
         break;
     case pausedRtsp:
+        setTimeLabelText("Камера");
         stopTimeSlider();
         icon = QIcon(":/player/icons/play");
         player->ui->buttonPlay->setIcon(icon);
@@ -315,6 +352,7 @@ void PlayerController::updatePlaybackState(PlaybackState newState)
         break;
     case stopped:
     default:
+        setTimeLabelText("Остановлено");
         stopTimeSlider();
         icon = QIcon(":/player/icons/playfirstvisible");
         player->ui->buttonPlay->setIcon(icon);

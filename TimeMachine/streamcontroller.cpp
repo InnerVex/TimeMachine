@@ -91,6 +91,12 @@ void StreamController::replenishVideoPatchesBuffer()
         bool eof = false;
         bool maxBuffered = false;
 
+        if(QString::compare(currentFilename, "", Qt::CaseInsensitive) == 0)
+        {
+            //Архив закончился
+            break;
+        }
+
         //Цикл по видеопатчам
         while(true)
         {

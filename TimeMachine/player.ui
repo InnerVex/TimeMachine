@@ -413,7 +413,7 @@
            </property>
            <property name="minimumSize">
             <size>
-             <width>130</width>
+             <width>150</width>
              <height>0</height>
             </size>
            </property>
@@ -438,13 +438,13 @@
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_5">
            <property name="spacing">
-            <number>3</number>
+            <number>0</number>
            </property>
            <property name="leftMargin">
             <number>0</number>
            </property>
            <item>
-            <widget class="QPushButton" name="buttonShowScroller">
+            <widget class="QPushButton" name="buttonShowSlider">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                <horstretch>0</horstretch>
@@ -474,13 +474,58 @@
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
              </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Fixed</enum>
+             </property>
              <property name="sizeHint" stdset="0">
               <size>
-               <width>40</width>
+               <width>6</width>
                <height>20</height>
               </size>
              </property>
             </spacer>
+           </item>
+           <item>
+            <widget class="Line" name="line_5">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_9">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Fixed</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>6</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QLabel" name="playTimeLabel">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>110</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Остановлено</string>
+             </property>
+            </widget>
            </item>
            <item>
             <spacer name="verticalSpacer">

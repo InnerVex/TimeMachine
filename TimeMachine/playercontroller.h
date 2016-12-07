@@ -56,6 +56,8 @@ public slots:
     void startPlayTimer(qint32 startTime);
     void stopTimeSlider();
     void updateRate(float rate);
+    void setTimeLabelText(QString text);
+    void setTimeLabelText(qint32 time);
     void playTimerShot();
 
     void playButtonClicked();
@@ -66,6 +68,7 @@ public slots:
     void stepForwardButtonClicked();
     void stepBackButtonClicked();
     void stopButtonClicked();
+    void showSliderButtonClicked();
 
     void updatePlaybackState(PlaybackState newState);
 
