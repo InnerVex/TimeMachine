@@ -41,7 +41,7 @@ set(${PROJECT_NAME}_HEADERS
     source.h
     path.h
     file.h
-    timeStamp.h
+    timestamp.h
     playerdefinitions.h
     player.h
     playercontroller.h

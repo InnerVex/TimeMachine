@@ -67,4 +67,14 @@ private:
   #pragma db unique
   quint32 dateTime_;
 };
+
+#pragma db view object(timeStamp)
+  struct timeStamp_stats
+{
+    #pragma db column("min(" + timeStamp::dateTime_ + ")")
+    quint32 min_dateTime;
+
+    #pragma db column("max(" + timeStamp::dateTime_ + ")")
+    quint32 max_dateTime;
+};
 #endif // TIMESTAMP_HXX

@@ -179,11 +179,11 @@ void Slicer::makeMultipleSlices(const char* input, int number)
 {
     qint32 time = QDateTime(QDate(2000,01,01),QTime(00,00,00)).toTime_t();
     char output[1000];
-    int duration_of_slice = 30000; // in milliseconds
+    int duration_of_slice = 60000; // in milliseconds
     for (long long int i=0;i<number;i++)
     {
         sprintf(output
-                ,"qweroutputFromStream_%lld"
+                ,"outputFromStream_%lld"
                 ".ts"
                 ,i
                 );
@@ -231,7 +231,7 @@ uint8_t * videoBuffer;
 void cbVideoPrerender(void *p_video_data, uint8_t **pp_pixel_buffer, int size) {
     // Locking
     imageMutex.lock();
-    qDebug()<<(dec)<<"Size is"<<size<<(int)p_video_data;
+    //qDebug()<<(dec)<<"Size is"<<size<<(int)p_video_data;
     videoBuffer = (uint8_t *)malloc(size);
     *pp_pixel_buffer = videoBuffer;
 }
