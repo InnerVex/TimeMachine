@@ -23,6 +23,7 @@ public:
 
 private:
     static qint32  selectFileId         (QString fileName);
+    static qint32  selectFileId         (quint32 sDateTime);
     static qint32  selectNextFileId     (quint32 sDateTime);
     static qint32  selectPreviousFileId (quint32 sDateTime);
     static qint32  selectPathId         (quint32 sDateTime);
