@@ -24,3 +24,17 @@ void Clean_Slicer::makeSlicesFromStreamClean(const char *input, const char *outp
 
     qDebug()<<"VLC started";
 }
+
+int Clean_Slicer::getDuration(const char *input)
+{
+    const char * const vlc_args[] =
+    {
+        "vlc://quit",
+    };
+    inst=libvlc_new(sizeof(vlc_args) / sizeof(vlc_args[0]), vlc_args);
+    m = libvlc_media_new_path (inst, input);
+    mp = libvlc_media_player_new_from_media (m);
+    libvlc_media_parse(m);
+
+    return libvlc_media_get_duration(m);
+}

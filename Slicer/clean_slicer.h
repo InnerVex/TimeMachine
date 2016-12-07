@@ -9,4 +9,5 @@ class Clean_Slicer
     libvlc_media_t *m;
 public:
     void makeSlicesFromStreamClean(const char* input, const char* output);
+    int getDuration(const char* input);
 };

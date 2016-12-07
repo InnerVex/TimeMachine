@@ -63,6 +63,7 @@ Writer::Writer(const char* destination, int wantedSize)
     dst = new char[strlen(destination)];
     strcpy(dst,destination);
     currFile = new QFile;
+    time = QDateTime(QDate(2000,01,01),QTime(00,00,00)).toTime_t();
 }
 
 void Writer::writeToFile(char *data, int len)
@@ -71,10 +72,9 @@ void Writer::writeToFile(char *data, int len)
     if(!currFile->isOpen())
     {
         qDebug()<<"Creating file";
-        //const char* beginig = "D:\\example\\cleanOut";
         const char* ending =".ts";
-        int rank = 1;
-        char *currName = new char[strlen(dst)+strlen(ending) + rank];
+        int rank = 5;
+        *currName = new char[strlen(dst)+strlen(ending) + rank];
         strcpy(currName,dst);
         char str[rank];
         sprintf(str, "%d", currNumber);
@@ -99,6 +99,11 @@ void Writer::writeToFile(char *data, int len)
     else
     {
         currFile->close();
+
+        int duration = Clean_Slicer::getDuration(currName);
+        Insert(time,currName,"EXAMPLE_SOURCE_NAME","EXAMPLE_SOURCE_ADRESS","EXAMPLE_FILE_PATH",duration);
+        time = time + duration/1000;
+
         //currFile=nullptr; //sudo collect junk, I dunno how....
         currNumber++;
         writeToFile(data,len);
