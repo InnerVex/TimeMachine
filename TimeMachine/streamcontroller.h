@@ -71,8 +71,6 @@ private:
     QTimer *mReplenishTimer;
     qint32 requestTime;
     bool attemptingToStartStream;
-    bool streamingImem;
-    bool streamingRtsp;
     bool signalledStartTimer;
     bool imemInstanceReady;
     bool rtspInstanceReady;
@@ -80,20 +78,25 @@ private:
     Player *player;
     int windid;
 
+    PlaybackState playbackState;
+
     void startWaitingForStreamStart(bool isImem);
 
 signals:
     void signalSourceObtained();
     void signalStreamStarted();
-    void signalTimerStart(qint32 startTime);
+    void signalTimerStart(qint32 startTime = -1);
     void signalUpdateRate(float rate);
+    void signalUpdatePlaybackState(PlaybackState playbackState);
     void sendMessageToStatusBar(QString message);
 
 public slots:
     void requestedToObtainSource(quint32 requestTime, float playSpeed);
     void requestedToStreamArchive();
     void requestedToStreamRealTime();
-    void requestedToPauseStream();
-    void streamSpeedUp();
-    void streamSpeedDown();
+    void requestedToPauseArchive();
+    void requestedToPauseRealTime();
+    void requestedToStop();
+    void requestedToSpeedUp();
+    void requestedToSpeedDown();
 };

@@ -16,18 +16,9 @@ public:
     QSize sizeHint() const Q_DECL_OVERRIDE;
     bool canRequestTime;
     QDateTimeEdit *fvtEdit;
+    qint32 firstVisibleTime;
+    qint32 lastVisibleTime;
 
-signals:
-
-    void sendMessageToStatusBar(QString message);
-    void setPlayTime(qint32 requestTime);
-
-protected:
-    void dragMoveEvent(QDragMoveEvent *event) Q_DECL_OVERRIDE;
-    void wheelEvent(QWheelEvent *event) Q_DECL_OVERRIDE;
-    void paintEvent(QPaintEvent *event) Q_DECL_OVERRIDE;
-    void mouseMoveEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
-    void mousePressEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
 
 private:
     QWidget *mainWindow;
@@ -43,8 +34,6 @@ private:
     int scale = 0;
     int divValue;
     qint32 minimumAvailableTime;
-    qint32 firstVisibleTime;
-    qint32 lastVisibleTime;
     qint32 currentTime;
     qint32 hoverTime;
     int minDivSignPeriod;
@@ -61,6 +50,18 @@ private:
     void drawDivSign(QPainter &painter, QString format);
     void updateFVT();
     void updateAvailability();
+
+signals:
+
+    void sendMessageToStatusBar(QString message);
+    void setPlayTime(qint32 requestTime);
+
+protected:
+    void dragMoveEvent(QDragMoveEvent *event) Q_DECL_OVERRIDE;
+    void wheelEvent(QWheelEvent *event) Q_DECL_OVERRIDE;
+    void paintEvent(QPaintEvent *event) Q_DECL_OVERRIDE;
+    void mouseMoveEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
+    void mousePressEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
 
 public slots:
     void setFVT(const QDateTime &datetime);

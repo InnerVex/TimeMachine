@@ -11,26 +11,29 @@ PlayerController::PlayerController(Player *_player, QObject *parent) :
     player(_player)
 {
     //Объекты libVLC для воспроизведения входящего стрима
-    const char * const vlc_args[] = {"--verbose=0"};
+    /*const char * const vlc_args[] = {"--verbose=0"};
     mVlcInstance=libvlc_new(sizeof(vlc_args) / sizeof(vlc_args[0]), vlc_args);
     mMediaPlayer = libvlc_media_player_new (mVlcInstance);
-
-    inputLocation = "rtsp://localhost:5544/";
+    inputLocation = "rtsp://localhost:5544/";*/
 
     currentRate = 1;
+    playbackState = PlaybackState::stopped;
 
     //Коннекты элементов управления
     connect(player->ui->buttonPlay, &QPushButton::clicked,
             this, &PlayerController::playButtonClicked);
     connect(player->ui->testTimeButton, &QPushButton::clicked,
             this, &PlayerController::testInputButtonClicked);
+    connect(player->ui->buttonStop, &QPushButton::clicked,
+            this, &PlayerController::stopButtonClicked);
+    connect(player->ui->buttonSpeedUp, &QPushButton::clicked,
+            this, &PlayerController::speedUpButtonClicked);
+    connect(player->ui->buttonSpeedDown, &QPushButton::clicked,
+            this, &PlayerController::speedDownButtonClicked);
     connect(player->ui->buttonStepBack, &QPushButton::clicked,
             this, &PlayerController::stepBackButtonClicked);
     connect(player->ui->buttonStepForward, &QPushButton::clicked,
             this, &PlayerController::stepForwardButtonClicked);
-
-
-
     connect(player->ui->buttonRealTime, &QPushButton::clicked,
             this, &PlayerController::playRealTimeButtonClicked);
 
@@ -40,30 +43,33 @@ PlayerController::PlayerController(Player *_player, QObject *parent) :
             this, &PlayerController::setPlayPosition);
     connect(player->ui->dateTimeEdit, &QDateTimeEdit::dateTimeChanged,
             player->timeBar, &TimeBar::setFVT);
-    connect(this, &PlayerController::updateTimeBarScroller,
+    connect(this, &PlayerController::updateTimeBarSlider,
             player->timeBar, &TimeBar::setSliderPosition);
 
 
-    mPlayTimer = new QTimer();
-    connect(mPlayTimer, &QTimer::timeout,
+    playTimer = new QTimer();
+    connect(playTimer, &QTimer::timeout,
             this, &PlayerController::playTimerShot);
 }
 
-
+/**
+ * @brief PlayerController::handleSourceObtained
+ * Запрашивает воспроизведение архивов, получив сигнал об окончании пребуферизации.
+ */
 void PlayerController::handleSourceObtained()
 {
-    //TODO::Воспроизведение продолжается, если воспроизводилось до этого
-    //if(isIntendedToPlay && !isPlaying)
-    {
-        //Запрос стримеру на начало стрима
-        emit requestToStreamArchive();
-    }
+    emit requestToStreamArchive();
 }
 
+/**
+ * @brief PlayerController::attemptToPlayStream
+ * Deprecated
+ */
 void PlayerController::attemptToPlayStream()
 {
+    /*
     //Объект медиаданных из источника
-    /*mMedia = libvlc_media_new_location(mVlcInstance, inputLocation.c_str());
+    mMedia = libvlc_media_new_location(mVlcInstance, inputLocation.c_str());
     libvlc_media_player_set_media (mMediaPlayer, mMedia);
 
     //Дескриптор окна
@@ -71,9 +77,15 @@ void PlayerController::attemptToPlayStream()
     libvlc_media_player_set_hwnd(mMediaPlayer, (void*)windid );
 
     //Старт проигрывания
-    libvlc_media_player_play(mMediaPlayer);*/
+    libvlc_media_player_play(mMediaPlayer);
+    */
 }
 
+/**
+ * @brief PlayerController::setPlayPosition
+ * @param requestTime - момент архива, с которого нужно начать воспроизведение.
+ * Запрашивает у Дешинковщика начало воспроизведения архива.
+ */
 void PlayerController::setPlayPosition(qint32 requestTime)
 {
     emit requestToObtainSource(requestTime, 1);
@@ -87,23 +99,36 @@ void PlayerController::setPlayPosition(qint32 requestTime)
  */
 void PlayerController::startPlayTimer(qint32 startTime)
 {
-    currentPlayTime = startTime;
-    mPlayTimer->start(1000);
+    if(startTime != -1)
+    {
+        currentPlayTime = startTime;
+    }
+    playTimer->start(1000 / currentRate);
 
     currentFilename = Select::selectFile(currentPlayTime);
     currentFileEndTime = Select::selectDateTime(currentFilename) + Select::selectDuration(currentPlayTime) * 0.001;
     nextFileStartTime = Select::selectNextDateTime(currentPlayTime);
 }
 
-void PlayerController::stopPlayTimer()
+/**
+ * @brief PlayerController::stopPlayTimer
+ * Останавливает таймер синхронизации интерфейса и скрывает кирпич
+ */
+void PlayerController::stopTimeSlider()
 {
-
+    playTimer->stop();
+    emit updateTimeBarSlider(-1);
 }
 
+/**
+ * @brief PlayerController::updateRate
+ * @param rate - новая скорость воспроизведения.
+ * Изменяет скорость воспроизведения.
+ */
 void PlayerController::updateRate(float rate)
 {
     currentRate = rate;
-    mPlayTimer->setInterval(1000 / currentRate);
+    playTimer->setInterval(1000 / currentRate);
 }
 
 /**
@@ -118,7 +143,7 @@ void PlayerController::playTimerShot()
         if(nextFileStartTime == -1)
         {
             //Архив закончился
-            mPlayTimer->stop();
+            playTimer->stop();
             emit requestToStreamRealTime();
         }
         else
@@ -130,87 +155,175 @@ void PlayerController::playTimerShot()
         }
     }
 
-    emit updateTimeBarScroller(currentPlayTime);
+    emit updateTimeBarSlider(currentPlayTime);
 }
 
+/**
+ * @brief PlayerController::playButtonClicked
+ * Обрабатывает нажатие на кнопку воспроизведения. В случае остановки всех инстансов запрашивается
+ * воспроизведение архива с первого видимого на таймбаре момента. В случае воспроизведения запрашивается
+ * пауза работающего инстанса. Изменения в интерфейсе происходят по приходу ответного сигнала.
+ */
 void PlayerController::playButtonClicked()
 {
-    //TODO::Различные действия в зависимости от того, воспроизводится ли стрим
-    /*
-     *  Вообще действий может быть три:
-     * Старт после паузы
-     * Старт с нуля
-     * Пауза
-     *
-     * Пока что старт с нуля
-     * */
-    //Запрос стримеру на начало стрима и старт попыток подхватить стрим
-    //libvlc_media_player_stop(mMediaPlayer);
-    //emit requestToStream(playSpeed);
-
-    //startAttemptsToPlayStream();
-    attemptToPlayStream();
+    switch (playbackState) {
+    case playingImem:
+        emit requestToPauseArchive();
+        playTimer->stop();
+        break;
+    case playingRtsp:
+        emit requestToPauseRealTime();
+        playTimer->stop();
+        break;
+    case pausedImem:
+        emit requestToStreamArchive();
+        break;
+    case pausedRtsp:
+        emit requestToStreamRealTime();
+        break;
+    case stopped:
+    default:
+        emit requestToObtainSource(player->timeBar->firstVisibleTime, 1.0);
+        break;
+    }
 }
 
-//Перемотка при помощи тестовых элементов управления
+/**
+ * @brief PlayerController::testInputButtonClicked
+ * Тестовый элемент управления перемоткой.
+ */
 void PlayerController::testInputButtonClicked()
 {
     quint32 requestedTime = player->ui->testTimeInput->dateTime().toTime_t();
     emit requestToObtainSource(requestedTime, 1);
 }
 
-//Real Time Stream
+/**
+ * @brief PlayerController::playRealTimeButtonClicked
+ * Отправляет запрос на воспроизведение входного потока с камеры.
+ */
 void PlayerController::playRealTimeButtonClicked()
 {
-    /*if (isPlaying = true)
-        libvlc_media_player_stop(mMediaPlayer);
-
-    const char * const vlc_args[] = {"--verbose=2"};
-    mVlcInstance=libvlc_new(sizeof(vlc_args) / sizeof(vlc_args[0]), vlc_args);
-    mMediaPlayer = libvlc_media_player_new (mVlcInstance);
-    mMedia = libvlc_media_new_location (mVlcInstance, "rtsp://ewns-hls-b-stream.hexaglobe.net/rtpeuronewslive/en_vidan750_rtp.sdp");
-    libvlc_media_player_set_media (mMediaPlayer, mMedia);
-    int windid = player->ui->videoFrame->winId();
-#if defined(Q_OS_WIN)
-   libvlc_media_player_set_hwnd(mMediaPlayer, (void*)windid );
-#endif
-   libvlc_media_player_set_xwindow (mMediaPlayer, windid );
-    libvlc_media_player_play(mMediaPlayer);*/
-
     emit requestToStreamRealTime();
 }
 
-void PlayerController::startToPlayRealTimeStream()
+/**
+ * @brief PlayerController::speedUpButtonClicked
+ * Отправляет запрос Дешинковщику на увеличение скорости воспроизведения.
+ */
+void PlayerController::speedUpButtonClicked()
 {
-
+    if(playbackState == PlaybackState::playingImem)
+    {
+        emit requestToSpeedUp();
+    }
 }
 
-void PlayerController::stepBackButtonClicked()
+/**
+ * @brief PlayerController::speedDownButtonClicked
+ * Отправляет запрос Дешинковщику на уменьшение скорости воспроизведения.
+ */
+void PlayerController::speedDownButtonClicked()
 {
-
+    if(playbackState == PlaybackState::playingImem)
+    {
+        emit requestToSpeedDown();
+    }
 }
+
+/**
+ * @brief PlayerController::stepForwardButtonClicked
+ * Отправляет запрос Дешинковщику перемотаться на фиксированный шаг вперёд.
+ */
 void PlayerController::stepForwardButtonClicked()
 {
-
+    if(playbackState == PlaybackState::playingImem)
+    {
+        emit requestToObtainSource(currentPlayTime + STEP_PERIOD, 1.0);
+    }
 }
 
-
-/*
-void TestPlayer::updateInterface()
+/**
+ * @brief PlayerController::stepBackButtonClicked
+ * Отправляет запрос Дешинковщику перемотаться на фиксированный шаг назад.
+ */
+void PlayerController::stepBackButtonClicked()
 {
-    if(!mIsPlaying)
-        return;
-
-    // It's possible that the vlc doesn't play anything
-    // so check before
-    libvlc_media_t *curMedia = libvlc_media_player_get_media (mMediaPlayer);
-    if (curMedia == NULL)
-        return;
-
-    float pos=libvlc_media_player_get_position (mMediaPlayer);
-    int sliderPos=(int)(pos*(float)(POSITION_RESOLUTION));
-    mPositionSlider->setValue(sliderPos);
-    int volume=libvlc_audio_get_volume (mMediaPlayer);
-    mVolumeSlider->setValue(volume);
+    if(playbackState == PlaybackState::playingImem)
+    {
+        emit requestToObtainSource(currentPlayTime - STEP_PERIOD, 1.0);
+    }
 }
-*/
+
+/**
+ * @brief PlayerController::stopButtonClicked
+ * Отправляет запрос на остановку обоих инстансов LibVLC.
+ */
+void PlayerController::stopButtonClicked()
+{
+    stopTimeSlider();
+    emit requestToStop();
+}
+
+/**
+ * @brief PlayerController::updatePlaybackState
+ * @param newState - новое состояние системы: что проигрывается и проигрывается ли вообще.
+ * Изменяет состояние интерфейса в зависимости от состояния системы.
+ */
+void PlayerController::updatePlaybackState(PlaybackState newState)
+{
+    QIcon icon;
+    switch (newState) {
+    case playingImem:
+        icon = QIcon(":/player/icons/pause");
+        player->ui->buttonPlay->setIcon(icon);
+        player->ui->buttonStop->setEnabled(true);
+        player->ui->buttonStepBack->setEnabled(true);
+        player->ui->buttonStepForward->setEnabled(true);
+        player->ui->buttonSpeedDown->setEnabled(true);
+        player->ui->buttonSpeedUp->setEnabled(true);
+        break;
+    case playingRtsp:
+        stopTimeSlider();
+        icon = QIcon(":/player/icons/pause");
+        player->ui->buttonPlay->setIcon(icon);
+        player->ui->buttonStop->setEnabled(true);
+        player->ui->buttonStepBack->setEnabled(false);
+        player->ui->buttonStepForward->setEnabled(false);
+        player->ui->buttonSpeedDown->setEnabled(false);
+        player->ui->buttonSpeedUp->setEnabled(false);
+        break;
+    case pausedImem:
+        playTimer->stop();
+        icon = QIcon(":/player/icons/play");
+        player->ui->buttonPlay->setIcon(icon);
+        player->ui->buttonStop->setEnabled(true);
+        player->ui->buttonStepBack->setEnabled(false);
+        player->ui->buttonStepForward->setEnabled(false);
+        player->ui->buttonSpeedDown->setEnabled(false);
+        player->ui->buttonSpeedUp->setEnabled(false);
+        break;
+    case pausedRtsp:
+        stopTimeSlider();
+        icon = QIcon(":/player/icons/play");
+        player->ui->buttonPlay->setIcon(icon);
+        player->ui->buttonStop->setEnabled(true);
+        player->ui->buttonStepBack->setEnabled(false);
+        player->ui->buttonStepForward->setEnabled(false);
+        player->ui->buttonSpeedDown->setEnabled(false);
+        player->ui->buttonSpeedUp->setEnabled(false);
+        break;
+    case stopped:
+    default:
+        stopTimeSlider();
+        icon = QIcon(":/player/icons/playfirstvisible");
+        player->ui->buttonPlay->setIcon(icon);
+        player->ui->buttonStop->setEnabled(false);
+        player->ui->buttonStepBack->setEnabled(false);
+        player->ui->buttonStepForward->setEnabled(false);
+        player->ui->buttonSpeedDown->setEnabled(false);
+        player->ui->buttonSpeedUp->setEnabled(false);
+        break;
+    }
+    playbackState = newState;
+}

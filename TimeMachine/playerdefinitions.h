@@ -1,6 +1,7 @@
 #pragma once
 
 #define PLAY_ATTEMPT_DELAY 2000
+#define STEP_PERIOD 10
 
 struct SourceData {
     SourceData(std::string _path, qint32 _sourceStartTime, qint32 _sourceEndTime) :
@@ -22,4 +23,13 @@ struct VideoPatchData
     VideoPatchData(char* _videoPatch, qint32 _bytes) : videoPatch(_videoPatch), bytes(_bytes) {}
     char* videoPatch;
     qint32 bytes;
+};
+
+enum PlaybackState
+{
+    stopped,
+    playingImem,
+    playingRtsp,
+    pausedImem,
+    pausedRtsp
 };

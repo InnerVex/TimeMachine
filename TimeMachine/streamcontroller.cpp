@@ -53,6 +53,33 @@ int MyImemReleaseCallback (void *data,
 }
 
 /**
+ * @brief StreamController::StreamController
+ * @param parent
+ * Конструктор.
+ */
+StreamController::StreamController(Player *_player, QObject *parent) :
+    QObject(parent),
+    player(_player)
+{
+    mImemData = new ImemData();
+    mImemData->cookieString = "TM_SC_Instance";
+    mImemData->controller = this;
+    attemptingToStartStream = false;
+    playbackState = PlaybackState::stopped;
+    imemInstanceReady = false;
+    rtspInstanceReady = false;
+    currentRate = 1;
+
+    windid = player->ui->videoFrame->winId();
+
+    //Создаём инстанс LibVLC для воспроизведения реалтайма
+    if(!rtspInstanceReady)
+    {
+        createRTPSInstance();
+    }
+}
+
+/**
  * @brief StreamController::replenishVideoPatchesBuffer
  * Буферизует кусочки видео в оперативной памяти, пока не будет буферизовано VIDEO_PATCHES_TOTAL_BYTES байт.
  */
@@ -217,33 +244,6 @@ void StreamController::createRTPSInstance()
 }
 
 /**
- * @brief StreamController::StreamController
- * @param parent
- * Конструктор.
- */
-StreamController::StreamController(Player *_player, QObject *parent) :
-    QObject(parent),
-    player(_player)
-{
-    mImemData = new ImemData();
-    mImemData->cookieString = "TM_SC_Instance";
-    mImemData->controller = this;
-    attemptingToStartStream = false;
-    streamingImem = false;
-    imemInstanceReady = false;
-    rtspInstanceReady = false;
-    currentRate = 1;
-
-    windid = player->ui->videoFrame->winId();
-
-    //Создаём инстанс LibVLC для воспроизведения реалтайма
-    if(!rtspInstanceReady)
-    {
-        createRTPSInstance();
-    }
-}
-
-/**
  * @brief StreamController::requestedToObtainSource
  * @param _requestTime - Какой момент из архивного видео буферизовать
  * @param playSpeed - Deprecated
@@ -252,6 +252,7 @@ StreamController::StreamController(Player *_player, QObject *parent) :
 void StreamController::requestedToObtainSource(quint32 _requestTime, float playSpeed)
 {
     //Получение данных из БД и буфферизация
+    //TODO::Проверка момента на вхождение в диапазон доступности
     requestTime = _requestTime;
     currentFilename = Select::selectFile(requestTime);
     percentOffset = Select::selectPercentOffset(requestTime);
@@ -290,9 +291,14 @@ void StreamController::startWaitingForStreamStart(bool isImem)
         {
             if(isImem)
             {
-                emit signalTimerStart(requestTime);
+                emit signalTimerStart(playbackState == PlaybackState::pausedImem ? -1 : requestTime);
+                playbackState = PlaybackState::playingImem;
             }
-            //emit signalStreamStarted();
+            else
+            {
+                playbackState = PlaybackState::playingRtsp;
+            }
+            emit signalUpdatePlaybackState(playbackState);
             attemptingToStartStream = false;
         }
         if(!attemptingToStartStream)
@@ -311,21 +317,18 @@ void StreamController::startWaitingForStreamStart(bool isImem)
  */
 void StreamController::requestedToStreamArchive()
 {
-    if(streamingRtsp)
+    if(playbackState == PlaybackState::playingRtsp || playbackState == PlaybackState::pausedRtsp)
     {
         libvlc_media_player_stop(mediaPlayerRtsp);
-        streamingRtsp = false;
     }
 
 #if defined(Q_OS_WIN)
     libvlc_media_player_set_hwnd(mediaPlayerImem, (void*)windid );
 #elif defined(Q_OS_LINUX)
-    libvlc_media_player_set_xwindow (mMediaPlayer, windid );
+    libvlc_media_player_set_xwindow (mediaPlayerImem, (void*)windid );
 #endif
 
     libvlc_media_player_play(mediaPlayerImem);
-    streamingImem = true;
-
     startWaitingForStreamStart(true);
 }
 
@@ -335,38 +338,69 @@ void StreamController::requestedToStreamArchive()
  */
 void StreamController::requestedToStreamRealTime()
 {
-    if(streamingImem)
+    if(playbackState == PlaybackState::playingImem || playbackState == PlaybackState::pausedImem)
     {
         libvlc_media_player_stop(mediaPlayerImem);
-        streamingImem = false;
     }
 
 #if defined(Q_OS_WIN)
-    libvlc_media_player_set_hwnd(mediaPlayerImem, (void*)windid );
+    libvlc_media_player_set_hwnd(mediaPlayerRtsp, (void*)windid );
 #elif defined(Q_OS_LINUX)
-    libvlc_media_player_set_xwindow (mMediaPlayer, windid );
+    libvlc_media_player_set_xwindow (mediaPlayerRtsp, (void*)windid );
 #endif
 
     libvlc_media_player_play(mediaPlayerRtsp);
-    streamingRtsp = true;
-
     startWaitingForStreamStart(false);
 }
 
-
-void StreamController::requestedToPauseStream()
+/**
+ * @brief StreamController::requestedToPauseArchive
+ * Ставит на паузу инстанс LibVLC, отвечающий за воспроизведение архива.
+ */
+void StreamController::requestedToPauseArchive()
 {
-    //TODO::Остановить стрим
-
+    if(playbackState == PlaybackState::playingImem && libvlc_media_player_can_pause(mediaPlayerImem))
+    {
+        libvlc_media_player_pause(mediaPlayerImem);
+        playbackState = PlaybackState::pausedImem;
+        emit signalUpdatePlaybackState(playbackState);
+    }
 }
 
 /**
- * @brief StreamController::streamSpeedUp
+ * @brief StreamController::requestedToPauseRealTime
+ * Ставит на паузу инстанс LibVLC, отвечающий за воспроизведение потока с камеры.
+ */
+void StreamController::requestedToPauseRealTime()
+{
+    if(playbackState == PlaybackState::playingRtsp && libvlc_media_player_can_pause(mediaPlayerRtsp))
+    {
+        libvlc_media_player_pause(mediaPlayerRtsp);
+        playbackState = PlaybackState::pausedRtsp;
+        emit signalUpdatePlaybackState(playbackState);
+    }
+}
+
+/**
+ * @brief StreamController::requestedToStop
+ * Останавливает оба инстанса LibVLC.
+ */
+void StreamController::requestedToStop()
+{
+    libvlc_media_player_stop(mediaPlayerImem);
+    libvlc_media_player_stop(mediaPlayerRtsp);
+
+    playbackState = PlaybackState::stopped;
+    emit signalUpdatePlaybackState(playbackState);
+}
+
+/**
+ * @brief StreamController::requestedToSpeedUp
  * Ускоряет воспроизведение. Сигнал на изменение значения скорости также посылается сигналом Проигрывателю.
  */
-void StreamController::streamSpeedUp()
+void StreamController::requestedToSpeedUp()
 {
-    if(streamingImem && imemInstanceReady)
+    if(playbackState == PlaybackState::playingImem && imemInstanceReady)
     {
         if(currentRate < RATE_MAX)
         {
@@ -379,12 +413,12 @@ void StreamController::streamSpeedUp()
 }
 
 /**
- * @brief StreamController::streamSpeedDown Замедляет воспроизведение.
+ * @brief StreamController::requestedToSpeedDown
  * Замедляет воспроизведение. Сигнал на изменение значения скорости также посылается сигналом Проигрывателю.
  */
-void StreamController::streamSpeedDown()
+void StreamController::requestedToSpeedDown()
 {
-    if(streamingImem && imemInstanceReady)
+    if(playbackState == PlaybackState::playingImem && imemInstanceReady)
     {
         if(currentRate > RATE_MIN)
         {

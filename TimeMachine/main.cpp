@@ -58,9 +58,10 @@ int main(int argc, char *argv[])
     */
     QApplication a(argc, argv);
     Player player;
+    player.show();
+
     PlayerController *playerController = new PlayerController(&player);
     StreamController *streamController = new StreamController(&player);
-    player.show();
 
     //Сигналы от Проигрывателя и GUI к Дешинковщику
     QObject::connect(playerController, &PlayerController::requestToObtainSource,
@@ -69,12 +70,16 @@ int main(int argc, char *argv[])
                     streamController, &StreamController::requestedToStreamArchive);
     QObject::connect(playerController, &PlayerController::requestToStreamRealTime,
                     streamController, &StreamController::requestedToStreamRealTime);
-    QObject::connect(playerController, &PlayerController::requestToPauseStream,
-                    streamController, &StreamController::requestedToPauseStream);
-    QObject::connect(player.ui->buttonSpeedUp, &QPushButton::clicked,
-                    streamController, &StreamController::streamSpeedUp);
-    QObject::connect(player.ui->buttonSpeedDown, &QPushButton::clicked,
-                    streamController, &StreamController::streamSpeedDown);
+    QObject::connect(playerController, &PlayerController::requestToPauseArchive,
+                    streamController, &StreamController::requestedToPauseArchive);
+    QObject::connect(playerController, &PlayerController::requestToPauseRealTime,
+                    streamController, &StreamController::requestedToPauseRealTime);
+    QObject::connect(playerController, &PlayerController::requestToSpeedUp,
+                    streamController, &StreamController::requestedToSpeedUp);
+    QObject::connect(playerController, &PlayerController::requestToSpeedDown,
+                    streamController, &StreamController::requestedToSpeedDown);
+    QObject::connect(playerController, &PlayerController::requestToStop,
+                    streamController, &StreamController::requestedToStop);
 
     //Сигналы от Дешинковщика к Проигрывателю и GUI
     QObject::connect(streamController, &StreamController::signalSourceObtained,
@@ -85,6 +90,8 @@ int main(int argc, char *argv[])
                     playerController, &PlayerController::startPlayTimer);
     QObject::connect(streamController, &StreamController::signalUpdateRate,
                     playerController, &PlayerController::updateRate);
+    QObject::connect(streamController, &StreamController::signalUpdatePlaybackState,
+                    playerController, &PlayerController::updatePlaybackState);
     QObject::connect(streamController, &StreamController::sendMessageToStatusBar,
                     &player, &Player::showMessageInStatusBar);
 

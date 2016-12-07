@@ -18,9 +18,9 @@ public:
 private:
     Player *player;
 
-    libvlc_instance_t *mVlcInstance;
-    libvlc_media_player_t *mMediaPlayer;
-    libvlc_media_t *mMedia;
+    //libvlc_instance_t *mVlcInstance;
+    //libvlc_media_player_t *mMediaPlayer;
+    //libvlc_media_t *mMedia;
 
     bool isPlaying = false;
     bool isIntendedToPlay = false;
@@ -32,35 +32,41 @@ private:
     qint32 currentFileEndTime;
     qint32 nextFileStartTime;
 
-    QTimer *mAttemptTimer;
-    QTimer *mPlayTimer;
+    QTimer *playTimer;
+
+    PlaybackState playbackState;
 
 signals:
     void requestToObtainSource(quint32 requestTime, float playSpeed);
     void requestToStreamRealTime();
     void requestToStreamArchive();
-    void requestToPauseStream();
-    void requestStepForward(quint32 step);
-    void requestStepBack(quint32 step);
+    void requestToPauseRealTime();
+    void requestToPauseArchive();
+    void requestToStop();
+    void requestToSpeedUp();
+    void requestToSpeedDown();
 
-    void updateTimeBarScroller(qint32 playTime);
+    void updateTimeBarSlider(qint32 playTime);
 
 public slots:
     void handleSourceObtained();
     void attemptToPlayStream();
-    void startToPlayRealTimeStream();
 
     void setPlayPosition(qint32 requestTime);
     void startPlayTimer(qint32 startTime);
-    void stopPlayTimer();
+    void stopTimeSlider();
     void updateRate(float rate);
     void playTimerShot();
 
     void playButtonClicked();
     void playRealTimeButtonClicked();
     void testInputButtonClicked();
+    void speedUpButtonClicked();
+    void speedDownButtonClicked();
     void stepForwardButtonClicked();
     void stepBackButtonClicked();
+    void stopButtonClicked();
 
+    void updatePlaybackState(PlaybackState newState);
 
 };
