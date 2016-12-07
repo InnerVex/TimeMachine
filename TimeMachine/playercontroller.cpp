@@ -2,7 +2,7 @@
 #include "iostream"
 #include <chrono>
 #include <thread>
-
+#include <QtGlobal>
 #include <ui_player.h>
 
 PlayerController::PlayerController(Player *_player, QObject *parent) :
@@ -81,7 +81,7 @@ void PlayerController::setPlayPosition(qint32 requestTime)
 void PlayerController::startPlayTimer(qint32 startTime)
 {
     currentPlayTime = startTime;
-    mPlayTimer->start(1000 / currentRate);
+    mPlayTimer->start(1000);
 }
 
 void PlayerController::stopPlayTimer()
@@ -141,7 +141,10 @@ void PlayerController::playRealTimeButtonClicked()
     mMedia = libvlc_media_new_location (mVlcInstance, "rtsp://ewns-hls-b-stream.hexaglobe.net/rtpeuronewslive/en_vidan750_rtp.sdp");
     libvlc_media_player_set_media (mMediaPlayer, mMedia);
     int windid = player->ui->videoFrame->winId();
-    libvlc_media_player_set_hwnd(mMediaPlayer, (void*)windid );
+#if defined(Q_OS_WIN)
+   libvlc_media_player_set_hwnd(mMediaPlayer, (void*)windid );
+#endif
+   libvlc_media_player_set_xwindow (mMediaPlayer, windid );
     libvlc_media_player_play(mMediaPlayer);
 
     isPlaying = true;

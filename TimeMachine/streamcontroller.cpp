@@ -160,7 +160,10 @@ void StreamController::createImemInstance()
 
     //TODO::for test
     int windid = player->ui->videoFrame->winId();
+ #if defined(Q_OS_WIN)
     libvlc_media_player_set_hwnd(mMediaPlayer, (void*)windid );
+#endif
+    libvlc_media_player_set_xwindow (mMediaPlayer, windid );
 
     for(option = options.begin(); option != options.end(); option++)
     {
