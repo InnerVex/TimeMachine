@@ -2,7 +2,7 @@
 #include "iostream"
 #include <chrono>
 #include <thread>
-
+#include <QtGlobal>
 #include <select.h>
 #include <ui_player.h>
 
@@ -88,11 +88,11 @@ void PlayerController::setPlayPosition(qint32 requestTime)
 void PlayerController::startPlayTimer(qint32 startTime)
 {
     currentPlayTime = startTime;
-    mPlayTimer->start(1000 / currentRate);
+    mPlayTimer->start(1000);
 
     currentFilename = Select::selectFile(currentPlayTime);
     currentFileEndTime = Select::selectDateTime(currentFilename) + Select::selectDuration(currentPlayTime) * 0.001;
-    nextFileStartTime = Select::selectNextDateTime(currentFilename);
+    nextFileStartTime = Select::selectNextDateTime(currentPlayTime);
 }
 
 void PlayerController::stopPlayTimer()
@@ -126,7 +126,7 @@ void PlayerController::playTimerShot()
             currentPlayTime = nextFileStartTime;
             currentFilename = Select::selectFile(currentPlayTime);
             currentFileEndTime = Select::selectDateTime(currentFilename) + Select::selectDuration(currentPlayTime) * 0.001;
-            nextFileStartTime = Select::selectNextDateTime(currentFilename);
+            nextFileStartTime = Select::selectNextDateTime(currentPlayTime);
         }
     }
 
@@ -171,7 +171,10 @@ void PlayerController::playRealTimeButtonClicked()
     mMedia = libvlc_media_new_location (mVlcInstance, "rtsp://ewns-hls-b-stream.hexaglobe.net/rtpeuronewslive/en_vidan750_rtp.sdp");
     libvlc_media_player_set_media (mMediaPlayer, mMedia);
     int windid = player->ui->videoFrame->winId();
-    libvlc_media_player_set_hwnd(mMediaPlayer, (void*)windid );
+#if defined(Q_OS_WIN)
+   libvlc_media_player_set_hwnd(mMediaPlayer, (void*)windid );
+#endif
+   libvlc_media_player_set_xwindow (mMediaPlayer, windid );
     libvlc_media_player_play(mMediaPlayer);*/
 
     emit requestToStreamRealTime();

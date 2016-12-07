@@ -317,7 +317,12 @@ void StreamController::requestedToStreamArchive()
         streamingRtsp = false;
     }
 
+#if defined(Q_OS_WIN)
     libvlc_media_player_set_hwnd(mediaPlayerImem, (void*)windid );
+#elif defined(Q_OS_LINUX)
+    libvlc_media_player_set_xwindow (mediaPlayerImem, windid );
+#endif
+
     libvlc_media_player_play(mediaPlayerImem);
     streamingImem = true;
 
@@ -336,7 +341,12 @@ void StreamController::requestedToStreamRealTime()
         streamingImem = false;
     }
 
+#if defined(Q_OS_WIN)
     libvlc_media_player_set_hwnd(mediaPlayerRtsp, (void*)windid );
+#elif defined(Q_OS_LINUX)
+    libvlc_media_player_set_xwindow (mediaPlayerRtsp, windid );
+#endif
+
     libvlc_media_player_play(mediaPlayerRtsp);
     streamingRtsp = true;
 

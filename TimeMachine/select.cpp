@@ -26,122 +26,338 @@
 using namespace std;
 using namespace odb::core;
 
-qint32 Select::selectPreviousDateTime(quint32 sDateTime)
+qint32  Select::selectDateTime(QString fileName)
 {
     auto_ptr<database> db (create_database ());
-    QString e;
+
+    qint32 sDateTime = -1;
+    qint32 sFileId = selectFileId(fileName);
+
+    typedef odb::query<timeStamp> query;
+    typedef odb::result<timeStamp> result;
+
+    transaction t2 (db->begin ());
+    result r (db->query<timeStamp> (query::fileId == sFileId));
+
+    for (result::iterator i (r.begin()); i != r.end(); ++i)
+    {
+        sDateTime = i->dateTime();
+    }
+    t2.commit();
+
+    return sDateTime;
+}
+qint32  Select::selectPreviousDateTime(quint32 sDateTime)
+{
+  auto_ptr<database> db (create_database ());
     qint32 sNewDateTime = -1;
+    qint32 minDateTime = selectMinDateTime();
+    if (sDateTime == minDateTime)
+    {
+        return sDateTime;
+    }
     while (sDateTime != sNewDateTime)
     {
-        try
-        {
-            typedef odb::query<timeStamp> query;
-            typedef odb::result<timeStamp> result;
+        --sDateTime;
 
-            transaction t2 (db->begin ());
-            result r (db->query<timeStamp> (query::dateTime == sDateTime));
-
-            for (result::iterator i (r.begin()); i != r.end(); ++i)
-            {
-                sNewDateTime = i->dateTime();
-            }
-            t2.commit();
-
-            if (sNewDateTime == -1)
-            {
-                e = "File with time:" + QString::number(sDateTime) + " wasn't found";
-                throw e;
-            }
-
-            return sNewDateTime;
-        }
-        catch(QString e)
-        {
-            //cout << e.toStdString().c_str() << endl;
-        }
-       --sDateTime;
-    }
-}
-qint32 Select::selectFileId(quint32 sDateTime)
-{
-    auto_ptr<database> db (create_database ());
-    QString e;
-    sDateTime = selectPreviousDateTime(sDateTime);
-    qint32 sFileId = -1;
-    try
-    {
         typedef odb::query<timeStamp> query;
         typedef odb::result<timeStamp> result;
 
-        transaction t1 (db->begin ());
+        transaction t2 (db->begin ());
         result r (db->query<timeStamp> (query::dateTime == sDateTime));
 
         for (result::iterator i (r.begin()); i != r.end(); ++i)
         {
-            sFileId = i->fileId();
+            sNewDateTime = i->dateTime();
         }
-        t1.commit();
-
-        if (sFileId == -1)
+        if (sDateTime == minDateTime)
         {
-            e = "File with time:" + QString::number(sDateTime) + " wasn't found";
-            throw e;
+            break;
         }
-
-        return sFileId;
+        t2.commit();
     }
-        catch(QString e)
-        {
-            cout << e.toStdString().c_str() << endl;
-        }
-
+    return sNewDateTime;
 }
-qint32 Select::selectDuration(quint32 sDateTime)
+qint32  Select::selectNextDateTime(quint32 sDateTime)
 {
     auto_ptr<database> db (create_database ());
-    qint32 sFileId = selectFileId(sDateTime);
-    qint32 sDuration = -1;
-    QString e;
+    qint32 sNewDateTime = -1;
+    qint32 maxDateTime = selectMaxDateTime();
 
-    try
+    if (sDateTime == maxDateTime)
     {
+        return -1;
+    }
+
+    while (sDateTime != sNewDateTime)
+    {
+        typedef odb::query<timeStamp> query;
+        typedef odb::result<timeStamp> result;
+
+        ++sDateTime;
+
+        transaction t2 (db->begin ());
+        result r (db->query<timeStamp> (query::dateTime == sDateTime));
+
+
+        for (result::iterator i (r.begin()); i != r.end(); ++i)
+        {
+            sNewDateTime = i->dateTime();
+        }
+        t2.commit();
+
+
+        if(sDateTime == maxDateTime)
+        {
+            break;
+        }
+    }
+
+    return sNewDateTime;
+}
+
+qint32  Select::selectFileId(QString fileName)
+{
+    auto_ptr<database> db (create_database ());
+
+    qint32 sFileId = -1;
+
+    typedef odb::query<file> query;
+    typedef odb::result<file> result;
+
+    transaction t (db->begin ());
+    result r (db->query<file> (query::name == fileName));
+
+    for (result::iterator i (r.begin()); i != r.end(); ++i)
+    {
+        sFileId = i->id();
+    }
+    t.commit();
+
+    return sFileId;
+}
+qint32  Select::selectFileId(quint32 sDateTime)
+{
+    auto_ptr<database> db (create_database ());
+
+    qint32 sFileId = -1;
+
+    typedef odb::query<timeStamp> query;
+    typedef odb::result<timeStamp> result;
+
+    transaction t (db->begin ());
+    result r (db->query<timeStamp> (query::dateTime == sDateTime));
+
+    for (result::iterator i (r.begin()); i != r.end(); ++i)
+    {
+        sFileId = i->fileId();
+    }
+    t.commit();
+
+    return sFileId;
+}
+qint32  Select::selectPreviousFileId(quint32 sDateTime)
+{
+    qint32 sFileId = selectFileId(sDateTime);
+
+    if(sFileId != -1)
+    {
+        return sFileId;
+    }
+
+    auto_ptr<database> db (create_database ());
+
+    sDateTime = selectPreviousDateTime(sDateTime);
+
+    typedef odb::query<timeStamp> query;
+    typedef odb::result<timeStamp> result;
+
+    transaction t1 (db->begin ());
+    result r (db->query<timeStamp> (query::dateTime == sDateTime));
+
+    for (result::iterator i (r.begin()); i != r.end(); ++i)
+    {
+        sFileId = i->fileId();
+    }
+
+    t1.commit();
+
+    return sFileId;
+
+}
+qint32  Select::selectNextFileId(quint32 sDateTime)
+{
+    auto_ptr<database> db (create_database ());
+    sDateTime = selectNextDateTime(sDateTime);
+
+    qint32 sFileId = -1;
+
+    if (sDateTime == -1)
+    {
+        return sFileId;
+    }
+
+    typedef odb::query<timeStamp> query;
+    typedef odb::result<timeStamp> result;
+
+    transaction t1 (db->begin ());
+    result r (db->query<timeStamp> (query::dateTime == sDateTime));
+
+    for (result::iterator i (r.begin()); i != r.end(); ++i)
+    {
+        sFileId = i->fileId();
+    }
+    t1.commit();
+
+    return sFileId;
+}
+
+QString Select::selectFile(quint32 sDateTime)
+{
+    if (sDateTime <= selectMaxDateTime() && sDateTime >= selectMinDateTime());
+    {
+        auto_ptr<database> db (create_database ());
+
+        qint32 sFileId = Select::selectPreviousFileId(sDateTime);
+
+        QString sFileName = "";
+
         typedef odb::query<file> query;
         typedef odb::result<file> result;
-
         transaction t (db->begin ());
         result r (db->query<file> (query::id == sFileId));
 
         for (result::iterator i (r.begin()); i != r.end(); ++i)
         {
-            sDuration = i->duration();
-
+            sFileName = i->name();
         }
         t.commit();
 
-        if (sDuration == -1)
-        {
-            e = "Duration of file for time: " + QDateTime::fromTime_t(sDateTime).toString() +"wasn't found";
-            throw e;
-        }
-
-        return sDuration;
+        return sFileName;
     }
-    catch(QString e)
+    return "";
+}
+QString Select::selectNextFile(QString fileName)
+{
+    QString sFileName = "";
+
+    auto_ptr<database> db (create_database ());
+
+    qint32 sDateTime = selectDateTime(fileName);
+
+    if(sDateTime == -1)
     {
-        cout << e.toStdString().c_str() << endl;
+        return sFileName;
+    }
+
+    qint32 sFileId = selectNextFileId(sDateTime);
+
+    if(sFileId == -1)
+    {
+        return sFileName;
+    }
+
+    typedef odb::query<file> query;
+    typedef odb::result<file> result;
+    transaction t (db->begin ());
+    result r (db->query<file> (query::id == sFileId));
+
+    for (result::iterator i (r.begin()); i != r.end(); ++i)
+    {
+        sFileName = i->name();
+    }
+
+    t.commit();
+
+    return sFileName;
+}
+
+qint32  Select::selectDuration(quint32 sDateTime)
+{
+    auto_ptr<database> db (create_database ());
+    qint32 sFileId = selectPreviousFileId(sDateTime);
+    qint32 sDuration = -1;
+    QString e;
+
+    typedef odb::query<file> query;
+    typedef odb::result<file> result;
+
+    transaction t (db->begin ());
+    result r (db->query<file> (query::id == sFileId));
+
+    for (result::iterator i (r.begin()); i != r.end(); ++i)
+    {
+        sDuration = i->duration();
+
+    }
+    t.commit();
+
+    return sDuration;
+}
+qint32  Select::selectOffset(quint32 sDateTime)
+{
+    qint32 offset = sDateTime - selectPreviousDateTime(sDateTime);
+
+    return offset;
+}
+float   Select::selectPercentOffset(quint32 sDateTime)
+{
+    float sOffset = selectOffset(sDateTime);
+    float sDuration = selectDuration(sDateTime);
+    float percentOffset = sOffset*1000/sDuration;
+
+    return percentOffset;
+}
+
+qint32  Select::selectMaxDateTime()
+{
+    auto_ptr<database> db (create_database ());
+    {
+        qint32 maxDateTime = -1;
+
+        typedef odb::query<timeStamp> query;
+
+        transaction t (db->begin ());
+
+        timeStamp_stats ts (db->query_value<timeStamp_stats> ());
+
+        maxDateTime = ts.max_dateTime;
+
+        t.commit ();
+
+        return maxDateTime;
     }
 }
-qint32 Select::selectPathId(quint32 sDateTime)
+qint32  Select::selectMinDateTime()
+{
+    auto_ptr<database> db (create_database ());
+    {
+        qint32 minDateTime = -1;
+
+        transaction t (db->begin ());
+
+        timeStamp_stats ts (db->query_value<timeStamp_stats> ());
+
+        minDateTime = ts.min_dateTime;
+
+        t.commit ();
+
+        return minDateTime;
+    }
+}
+
+qint32  Select::selectPathId(quint32 sDateTime)
 {
     auto_ptr<database> db (create_database ());
 
-    qint32 sPathId = -1,sFileId;
+    qint32 sPathId = -1;
+    qint32 sFileId =Select::selectPreviousFileId(sDateTime);
     QString sFileName,e;
     try
     {
         typedef odb::query<file> query;
         typedef odb::result<file> result;
-        sFileId = Select::selectFileId(sDateTime);
+
         transaction t1 (db->begin ());
         result r (db->query<file> (query::id == sFileId));
 
@@ -165,12 +381,12 @@ qint32 Select::selectPathId(quint32 sDateTime)
         cout << e.toStdString().c_str() << endl;
     }
 }
-qint32 Select::selectSourceId(quint32 sDateTime)
+qint32  Select::selectSourceId(quint32 sDateTime)
 {
     auto_ptr<database> db (create_database ());
 
     qint32 sSourceId = -1;
-    qint32 sFileId = Select::selectFileId(sDateTime);
+    qint32 sFileId = Select::selectPreviousFileId(sDateTime);
     QString e;
     try
     {
@@ -188,7 +404,7 @@ qint32 Select::selectSourceId(quint32 sDateTime)
 
         if(sSourceId == -1)
         {
-            e = "Source for time = " + QDateTime::fromTime_t(sDateTime).toString() +"wasn't found";
+            e = "Source for time = " + QDateTime::fromTime_t(sDateTime).toString() +" wasn't found";
             throw e;
 
         }
@@ -199,100 +415,33 @@ qint32 Select::selectSourceId(quint32 sDateTime)
         cout << e.toStdString().c_str() << endl;
     }
 }
-qint32 Select::selectOffset(quint32 sDateTime)
-{
-    qint32 offset = sDateTime - selectPreviousDateTime(sDateTime);
-
-    return offset;
-}
-QString Select::selectFile(quint32 sDateTime)
-{
-    //TODO::Сюда тоже проверка на границу (минимальную) //Казиев
-    auto_ptr<database> db (create_database ());
-    qint32 sFileId;
-    QString sFileName = "",e;
-
-    typedef odb::query<file> query;
-    typedef odb::result<file> result;
-    sFileId = Select::selectFileId(sDateTime);
-    transaction t (db->begin ());
-    result r (db->query<file> (query::id == sFileId));
-
-    for (result::iterator i (r.begin()); i != r.end(); ++i)
-    {
-        sFileName = i->name();
-    }
-    t.commit();
-
-    if(sFileName == "")
-    {
-        e = "File for time = " + QDateTime::fromTime_t(sDateTime).toString() +"wasn't found";
-        //cout << e.toStdString().c_str() << endl;
-    }
-
-    return sFileName;
-}
 QString Select::selectPath(quint32 sDateTime)
 {
     auto_ptr<database> db (create_database ());
-    qint32 sPathId;
-    QString sPath;
-    try
+
+    qint32 sPathId = Select::selectPathId(sDateTime);
+    QString sPath = "";
+
     {
+        typedef odb::query<path> query;
+        typedef odb::result<path> result;
+        transaction t (db->begin ());
+        result r (db->query<path> (query::id == sPathId));
+
+        for (result::iterator i (r.begin()); i != r.end(); ++i)
         {
-            typedef odb::query<path> query;
-            typedef odb::result<path> result;
-            sPathId = Select::selectPathId(sDateTime);
-            transaction t (db->begin ());
-            result r (db->query<path> (query::id == sPathId));
-
-            for (result::iterator i (r.begin()); i != r.end(); ++i)
-            {
-                sPath = i->filePath();
-            }
-            t.commit();
+            sPath = i->filePath();
         }
+        t.commit();
+    }
 
-        return sPath;
-    }
-    catch(QString e)
-    {
-        cout << e.toStdString().c_str() << endl;
-    }
+    return sPath;
 }
 QString Select::selectSourceName(quint32 sDateTime){
     auto_ptr<database> db (create_database ());
     qint32 sSourceId;
-    QString sSourceName;
-    try
-    {
-        {
-            typedef odb::query<source> query;
-            typedef odb::result<source> result;
-            sSourceId = Select::selectSourceId(sDateTime);
-            transaction t (db->begin ());
-            result r (db->query<source> (query::id == sSourceId));
+    QString sSourceName = "";
 
-            for (result::iterator i (r.begin()); i != r.end(); ++i)
-            {
-                sSourceName = i->name();
-
-            }
-            t.commit();
-        }
-
-        return sSourceName;
-    }
-    catch(QString e)
-    {
-        cout << e.toStdString().c_str() << endl;
-    }
-}
-QString Select::selectSourceAdress(quint32 sDateTime){
-    auto_ptr<database> db (create_database ());
-    qint32 sSourceId;
-    QString sSourceAdress;
-    try
     {
         typedef odb::query<source> query;
         typedef odb::result<source> result;
@@ -302,173 +451,31 @@ QString Select::selectSourceAdress(quint32 sDateTime){
 
         for (result::iterator i (r.begin()); i != r.end(); ++i)
         {
-            sSourceAdress = i->adress();
+            sSourceName = i->name();
+
         }
         t.commit();
+    }
 
-        return sSourceAdress;
-    }
-    catch(QString e)
-    {
-        cout << e.toStdString().c_str() << endl;
-    }
+    return sSourceName;
 }
-float Select::selectPercentOffset(quint32 sDateTime)
-{
-    try
-    {
-        float sOffset = selectOffset(sDateTime);
-        float sDuration = selectDuration(sDateTime);
-        float percentOffset = sOffset*1000/sDuration;
-
-        if (sOffset > sDuration)
-        {
-            QString e = "Error in the calculation";
-            throw e;
-        }
-
-        return percentOffset;
-    }
-    catch(QString e)
-    {
-        cout << e.toStdString().c_str() << endl;
-    }
-}
-QString Select::selectNextFile(QString fileName)
-{
-    //TODO::В selectNextFile, selectNextDateTime и selectFile убрал TRY-CATCH, в случае ненайденного файла возвращается ''.
-    //Нужно сделать так же везде.
-    //Также операторы после return не выполняются
-    //Также сообщения нужно убрать, так как запросы вызываются теперь при каждой отрисовке - очень много спама //Казиевы
-    QString sFileName = "", e;
-
+QString Select::selectSourceAdress(quint32 sDateTime){
     auto_ptr<database> db (create_database ());
-    qint32 sDateTime = selectNextDateTime(fileName);
-    if(sDateTime == -1)
-    {
-        return sFileName;
-    }
-    qint32 sFileId = selectFileId(sDateTime);
 
+    qint32 sSourceId;
+    QString sSourceAdress = "";
 
-    typedef odb::query<file> query;
-    typedef odb::result<file> result;
+    typedef odb::query<source> query;
+    typedef odb::result<source> result;
+    sSourceId = Select::selectSourceId(sDateTime);
     transaction t (db->begin ());
-    result r (db->query<file> (query::id == sFileId));
+    result r (db->query<source> (query::id == sSourceId));
 
     for (result::iterator i (r.begin()); i != r.end(); ++i)
     {
-        sFileName = i->name();
+        sSourceAdress = i->adress();
     }
-
-    if(sFileName == "")
-    {
-        e = "File for time = " + QDateTime::fromTime_t(sDateTime).toString() +"wasn't found";
-        //cout << e.toStdString().c_str() << endl;
-    }
-
     t.commit();
-    return sFileName;
-}
-qint32  Select::selectNextDateTime(QString fileName)
-{
-    auto_ptr<database> db (create_database ());
-    QString e;
-    qint32 sDateTime = selectDateTime(fileName);
-    qint32 sNewDateTime = -1;
-    while (sDateTime != sNewDateTime)
-    {
-        typedef odb::query<timeStamp> query;
-        typedef odb::result<timeStamp> result;
 
-        ++sDateTime;
-
-        transaction t2 (db->begin ());
-        result r (db->query<timeStamp> (query::dateTime == sDateTime));
-
-
-        for (result::iterator i (r.begin()); i != r.end(); ++i)
-        {
-            sNewDateTime = i->dateTime();
-        }
-        t2.commit();
-
-        //TODO::Сюда добавил заглушку вместо max-значения //Казиев
-        qint32 maxDateTime = 946660000;
-        if(sDateTime > maxDateTime)
-        {
-            break;
-        }
-    }
-    if (sNewDateTime == -1)
-    {
-        e = "File with time:" + QString::number(sDateTime) + " wasn't found";
-        //cout << e.toStdString().c_str() << endl;
-    }
-
-    return sNewDateTime;
-}
-qint32  Select::selectDateTime(QString fileName)
-{
-    auto_ptr<database> db (create_database ());
-    QString e;
-    qint32 sDateTime = -1;
-    qint32 sFileId = selectFileId(fileName);
-    try
-    {
-        typedef odb::query<timeStamp> query;
-        typedef odb::result<timeStamp> result;
-
-        transaction t2 (db->begin ());
-        result r (db->query<timeStamp> (query::fileId == sFileId));
-
-        for (result::iterator i (r.begin()); i != r.end(); ++i)
-        {
-            sDateTime = i->dateTime();
-        }
-        t2.commit();
-
-        if (sDateTime == -1)
-        {
-            e = "Time for file:" + fileName + " wasn't found";
-            throw e;
-        }
-    }
-    catch(QString e)
-    {
-        cout << e.toStdString().c_str() << endl;
-    }
-    return sDateTime;
-}
-qint32  Select::selectFileId(QString fileName)
-{
-    auto_ptr<database> db (create_database ());
-    qint32 sFileId = -1;
-    QString e;
-    try
-    {
-        typedef odb::query<file> query;
-        typedef odb::result<file> result;
-
-        transaction t (db->begin ());
-        result r (db->query<file> (query::name == fileName));
-
-        for (result::iterator i (r.begin()); i != r.end(); ++i)
-        {
-            sFileId = i->id();
-        }
-        t.commit();
-
-        if(sFileId == -1)
-        {
-            e = "File ID for file = " + fileName +"wasn't found";
-            throw e;
-        }
-
-        return sFileId;
-    }
-    catch(QString e)
-    {
-        cout << e.toStdString().c_str() << endl;
-    }
+    return sSourceAdress;
 }
