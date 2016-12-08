@@ -258,10 +258,41 @@ void StreamController::createRTPSInstance()
 void StreamController::requestedToObtainSource(quint32 _requestTime, float playSpeed)
 {
     //Получение данных из БД и буфферизация
-    //TODO::Проверка момента на вхождение в диапазон доступности
     requestTime = _requestTime;
     currentFilename = Select::selectFile(requestTime);
     percentOffset = Select::selectPercentOffset(requestTime);
+    bool searchNextFile = false;
+    if(QString::compare(currentFilename, "") != 0)
+    {
+        qint32 startTime = Select::selectDateTime(currentFilename);
+        if(startTime + Select::selectDuration(startTime) * 0.001 < requestTime)
+        {
+            //На самом деле, момент запроса не принадлежит предыдущему файлу архиваы
+            searchNextFile = true;
+        }
+    }
+    else
+    {
+        //Перед моментом запроса нет архивов
+        searchNextFile = true;
+    }
+
+    if(searchNextFile)
+    {
+        qint32 nextFileStartTime = Select::selectNextDateTime(requestTime);
+        if(nextFileStartTime == -1)
+        {
+            //После момента запроса архивов тоже нет
+            requestedToStreamRealTime();
+            return;
+        }
+        else
+        {
+            //Воспроизводим следующий файл
+            currentFilename = Select::selectFile(nextFileStartTime);
+            percentOffset = 0;
+        }
+    }
 
     //Буфферизуем видеопатчи
     totalBytesBuffered = 0;

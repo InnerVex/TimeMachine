@@ -14,7 +14,7 @@ TimeBar::TimeBar(QDateTimeEdit *_fvtEdit, QWidget *parent) :
     setMouseTracking(true);
 
     firstVisibleTime = fvtEdit->dateTime().toTime_t();
-    minimumAvailableTime = 946659600;
+    minimumAvailableTime = Select::selectMinDateTime();
     canRequestTime = true;
     cursorHover = false;
     drawSlider = false;
@@ -78,21 +78,18 @@ void TimeBar::wheelEvent(QWheelEvent *event)
     {
         scale -= (event->delta()/120);
         scale = (scale < 0) ? 0 : (scale > TB_SCALE_MAX) ? TB_SCALE_MAX : scale;
-        emit sendMessageToStatusBar("Scale: " + QString::number(scale));
     }
     else if(event->modifiers() & Qt::ShiftModifier)
     {
         firstVisibleTime -= (event->delta()/120) * divValue * 10;
         firstVisibleTime = (firstVisibleTime < 0) ? 0 : firstVisibleTime;
         if(firstVisibleTime < minimumAvailableTime) firstVisibleTime = minimumAvailableTime;
-        emit sendMessageToStatusBar("FirstVisibleTime: " + QString::number(firstVisibleTime));
     }
     else
     {
         firstVisibleTime -= (event->delta()/120) * divValue;
         firstVisibleTime = (firstVisibleTime < 0) ? 0 : firstVisibleTime;
         if(firstVisibleTime < minimumAvailableTime) firstVisibleTime = minimumAvailableTime;
-        emit sendMessageToStatusBar("FirstVisibleTime: " + QString::number(firstVisibleTime));
     }
 
     updateFVT();
@@ -102,6 +99,11 @@ void TimeBar::wheelEvent(QWheelEvent *event)
 void TimeBar::setFVT(const QDateTime &datetime)
 {
     firstVisibleTime = datetime.toTime_t();
+    if(firstVisibleTime < minimumAvailableTime)
+    {
+        firstVisibleTime = minimumAvailableTime;
+        updateFVT();
+    }
     repaint();
 }
 

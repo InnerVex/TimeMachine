@@ -70,7 +70,7 @@ qint32  Select::selectPreviousDateTime(quint32 sDateTime)
         {
             sNewDateTime = i->dateTime();
         }
-        if (sDateTime == minDateTime)
+        if (sDateTime <= minDateTime)
         {
             break;
         }
@@ -107,7 +107,7 @@ qint32  Select::selectNextDateTime(quint32 sDateTime)
         t2.commit();
 
 
-        if(sDateTime == maxDateTime)
+        if(sDateTime >= maxDateTime)
         {
             break;
         }
