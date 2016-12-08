@@ -316,19 +316,16 @@ void TimeBar::paintEvent(QPaintEvent *event)
         prevRight = right;
     }
     currentTime = QDateTime::currentDateTimeUtc().toTime_t();
-    if(availabilityVector.last().second < lastVisibleTime)
+    int right = widgetWidth;
+    if(currentTime < lastVisibleTime)
     {
-        int right = widgetWidth;
-        if(currentTime < lastVisibleTime)
-        {
-            right = widgetWidth *
-                    (float)(currentTime - firstVisibleTime) / (lastVisibleTime - firstVisibleTime);
+        right = widgetWidth *
+                (float)(currentTime - firstVisibleTime) / (lastVisibleTime - firstVisibleTime);
 
-        }
-        if(right == widgetWidth) right -= 1;
-        painter.setBrush(QBrush(Qt::red));
-        painter.drawRect(QRect(prevRight, 1, (right - prevRight), TB_TIME_SLIDER_HEIGHT - 1));
     }
+    if(right == widgetWidth) right -= 1;
+    painter.setBrush(QBrush(Qt::red));
+    painter.drawRect(QRect(prevRight, 1, (right - prevRight), TB_TIME_SLIDER_HEIGHT - 1));
     divPen.setStyle(Qt::SolidLine);
 
     //Отрисовка подсказывающей полосочки под курсором

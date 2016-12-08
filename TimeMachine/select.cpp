@@ -60,26 +60,17 @@ qint32  Select::selectPreviousDateTime(quint32 sDateTime)
     {
         return sDateTime;
     }
-    while (sDateTime != sNewDateTime)
+
+    typedef odb::query<timeStamp> query;
+    typedef odb::result<timeStamp> result;
+    transaction t2 (db->begin ());
+    result r (db->query<timeStamp> (query::dateTime < sDateTime));
+    for (result::iterator i (r.begin()); i != r.end(); ++i)
     {
-        --sDateTime;
-
-        typedef odb::query<timeStamp> query;
-        typedef odb::result<timeStamp> result;
-
-        transaction t2 (db->begin ());
-        result r (db->query<timeStamp> (query::dateTime == sDateTime));
-
-        for (result::iterator i (r.begin()); i != r.end(); ++i)
-        {
-            sNewDateTime = i->dateTime();
-        }
-        if (sDateTime <= minDateTime)
-        {
-            break;
-        }
-        t2.commit();
+        sNewDateTime = i->dateTime();
     }
+    t2.commit();
+
     return sNewDateTime;
 }
 qint32  Select::selectNextDateTime(quint32 sDateTime)
@@ -93,29 +84,16 @@ qint32  Select::selectNextDateTime(quint32 sDateTime)
         return -1;
     }
 
-    while (sDateTime != sNewDateTime)
+    typedef odb::query<timeStamp> query;
+    typedef odb::result<timeStamp> result;
+    transaction t2 (db->begin ());
+    result r (db->query<timeStamp> (query::dateTime > sDateTime));
+    if(!r.empty())
     {
-        typedef odb::query<timeStamp> query;
-        typedef odb::result<timeStamp> result;
-
-        ++sDateTime;
-
-        transaction t2 (db->begin ());
-        result r (db->query<timeStamp> (query::dateTime == sDateTime));
-
-
-        for (result::iterator i (r.begin()); i != r.end(); ++i)
-        {
-            sNewDateTime = i->dateTime();
-        }
-        t2.commit();
-
-
-        if(sDateTime >= maxDateTime)
-        {
-            break;
-        }
+        result::iterator i (r.begin());
+        sNewDateTime = i->dateTime();
     }
+    t2.commit();
 
     return sNewDateTime;
 }

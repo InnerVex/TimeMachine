@@ -62,11 +62,11 @@ int main(int argc, char *argv[])
     */
     QApplication a(argc, argv);
 
-    Clean_Server server;
+    //Clean_Server server;
     const char* input = "rtsp://10.0.0.197:8554/CH001.sdp";
     const char* dst = "example/out";
     int wantedSize = 5000000; //bytes
-    server.startRecord(input,dst,wantedSize);
+    //server.startRecord(input,dst,wantedSize);
 
     Player player;
     player.show();
