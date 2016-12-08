@@ -1,21 +1,20 @@
 /*#include <QCoreApplication>
-#include "slicer.h"
-#include "parser.h"
 #include "QDebug"
+#include <QApplication>
+#include <QtCore>
+
+#include "clean_server.h"
+#include "client.h"
 int main(int argc, char *argv[])
 {
-    QCoreApplication a(argc, argv);
-
-    Slicer slicer;
-    const char* input ="D:\\Work\\TD\\test\\Projects\\TestLibVLC\\video\\output4.ts";
-    const char* output ="D:\\Work\\TD\\test\\Projects\\TestLibVLC\\video\\slices\\slice_5-10.ts";
-    //slicer.convertToTS(input,output);
-    uint start = 0;
-    uint stop = 300;
-    slicer.makeSlice(input,start,stop,output);
+    QApplication a(argc, argv);
+    Clean_Server server;
+    const char* input = "rtsp://ewns-hls-b-stream.hexaglobe.net/rtpeuronewslive/en_vidan750_rtp.sdp";
+    const char* dst = "D:\\example\\cleanOut";
+    int wantedSize = 5000000; //bytes
+    server.startRecord(input,dst,wantedSize);
 
     qDebug()<<"End of main";
-
     return a.exec();
 }
 */

@@ -242,7 +242,7 @@ void StreamController::createRTPSInstance()
     options.push_back("--verbose=2");
 
     vlcInstanceRtsp = libvlc_new (int(options.size()), options.data());
-    QString source = "rtsp://ewns-hls-b-stream.hexaglobe.net/rtpeuronewslive/en_vidan750_rtp.sdp";
+    QString source = "rtsp://10.0.0.197:8554/CH001.sdp";
     mediaRtsp = libvlc_media_new_location (vlcInstanceRtsp, source.toStdString().c_str());
     mediaPlayerRtsp = libvlc_media_player_new_from_media(mediaRtsp);
 

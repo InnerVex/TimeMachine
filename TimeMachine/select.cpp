@@ -52,6 +52,10 @@ qint32  Select::selectPreviousDateTime(quint32 sDateTime)
   auto_ptr<database> db (create_database ());
     qint32 sNewDateTime = -1;
     qint32 minDateTime = selectMinDateTime();
+    if (minDateTime == 0)
+    {
+        return sNewDateTime;
+    }
     if (sDateTime == minDateTime)
     {
         return sDateTime;

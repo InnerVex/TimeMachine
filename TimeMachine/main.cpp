@@ -1,12 +1,15 @@
+#include <iostream>
+#include <QApplication>
+#include <QObject>
+
 #include "streamcontroller.h"
 #include "playercontroller.h"
 #include "player.h"
 #include "insert.h"
 #include "select.h"
 #include "slicer.h"
-#include <iostream>
-#include <QApplication>
-#include <QObject>
+#include "clean_server.h"
+
 
 int main(int argc, char *argv[])
 {
@@ -20,9 +23,9 @@ int main(int argc, char *argv[])
         slicer.makeMultipleSlices(input, numberOfSlices);
 
     }
-    */
+
     {
-        /*
+    /*
     QDateTime SelectDateTime(QDate(2000,01,01),QTime(00,00,10));
     qint32 time = SelectDateTime.toTime_t();
     qint32 previousDateTime = Select::selectPreviousDateTime(time);
@@ -30,7 +33,7 @@ int main(int argc, char *argv[])
     QString path = Select::selectPath(time);
     QString sourceadress = Select::selectSourceAdress(time);
     QString sourceName = Select::selectSourceName(time);
-    */
+
     QString file = Select::selectFile(946659600);
     qint32 time = 946659600 + 10;
     file = Select::selectFile(time);
@@ -56,8 +59,15 @@ int main(int argc, char *argv[])
               << " NextFile:"    << Select::selectNextFile(Select::selectFile(time)).toStdString()
                                  << std::endl;
     }
-
+    */
     QApplication a(argc, argv);
+
+    Clean_Server server;
+    const char* input = "rtsp://10.0.0.197:8554/CH001.sdp";
+    const char* dst = "example/out";
+    int wantedSize = 5000000; //bytes
+    server.startRecord(input,dst,wantedSize);
+
     Player player;
     player.show();
 

@@ -11,6 +11,8 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/Modules")
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Gui REQUIRED)
+find_package(Qt5Network REQUIRED)
+
 include_directories( ${Qt5Core_INCLUDE_DIRS})
 
 find_package(ODB REQUIRED COMPONENTS qt sqlite)
@@ -34,7 +36,9 @@ set(${PROJECT_NAME}_SOURCES
     timebar.cpp
     main_old.cpp
     slicer.cpp
-    parser.cpp)
+    parser.cpp
+    clean_server.cpp
+    clean_slicer.cpp)
 set(${PROJECT_NAME}_HEADERS
     insert.h
     select.h
@@ -49,7 +53,9 @@ set(${PROJECT_NAME}_HEADERS
     timebarconstants.h
     timebar.h
     slicer.h
-    parser.h)
+    parser.h
+    clean_server.h
+    clean_slicer.h)
 set(UI
     player.ui)
 set(RESOURCES
@@ -98,7 +104,8 @@ target_compile_definitions(${PROJECT_NAME}
         PRIVATE
                 DATABASE_SQLITE)
 
-qt5_use_modules(${PROJECT_NAME} Core Widgets Gui)
+qt5_use_modules(${PROJECT_NAME} Core Widgets Gui Network)
+
 message("ODB_SOURCES: " ${ODB_SOURCES_SOURCE})
 message("ODB_HEADERS: " ${ODB_HEADERS_SOURCE})
 
