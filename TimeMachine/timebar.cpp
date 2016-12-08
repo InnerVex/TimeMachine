@@ -18,6 +18,13 @@ TimeBar::TimeBar(QDateTimeEdit *_fvtEdit, QWidget *parent) :
     canRequestTime = true;
     cursorHover = false;
     drawSlider = false;
+
+    repaintTimer = new QTimer();
+    connect(repaintTimer, &QTimer::timeout, [=]()
+    {
+        repaint();
+    });
+    repaintTimer->start(1000);
 }
 
 QSize TimeBar::sizeHint() const
@@ -315,7 +322,7 @@ void TimeBar::paintEvent(QPaintEvent *event)
 
         prevRight = right;
     }
-    currentTime = QDateTime::currentDateTimeUtc().toTime_t();
+    currentTime = QDateTime::currentDateTime().toTime_t();
     int right = widgetWidth;
     if(currentTime < lastVisibleTime)
     {

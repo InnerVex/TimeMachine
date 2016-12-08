@@ -6,6 +6,7 @@
 
 #include <QWidget>
 #include <QDateTimeEdit>
+#include <QTimer>
 
 class TimeBar : public QWidget
 {
@@ -28,6 +29,8 @@ private:
     bool cursorHover;
     bool drawSlider;
     QPoint tooltipPoint;
+
+    QTimer *repaintTimer;
 
     //Параметры шкалы
     int widgetWidth;
