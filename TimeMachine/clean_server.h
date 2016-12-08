@@ -1,16 +1,18 @@
 #pragma once
 #include <QtNetwork/qlocalserver.h>
-#include <QtNetwork/QLocalSocket>
+#include <QtNetwork/QUdpSocket>
 #include <QtWidgets/QDialog>
 #include <QFile>
 #include <QDataStream>
 #include <QString>
+#include <QDir>
 
 class Writer
 {
     int maxSize;
     QFile *currFile;
     QDataStream *stream;
+
     char * dst;
     int currNumber;
     qint32 time;
@@ -24,7 +26,7 @@ public:
 class Clean_Server : public QObject
 {
     Q_OBJECT
-    QLocalServer *server;
+    QUdpSocket *server;
     QLocalSocket *clientConnection;
     Writer *writer;
     QString socket_name;

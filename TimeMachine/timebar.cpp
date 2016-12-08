@@ -335,18 +335,18 @@ void TimeBar::paintEvent(QPaintEvent *event)
         prevRight = right;
     }
     currentTime = QDateTime::currentDateTimeUtc().toTime_t();
-    if(availabilityVector.last().second < lastVisibleTime)
-    {
-        int right = widgetWidth;
-        if(currentTime < lastVisibleTime)
-        {
-            right = widgetWidth *
-                    (float)(currentTime - firstVisibleTime) / (lastVisibleTime - firstVisibleTime);
 
-        }
-        painter.setBrush(QBrush(Qt::red));
-        painter.drawRect(QRect(prevRight, TB_TIME_SLIDER_HEIGHT, (right - prevRight), TB_AVAILABILITY_AREA_HEIGHT));
+    //Недоступная область после последней области доступности / На весь таймбар
+    int right = widgetWidth;
+    if(currentTime < lastVisibleTime)
+    {
+        right = widgetWidth *
+                (float)(currentTime - firstVisibleTime) / (lastVisibleTime - firstVisibleTime);
+
     }
+    painter.setBrush(QBrush(Qt::red));
+    painter.drawRect(QRect(prevRight, TB_TIME_SLIDER_HEIGHT, (right - prevRight), TB_AVAILABILITY_AREA_HEIGHT));
+
     divPen.setStyle(Qt::SolidLine);
 }
 

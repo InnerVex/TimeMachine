@@ -3,15 +3,16 @@
 #include "insert.h"
 #include <QFile>
 #include <QDataStream>
+#include <QDir>
 
 
 Clean_Server::Clean_Server()
 {
     socket_name = "my_socket";
-    QLocalServer::removeServer(socket_name);
+//    QLocalServer::removeServer(socket_name);
 
-    server = new QLocalServer();
-    if (!server->listen(socket_name))
+    server = new QUdpSocket();
+    if ( !server->bind(QHostAddress::LocalHost, 7776) )
     {
         qDebug()<<"Server is not started";
     }
@@ -19,43 +20,58 @@ Clean_Server::Clean_Server()
     {
         qDebug()<<"Server started";
     }
-    server->connect(server, SIGNAL(newConnection()), this, SLOT(onNewConnection()));
+    connect(server, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
 
-    qDebug()<<server->serverName();
+
+//    qDebug()<<server->serverName();
 }
 
 void Clean_Server::startRecord(const char* input, const char* destination, int wantedSize)
 {
     writer = new Writer(destination,wantedSize);
     Clean_Slicer slicer;
-    std::string str = server->fullServerName().toStdString();
-    char *socket;
-    socket = new char[str.length()];
-    strcpy(socket,str.data());
-    qDebug()<<"Socket name:"<<socket;
-    slicer.makeSlicesFromStreamClean(input,socket);
+//    std::string str = server->fullServerName().toStdString();
+//    char *socket;
+//    socket = new char[str.length()];
+//    strcpy(socket,str.data());
+//    qDebug()<<"Socket name:"<<socket;
+    QString addr = "127.0.0.1:7776";
+    slicer.makeSlicesFromStreamClean(input,addr.toLocal8Bit().data());
 }
 
 void Clean_Server::onNewConnection()
 {
-    clientConnection = server->nextPendingConnection();
-    QObject::connect(clientConnection, SIGNAL(disconnected()), clientConnection, SLOT(deleteLater()));
-    QObject::connect(clientConnection, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
+//    clientConnection = server->nextPendingConnection();
+//    QObject::connect(clientConnection, SIGNAL(disconnected()), clientConnection, SLOT(deleteLater()));
+//    QObject::connect(clientConnection, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
 }
 
 void Clean_Server::onReadyRead()
 {
-    //qDebug()<<"OnReadyRead"<<clientConnection->bytesAvailable();
+    qDebug()<<"OnReadyRead"<<server->bytesAvailable();
     int limit = 188*100;
     char data[limit];
     int len;
 
-    while (clientConnection->bytesAvailable()>0 && (int)(clientConnection->bytesAvailable()/limit) > 0)
+    while (server->hasPendingDatagrams())
     {
-        clientConnection->bytesAvailable();
-        len=clientConnection->read(data,limit);
-        writer->writeToFile(data,len);
+        QByteArray datagram;
+        datagram.resize(server->pendingDatagramSize());
+        QHostAddress sender;
+        quint16 senderPort;
+
+        server->readDatagram(datagram.data(), datagram.size(),
+                             &sender, &senderPort);
+
+        writer->writeToFile(datagram.data(),datagram.size());
     }
+
+//    while (server->bytesAvailable()>0 && (int)(server->bytesAvailable()/limit) > 0)
+//    {
+//        server->bytesAvailable();
+//        len=server->read(data,limit);
+//        writer->writeToFile(data,len);
+//    }
 }
 
 Writer::Writer(const char* destination, int wantedSize)
@@ -66,7 +82,12 @@ Writer::Writer(const char* destination, int wantedSize)
     dst = new char[length_of_dst];
     strcpy(dst,destination);
     currFile = new QFile;
-    time = QDateTime(QDate(2000,01,01),QTime(00,00,00)).toTime_t();
+    //time = QDateTime(QDate(2000,01,01),QTime(00,00,00)).toTime_t();
+
+    time = QDateTime::currentDateTime().toTime_t();
+
+    QDir dir;
+    qDebug()<<"Creating dir"<<dir.mkdir("example");
 }
 
 void Writer::writeToFile(char *data, int len)
@@ -83,6 +104,11 @@ void Writer::writeToFile(char *data, int len)
         sprintf(str, "%d", currNumber);
         strcat(currName,str);
         strcat(currName,ending);
+
+// Мультиплатформенный путь
+
+        QString tmp(currName);
+        currName = QDir::toNativeSeparators(tmp).toLocal8Bit().data();
 
         currFile = new QFile(currName);
         if (!currFile->open(QIODevice::WriteOnly))

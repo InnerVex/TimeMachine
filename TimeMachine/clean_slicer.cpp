@@ -1,10 +1,10 @@
 #include "clean_slicer.h"
 #include <QDebug>
+#include <QtGlobal>
 
 void Clean_Slicer::makeSlicesFromStreamClean(const char *input, const char *output)
 {
-    const char* sout="--sout=#standard{access=file,mux=ts,dst="; //not sure for unix
-    //const char* sout="--sout=#file{mux=ps,dst=";
+    const char* sout="--sout=#standard{access=udp{caching=3000},mux=ts,dst="; //unix
     const char* ending="}";
     char *param;
     param = new char[strlen(sout)+strlen(output)+strlen(ending)];
@@ -13,7 +13,7 @@ void Clean_Slicer::makeSlicesFromStreamClean(const char *input, const char *outp
 
     const char * const vlc_args[] =
     {
-        //"--verbose=2",
+        "--verbose=2",
         param,
         "vlc://quit",
     };
