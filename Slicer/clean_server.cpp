@@ -1,9 +1,10 @@
 #include "clean_server.h"
 #include "clean_slicer.h"
-#include "insert.h"
+//#include "insert.h"
 #include <QFile>
 #include <QDataStream>
 #include <QTime>
+#include <QDir>
 
 
 //const QString socket_name = "my_socket" + qrand();
@@ -17,6 +18,7 @@ Clean_Server::Clean_Server()
     socket_name = "my_socket";
     socket_name.append(str);
     qDebug()<<socket_name;
+
     server = new QLocalServer();
     if (!server->listen(socket_name))
     {
@@ -65,15 +67,16 @@ void Clean_Server::onReadyRead()
     }
 }
 
-Writer::Writer(const char* destination, int wantedSize)
+Writer::Writer(const char* destination_folder, int wantedSize)
 {
-    currNumber = 0;
     maxSize = wantedSize;
-    length_of_dst = strlen(destination);
+    length_of_dst = strlen(destination_folder);
     dst = new char[length_of_dst];
-    strcpy(dst,destination);
+    strcpy(dst,destination_folder);
     currFile = new QFile;
-    time = QDateTime(QDate(2000,01,01),QTime(00,00,00)).toTime_t();
+    QDir dir;
+    dir.mkdir(destination_folder);
+    time=QDateTime::currentDateTime().toTime_t();
 }
 
 void Writer::writeToFile(char *data, int len)
@@ -82,22 +85,28 @@ void Writer::writeToFile(char *data, int len)
     if(!currFile->isOpen())
     {
         qDebug()<<"Creating file";
+        const char* first_part_of_name = "out";
         const char* ending =".ts";
-        int rank = 5;
-        currName = new char[length_of_dst+strlen(ending) + rank];
+        int rank = 10;
+        currName = new char[length_of_dst+2+strlen(first_part_of_name)+strlen(ending) + rank];
         strcpy(currName,dst);
+        strcat(currName,"\\");
+        strcat(currName,first_part_of_name);
         char str[rank];
-        sprintf(str, "%d", currNumber);
+        sprintf(str, "%d", QDateTime::currentDateTimeUtc().toTime_t());
         strcat(currName,str);
         strcat(currName,ending);
 
+        QString native_path(currName);
+        strcpy(currName,QDir::toNativeSeparators(native_path).toLocal8Bit().data());
+        qDebug()<<currName;
         currFile = new QFile(currName);
         if (!currFile->open(QIODevice::WriteOnly))
         {
             qDebug()<<"Error at creating file";
             return;
         }
-        qDebug()<<"File created"<<currName;
+        qDebug()<<"File created"<<currName<<QDir::toNativeSeparators(native_path);
 
         stream = new QDataStream(currFile);
     }
@@ -112,12 +121,12 @@ void Writer::writeToFile(char *data, int len)
 
         Clean_Slicer slicer;
         int duration = slicer.getDuration(currName);
-        Insert(time,currName,"EXAMPLE_SOURCE_NAME","EXAMPLE_SOURCE_ADRESS","EXAMPLE_FILE_PATH",duration);
+        qDebug()<<currName<<time<<duration;
+        //Insert(time,currName,"EXAMPLE_SOURCE_NAME","EXAMPLE_SOURCE_ADRESS","EXAMPLE_FILE_PATH",duration);
         time = time + duration/1000;
 
         //currFile=nullptr; //sudo collect junk, I dunno how....
-        currNumber++;
-        writeToFile(data,len);
+        writeToFile(data,len); //reccursion
     }
 
 

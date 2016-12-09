@@ -12,12 +12,11 @@ class Writer
     QFile *currFile;
     QDataStream *stream;
     char * dst;
-    int currNumber;
     qint32 time;
     char *currName;
     int length_of_dst;
 public:
-    Writer(const char* destination, int wantedSize = 188 * 10000);
+    Writer(const char* destination_folder, int wantedSize = 188 * 10000);
     void writeToFile(char* data,int len);
 };
 
