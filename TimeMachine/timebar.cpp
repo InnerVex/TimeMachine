@@ -380,6 +380,7 @@ void TimeBar::updateFVT()
 }
 
 void TimeBar::updateAvailability()
+
 {
     availabilityVector.clear();
 
@@ -392,14 +393,20 @@ void TimeBar::updateAvailability()
         availabilityVector.append(QPair<qint32, qint32>(firstVisibleTime, fileEndTime));
     }
 
+    if(fileStartTime < 0)
+    {
+        fileStartTime = firstVisibleTime;
+    }
+
     while(true)
     {
-        filename = Select::selectNextFile(filename);
-        if(QString::compare(filename, "", Qt::CaseInsensitive) == 0)
+        qint32 nextFileTime = Select::selectNextDateTime(fileStartTime);
+        if(nextFileTime == -1)
         {
             break;
         }
 
+        filename = Select::selectFile(nextFileTime);
         fileStartTime = Select::selectDateTime(filename);
         if(fileStartTime >= lastVisibleTime)
         {

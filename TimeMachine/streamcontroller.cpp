@@ -362,7 +362,7 @@ void StreamController::requestedToStreamArchive()
 #if defined(Q_OS_WIN)
     libvlc_media_player_set_hwnd(mediaPlayerImem, (void*)windid );
 #elif defined(Q_OS_LINUX)
-    libvlc_media_player_set_xwindow (mediaPlayerImem, (void*)windid );
+    libvlc_media_player_set_xwindow (mediaPlayerImem, windid );
 #endif
 
     libvlc_media_player_play(mediaPlayerImem);
@@ -383,7 +383,7 @@ void StreamController::requestedToStreamRealTime()
 #if defined(Q_OS_WIN)
     libvlc_media_player_set_hwnd(mediaPlayerRtsp, (void*)windid );
 #elif defined(Q_OS_LINUX)
-    libvlc_media_player_set_xwindow (mediaPlayerRtsp, (void*)windid );
+    libvlc_media_player_set_xwindow (mediaPlayerRtsp,windid );
 #endif
 
     libvlc_media_player_play(mediaPlayerRtsp);

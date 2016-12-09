@@ -13,7 +13,7 @@ void Clean_Slicer::makeSlicesFromStreamClean(const char *input, const char *outp
 
     const char * const vlc_args[] =
     {
-        "--verbose=2",
+        //"--verbose=2",
         param,
         "vlc://quit",
     };

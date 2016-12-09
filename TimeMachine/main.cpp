@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
 
     Clean_Server server;
     const char* input = "rtsp://10.0.0.197:8554/CH001.sdp";
-    const char* dst = "example/out";
+    const char* dst = "example/";
     int wantedSize = 5000000; //bytes
     server.startRecord(input,dst,wantedSize);
 
