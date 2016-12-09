@@ -34,9 +34,6 @@ set(${PROJECT_NAME}_SOURCES
     streamcontroller.cpp
     timebarconstants.h
     timebar.cpp
-    main_old.cpp
-    slicer.cpp
-    parser.cpp
     clean_server.cpp
     clean_slicer.cpp)
 set(${PROJECT_NAME}_HEADERS
@@ -52,8 +49,6 @@ set(${PROJECT_NAME}_HEADERS
     streamcontroller.h
     timebarconstants.h
     timebar.h
-    slicer.h
-    parser.h
     clean_server.h
     clean_slicer.h)
 set(UI

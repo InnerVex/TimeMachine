@@ -64,8 +64,7 @@ int main(int argc, char *argv[])
 
     Clean_Server server;
     const char* input = "rtsp://10.0.0.197:8554/CH001.sdp";
-    const char* dst = "example/";
-    int wantedSize = 5000000; //bytes
+    int wantedSize = 5000000; //bytes, sometimes vlc can't determine duration if file shorter than 6 sec, so probably should make file bigger
     server.startRecord(input,dst,wantedSize);
 
     Player player;

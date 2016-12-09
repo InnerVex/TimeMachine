@@ -74,20 +74,19 @@ void Clean_Server::onReadyRead()
 //    }
 }
 
-Writer::Writer(const char* destination, int wantedSize)
-{
-    currNumber = 0;
+Writer::Writer(const char* destination_folder, int wantedSize)
+{    
     maxSize = wantedSize;
-    length_of_dst = strlen(destination);
+    length_of_dst = strlen(destination_folder);
     dst = new char[length_of_dst];
-    strcpy(dst,destination);
+    strcpy(dst,destination_folder);
     currFile = new QFile;
     //time = QDateTime(QDate(2000,01,01),QTime(00,00,00)).toTime_t();
 
     time = QDateTime::currentDateTime().toTime_t();
 
     QDir dir;
-    qDebug()<<"Creating dir"<<dir.mkdir("example");
+    qDebug()<<"Creating dir"<<dir.mkdir(destination_folder);
 }
 
 void Writer::writeToFile(char *data, int len)
@@ -96,20 +95,23 @@ void Writer::writeToFile(char *data, int len)
     if(!currFile->isOpen())
     {
         qDebug()<<"Creating file";
+        const char* first_part_of_name = "out";
         const char* ending =".ts";
-        int rank = 5;
-        currName = new char[length_of_dst+strlen(ending) + rank];
+        int rank = 10;
+        currName = new char[length_of_dst+2+strlen(first_part_of_name)+strlen(ending) + rank];
         strcpy(currName,dst);
+        strcat(currName,"\\");
+        strcat(currName,first_part_of_name);
         char str[rank];
-        sprintf(str, "%d", currNumber);
+        sprintf(str, "%d", QDateTime::currentDateTimeUtc().toTime_t());
         strcat(currName,str);
         strcat(currName,ending);
 
-// Мультиплатформенный путь
+// Multiplatform path
 
-        QString tmp(currName);
-        currName = QDir::toNativeSeparators(tmp).toLocal8Bit().data();
-
+        QString native_path(currName);
+        strcpy(currName,QDir::toNativeSeparators(native_path).toLocal8Bit().data());
+        qDebug()<<currName;
         currFile = new QFile(currName);
         if (!currFile->open(QIODevice::WriteOnly))
         {
@@ -131,12 +133,12 @@ void Writer::writeToFile(char *data, int len)
 
         Clean_Slicer slicer;
         int duration = slicer.getDuration(currName);
+        qDebug()<<currName<<time<<duration;
         Insert(time,currName,"EXAMPLE_SOURCE_NAME","EXAMPLE_SOURCE_ADRESS","EXAMPLE_FILE_PATH",duration);
         time = time + duration/1000;
 
         //currFile=nullptr; //sudo collect junk, I dunno how....
-        currNumber++;
-        writeToFile(data,len);
+        writeToFile(data,len); //reccursion
     }
 
 
